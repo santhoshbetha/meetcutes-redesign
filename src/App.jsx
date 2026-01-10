@@ -5,7 +5,7 @@ import { About } from "@/pages/About";
 import { Contact } from "@/pages/Contact";
 import { Donate } from "@/pages/Donate";
 import { Search } from "@/pages/Search";
-//import { Photos } from "@/pages/Photos";
+import { Photos } from "@/pages/Photos";
 import Questionaire from "@/pages/Questionaire";
 import { Dashboard } from "@/pages/dashboard/Dashboard";
 import { ChangePassword } from "@/pages/ChangePassword";
@@ -70,7 +70,7 @@ function App() {
           <Route path="/search" element={<Search />} />
           <Route path="/questionaire" element={<Questionaire />} />
 
-          {/* <Route path="/photos" element={<Photos />} /> */}
+          <Route path="/photos" element={<Photos />} />
 
           <Route path="/changepassword" element={<ChangePassword />} />
           <Route path="/forgotpassword" element={<ForgotPassword />} />
