@@ -98,7 +98,115 @@ export function Settings() {
           </button>
         </CardHeader>
         <CardContent>
+          <form
+            action=""
+            method="post"
+            role="form"
+            className=""
+            onSubmit={formik.handleSubmit}
+          >
+            <div className="flex flex-col gap-3">
+              <div className="grid grid-cols-12 gap-1">
+                <div className="col-span-9">
+                  Email search visibilty of my profile:
+                </div>
+                <span className="col-span-1">Off</span>
+                <span className="col-span-1">
+                  <Switch
+                    checked={emailsearch}
+                    //  onCheckedChange={(value) => {
+                    // if (profiledata.emailsearch != value) {
+                    //     setValue1changed(true)
+                    // } else {
+                    //   setValue1changed(false)
+                    // }
+                    //  setEmailsearch(value)
+                    // }
+                    // }
+                  />
+                </span>
+                <span className="ms-4 col-span-1">On</span>
+              </div>
+
+              <div className="grid grid-cols-12 gap-1">
+                <div className="col-span-9">
+                  Phone search visibilty of my profile:
+                </div>
+                <span className="col-span-1">Off</span>
+                <span className="col-span-1">
+                  <Switch
+                    checked={phonenumbersearch}
+                    //   onCheckedChange={(value) => {
+                    // if (profiledata.phonenumbersearch != value) {
+                    //     setValue2changed(true)
+                    // } else {
+                    //     setValue2changed(false)
+                    // }
+                    // setPhonenumbersearch(value)
+                    // }
+                    // }
+                  />
+                </span>
+                <span className="ms-4 col-span-1">On</span>
+              </div>
+
+              <div className="grid grid-cols-12 gap-1">
+                <div className="col-span-9">
+                  UserHandle search visibilty of my profile:
+                </div>
+                <span className="col-span-1">Off</span>
+                <span className="col-span-1">
+                  <Switch checked={userhandlesearch} />
+                </span>
+                <span className="ms-4 col-span-1">On</span>
+              </div>
+
+              <div className="grid grid-cols-12 gap-1">
+                <div className="col-span-9">
+                  Visiblity to only people within 100 miles:
+                </div>
+                <span className="col-span-1">Off</span>
+                <span className="col-span-1">
+                  <Switch checked={onlyhundredmileevisiblity} />
+                </span>
+                <span className="ms-4 col-span-1">On</span>
+              </div>
+
+              <div className="flex">
+                <Button
+                  type="submit"
+                  className="ms-auto me-2"
+                  disabled={
+                    !(
+                      value1changed ||
+                      value2changed ||
+                      value3changed ||
+                      value4changed
+                    )
+                  }
+                >
+                  Submit
+                </Button>
+              </div>
+            </div>
+          </form>
         </CardContent>
+        <div className="m-5 border-6 border-red-600 pb-5 pt-4">
+          <CardHeader>
+            <CardTitle className="text-black">Danger Zone</CardTitle>
+          </CardHeader>
+          <CardContent className="">
+            <div className="flex flex-row">
+              <h3 className="text-xl font-semibold">Delete my account</h3>
+              <Button
+                className="ms-auto bg-red-600 text-white font-semibold"
+                onClick={() => setConfirmPopup(true)}
+              >
+                DELETE ACCOUNT
+              </Button>
+            </div>
+          </CardContent>
+        </div>
       </Card>
     </div>
   );
