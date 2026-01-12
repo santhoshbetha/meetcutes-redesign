@@ -20,7 +20,7 @@ const NavBefore = ({ openLogin, setOpenLogin, openSignup, setOpenSignup }) => {
           </div>
         </Link>
 
-        <nav className="hidden items-center gap-6 md:flex">
+        <nav className="hidden items-center gap-6 lg:flex">
           <Link
             to="/about"
             className="text-sm font-medium text-foreground hover:text-primary transition-colors"
@@ -75,7 +75,7 @@ const NavBefore = ({ openLogin, setOpenLogin, openSignup, setOpenSignup }) => {
       
       {/* Mobile Navigation */}
       {isMenuOpen && (
-        <div className="md:hidden border-t border-border bg-background">
+        <div className="lg:hidden border-t border-border bg-background">
           <div className="px-2 pt-2 pb-3 space-y-1">
             <Link to="#about" className="block px-3 py-2 text-muted-foreground hover:text-foreground">
               About
