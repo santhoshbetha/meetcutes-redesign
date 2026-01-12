@@ -31,6 +31,8 @@ import { AutoComplete } from "@/components/AutoComplete";
 import { AutoCompleteDataContext } from "@/context/AutoCompleteDataContext";
 import { cn } from "@/lib/utils"
 import { LoadingButton } from '@/components/ui/loading-button';
+import { DialogTitle, DialogContent } from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area'
 
 const getCity = (stateIn)  => {
     if (!isObjEmpty(stateIn)) {
@@ -121,334 +123,347 @@ export function CreateEvent({ onClose }) {
   });
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 dark:bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
-      {loading && (
-        <Spinner
-          className='fixed top-[50%] left-[50%] z-[10010] -translate-x-1/2 -translate-y-1/2'
-          size="xlarge" 
-        />
-      )}
-      <div
-        className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto bg-card dark:bg-[#071226] dark:border-gray-800 border border-gray-200 rounded-2xl shadow-2xl animate-in zoom-in-95 duration-300"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Close Button */}
-        <button
-          onClick={onClose}
-          className="absolute top-6 right-6 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200 z-[10005]"
-          aria-label="Close modal"
-        >
-          <X className="w-6 h-6 text-gray-600 dark:text-gray-200" />
-        </button>
-
-        {/* Header */}
-        <div className="text-center pt-12 pb-8 px-8">
-          <h2 className="text-3xl md:text-4xl font-bold text-red-600 mb-3">
-            Create Event
-          </h2>
-          <p className="text-gray-600 dark:text-gray-300 text-sm md:text-base">
-            Fill in the details for your event
-          </p>
-        </div>
-
-        {/* Form */}
-        <form 
-            className="px-8 md:px-12 pb-12 space-y-8"
-            onSubmit={formik.handleSubmit} 
-        >
-          {/* Location Name */}
-          <div className="space-y-2">
-            <Label
-              htmlFor="locationName"
-              className="text-sm font-medium text-gray-300"
-            >
-              Location Name
-            </Label>
-            <Input
-              id='location'
-              name='location'
-              type='text'
-              onChange={formik.handleChange}
-              className="bg-card dark:bg-slate-800 dark:text-white border-gray-300 dark:border-gray-700 focus:border-red-500 focus:ring-red-500/20"
-              placeholder="e.g., TARGET, Starbucks"
-              required
-            />
-          </div>
-
-          {/* Street Address */}
-          <div className="space-y-2">
-            <Label
-              htmlFor="streetAddress"
-              className="text-sm font-medium text-gray-700"
-            >
-              Street Address
-            </Label>
-            <AutoComplete
-              data={autocompletedata}
-              formik={formik}
-            />
-          </div>
-
-          {/* State, City, Zipcode Row */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <Label
-                htmlFor="state"
-                className="text-sm font-medium text-gray-700"
-              >
-                State
-              </Label>
-              <Select
-                required
-                id="state"
-                name="state" 
-                value={state}
-                onValueChange={(value) => {
-                    formik.values.state = value
-                    setState(value)
-                }}
-              >
-                <SelectTrigger className="bg-card dark:bg-slate-800 dark:text-white border-gray-300 dark:border-gray-700 focus:border-red-500 focus:ring-red-500/20 w-full">
-                  <SelectValue placeholder="Select state" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Alabama">Alabama</SelectItem>
-                  <SelectItem value="Alaska">Alaska</SelectItem>
-                  <SelectItem value="Arizona">Arizona</SelectItem>
-                  <SelectItem value="Arkansas">Arkansas</SelectItem>
-                  <SelectItem value="California">California</SelectItem>
-                  <SelectItem value="Colorado">Colorado</SelectItem>
-                  <SelectItem value="Connecticut">Connecticut</SelectItem>
-                  <SelectItem value="Delaware">Delaware</SelectItem>
-                  <SelectItem value="Florida">Florida</SelectItem>
-                  <SelectItem value="Georgia">Georgia</SelectItem>
-                  <SelectItem value="Hawaii">Hawaii</SelectItem>
-                  <SelectItem value="Idaho">Idaho</SelectItem>
-                  <SelectItem value="Illinois">Illinois</SelectItem>
-                  <SelectItem value="Indiana">Indiana</SelectItem>
-                  <SelectItem value="Iowa">Iowa</SelectItem>
-                  <SelectItem value="Kansas">Kansas</SelectItem>
-                  <SelectItem value="Kentucky">Kentucky</SelectItem>
-                  <SelectItem value="Louisiana5">Louisiana</SelectItem>
-                  <SelectItem value="Maine">Maine</SelectItem>
-                  <SelectItem value="Maryland">Maryland</SelectItem>
-                  <SelectItem value="Massachusetts">
-                    Massachusetts
-                  </SelectItem>
-                  <SelectItem value="Michigan">Michigan</SelectItem>
-                  <SelectItem value="Minnesota">Minnesota</SelectItem>
-                  <SelectItem value="Mississipi">Mississippi</SelectItem>
-                  <SelectItem value="Missouri">Missouri</SelectItem>
-                  <SelectItem value="Montana">Montana</SelectItem>
-                  <SelectItem value="Nebraska">Nebraska</SelectItem>
-                  <SelectItem value="Nevada">Nevada</SelectItem>
-                  <SelectItem value="new Hampshire">
-                    New Hampshire
-                  </SelectItem>
-                  <SelectItem value="New Jersey">New Jersey</SelectItem>
-                  <SelectItem value="New Mexico">New Mexico</SelectItem>
-                  <SelectItem value="New york">New York</SelectItem>
-                  <SelectItem value="North Carolina">
-                    North Carolina
-                  </SelectItem>
-                  <SelectItem value="North Dakota">
-                    North Dakota
-                  </SelectItem>
-                  <SelectItem value="Ohio">Ohio</SelectItem>
-                  <SelectItem value="Oklahoma">Oklahoma</SelectItem>
-                  <SelectItem value="Oregon">Oregon</SelectItem>
-                  <SelectItem value="Pennsylvania">
-                    Pennsylvania
-                  </SelectItem>
-                  <SelectItem value="Rhode Island">
-                    Rhode Island
-                  </SelectItem>
-                  <SelectItem value="South Carolina">
-                    South Carolina
-                  </SelectItem>
-                  <SelectItem value="South Dakota">
-                    South Dakota
-                  </SelectItem>
-                  <SelectItem value="Tennessee">Tennessee</SelectItem>
-                  <SelectItem value="Texas">Texas</SelectItem>
-                  <SelectItem value="Utah">Utah</SelectItem>
-                  <SelectItem value="Vermont">Vermont</SelectItem>
-                  <SelectItem value="Virginia">Virginia</SelectItem>
-                  <SelectItem value="Washington">Washington</SelectItem>
-                  <SelectItem value="West Virginia">
-                    West Virginia
-                  </SelectItem>
-                  <SelectItem value="Wisconsin">Wisconsin</SelectItem>
-                  <SelectItem value="Wyoming">Wyoming</SelectItem>
-                  <SelectItem value="Washington DC">
-                    Washington DC
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label
-                htmlFor="city"
-                className="text-sm font-medium text-gray-700"
-              >
-                City
-              </Label>
-              <Select
-                required
-                id="city"
-                name="city" 
-                onValueChange={(value) => {
-                  //formik.handleChange(value)
-                  formik.values.city = value
-                }}
-              >
-                <SelectTrigger className="bg-card dark:bg-slate-800 dark:text-white border-gray-300 dark:border-gray-700 focus:border-red-500 focus:ring-red-500/20 w-full">
-                  <SelectValue placeholder="Select city" />
-                </SelectTrigger>
-                <SelectContent>
-                    {getCity(state)}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label
-                htmlFor="zipcode"
-                className="text-sm font-medium text-gray-700"
-              >
-                Zipcode
-              </Label>
-              <Input
-                id='zip'
-                name='zip'
-                type='text'
-                onChange={formik.handleChange}
-                className="bg-card dark:bg-slate-800 dark:text-white border-gray-300 dark:border-gray-700 focus:border-red-500 focus:ring-red-500/20"
-                placeholder="95630"
-                maxLength={5}
-                required
+      <DialogContent className='flex max-h-[min(900px,80vh)] min-w-[calc(70vw-2rem)] flex-col gap-0 p-0 sm:max-w-md'>
+        <ScrollArea className='flex max-h-full flex-col overflow-hidden'>
+        <div className="relative">
+            {loading && (
+              <Spinner
+                className='absolute top-[50%] left-[50%] -translate-x-1/2 -translate-y-1/2'
+                size="xlarge" 
+                text="Creating Event..."
               />
-            </div>
-          </div>
+            )}
+            <DialogTitle></DialogTitle>
+            <div
+              className="w-full max-w-3xlX overflow-y-auto bg-card dark:bg-[#071226] dark:border-none border border-none rounded-2xl shadow-2xl animate-in zoom-in-95 duration-300"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div>
+                {/* Header */}
+                <div className="text-center pt-12 pb-8 px-8">
+                  <h2 className="text-3xl md:text-4xl font-bold text-red-600 mb-3">
+                    Create Event
+                  </h2>
+                  <p className="text-gray-600 dark:text-gray-300 text-sm md:text-base">
+                    Fill in the details for your event
+                  </p>
+                </div>
 
-          {/* Date and Time Row */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <Label
-                htmlFor="eventDate"
-                className="text-sm font-medium text-gray-700"
-              >
-                Event Date
-              </Label>
-              <Popover open={open} onOpenChange={setOpen}>
-                <PopoverTrigger asChild>
-                    <Button
-                        variant={"outline"}
-                        className={cn(
-                            "w-full justify-start text-left font-normal",
-                            !date1 && "text-muted-foreground"
-                        )}
+                {/* Form */}
+                <form 
+                    className="px-8 md:px-12 pb-12 space-y-8"
+                    onSubmit={formik.handleSubmit} 
+                >
+                  {/* Location Name */}
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="locationName"
+                      className="text-sm font-medium text-gray-300"
                     >
-                    <CalendarIcon />
-                    {date1 ? format(date1, "PPP") : <span>Event date</span>}
-                    </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                    <Calendar
-                        mode="single"
-                        selected={date1}
-                        //onSelect={setDate1}
-                        onSelect={(date) => {
-                          setDate1(date)
-                          setOpen(false)
-                        }}
-                        initialFocus
+                      Location Name
+                    </Label>
+                    <Input
+                      id='location'
+                      name='location'
+                      type='text'
+                      onChange={formik.handleChange}
+                      className="bg-card dark:bg-slate-800 dark:text-white border-gray-300 dark:border-gray-700 focus:border-red-500 focus:ring-red-500/20"
+                      placeholder="e.g., TARGET, Starbucks"
+                      required
                     />
-                </PopoverContent>
-              </Popover>
-            </div>
+                  </div>
 
-            <div className="space-y-2">
-              <Label
-                htmlFor="startTime"
-                className="text-sm font-medium text-gray-700"
-              >
-                Start Time
-              </Label>
-              <div className="relative">
-                <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-                <Input
-                  id='startTime'
-                  name='startTime'
-                  type='time'
-                  onChange={e => {
-                      setStartTime(e.target.value)
-                  }} 
-                  className="bg-card dark:bg-slate-800 dark:text-white border-gray-300 dark:border-gray-700 focus:border-red-500 focus:ring-red-500/20 pl-10"
-                  required
-                />
+                  {/* Street Address */}
+                  <div className="space-y-2" hidden>
+                    <Label
+                      htmlFor="streetAddress"
+                      className="text-sm font-medium text-gray-700"
+                    >
+                      Street Address
+                    </Label>
+                    <AutoComplete
+                      data={autocompletedata}
+                      formik={formik}
+                    />
+                  </div>
+
+                  {/* State, City, Zipcode Row */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                      <Label
+                        htmlFor="state"
+                        className="text-sm font-medium text-gray-700"
+                      >
+                        State
+                      </Label>
+                      <Select
+                        required
+                        id="state"
+                        name="state" 
+                        value={state}
+                        onValueChange={(value) => {
+                            formik.values.state = value
+                            setState(value)
+                        }}
+                      >
+                        <SelectTrigger className="bg-card dark:bg-slate-800 dark:text-white border-gray-300 dark:border-gray-700 focus:border-red-500 focus:ring-red-500/20 w-full">
+                          <SelectValue placeholder="Select state" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Alabama">Alabama</SelectItem>
+                          <SelectItem value="Alaska">Alaska</SelectItem>
+                          <SelectItem value="Arizona">Arizona</SelectItem>
+                          <SelectItem value="Arkansas">Arkansas</SelectItem>
+                          <SelectItem value="California">California</SelectItem>
+                          <SelectItem value="Colorado">Colorado</SelectItem>
+                          <SelectItem value="Connecticut">Connecticut</SelectItem>
+                          <SelectItem value="Delaware">Delaware</SelectItem>
+                          <SelectItem value="Florida">Florida</SelectItem>
+                          <SelectItem value="Georgia">Georgia</SelectItem>
+                          <SelectItem value="Hawaii">Hawaii</SelectItem>
+                          <SelectItem value="Idaho">Idaho</SelectItem>
+                          <SelectItem value="Illinois">Illinois</SelectItem>
+                          <SelectItem value="Indiana">Indiana</SelectItem>
+                          <SelectItem value="Iowa">Iowa</SelectItem>
+                          <SelectItem value="Kansas">Kansas</SelectItem>
+                          <SelectItem value="Kentucky">Kentucky</SelectItem>
+                          <SelectItem value="Louisiana5">Louisiana</SelectItem>
+                          <SelectItem value="Maine">Maine</SelectItem>
+                          <SelectItem value="Maryland">Maryland</SelectItem>
+                          <SelectItem value="Massachusetts">
+                            Massachusetts
+                          </SelectItem>
+                          <SelectItem value="Michigan">Michigan</SelectItem>
+                          <SelectItem value="Minnesota">Minnesota</SelectItem>
+                          <SelectItem value="Mississipi">Mississippi</SelectItem>
+                          <SelectItem value="Missouri">Missouri</SelectItem>
+                          <SelectItem value="Montana">Montana</SelectItem>
+                          <SelectItem value="Nebraska">Nebraska</SelectItem>
+                          <SelectItem value="Nevada">Nevada</SelectItem>
+                          <SelectItem value="new Hampshire">
+                            New Hampshire
+                          </SelectItem>
+                          <SelectItem value="New Jersey">New Jersey</SelectItem>
+                          <SelectItem value="New Mexico">New Mexico</SelectItem>
+                          <SelectItem value="New york">New York</SelectItem>
+                          <SelectItem value="North Carolina">
+                            North Carolina
+                          </SelectItem>
+                          <SelectItem value="North Dakota">
+                            North Dakota
+                          </SelectItem>
+                          <SelectItem value="Ohio">Ohio</SelectItem>
+                          <SelectItem value="Oklahoma">Oklahoma</SelectItem>
+                          <SelectItem value="Oregon">Oregon</SelectItem>
+                          <SelectItem value="Pennsylvania">
+                            Pennsylvania
+                          </SelectItem>
+                          <SelectItem value="Rhode Island">
+                            Rhode Island
+                          </SelectItem>
+                          <SelectItem value="South Carolina">
+                            South Carolina
+                          </SelectItem>
+                          <SelectItem value="South Dakota">
+                            South Dakota
+                          </SelectItem>
+                          <SelectItem value="Tennessee">Tennessee</SelectItem>
+                          <SelectItem value="Texas">Texas</SelectItem>
+                          <SelectItem value="Utah">Utah</SelectItem>
+                          <SelectItem value="Vermont">Vermont</SelectItem>
+                          <SelectItem value="Virginia">Virginia</SelectItem>
+                          <SelectItem value="Washington">Washington</SelectItem>
+                          <SelectItem value="West Virginia">
+                            West Virginia
+                          </SelectItem>
+                          <SelectItem value="Wisconsin">Wisconsin</SelectItem>
+                          <SelectItem value="Wyoming">Wyoming</SelectItem>
+                          <SelectItem value="Washington DC">
+                            Washington DC
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label
+                        htmlFor="city"
+                        className="text-sm font-medium text-gray-700"
+                      >
+                        City
+                      </Label>
+                      <Select
+                        required
+                        id="city"
+                        name="city" 
+                        onValueChange={(value) => {
+                          //formik.handleChange(value)
+                          formik.values.city = value
+                        }}
+                      >
+                        <SelectTrigger className="bg-card dark:bg-slate-800 dark:text-white border-gray-300 dark:border-gray-700 focus:border-red-500 focus:ring-red-500/20 w-full">
+                          <SelectValue placeholder="Select city" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {getCity(state)}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label
+                        htmlFor="zipcode"
+                        className="text-sm font-medium text-gray-700"
+                      >
+                        Zipcode
+                      </Label>
+                      <Input
+                        id='zip'
+                        name='zip'
+                        type='text'
+                        onChange={formik.handleChange}
+                        className="bg-card dark:bg-slate-800 dark:text-white border-gray-300 dark:border-gray-700 focus:border-red-500 focus:ring-red-500/20"
+                        placeholder="95630"
+                        maxLength={5}
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  {/* Date and Time Row */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                      <Label
+                        htmlFor="eventDate"
+                        className="text-sm font-medium text-gray-700"
+                      >
+                        Event Date
+                      </Label>
+                      <Popover open={open} onOpenChange={setOpen}>
+                        <PopoverTrigger asChild>
+                            <Button
+                                variant={"outline"}
+                                className={cn(
+                                    "w-full justify-start text-left font-normal",
+                                    !date1 && "text-muted-foreground"
+                                )}
+                            >
+                            <CalendarIcon />
+                            {date1 ? format(date1, "PPP") : <span>Event date</span>}
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0">
+                            <Calendar
+                                mode="single"
+                                selected={date1}
+                                //onSelect={setDate1}
+                                onSelect={(date) => {
+                                  setDate1(date)
+                                  setOpen(false)
+                                }}
+                                initialFocus
+                            />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label
+                        htmlFor="startTime"
+                        className="text-sm font-medium text-gray-700"
+                      >
+                        Start Time
+                      </Label>
+                      <div className="relative">
+                        <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+                        <Input
+                          id='startTime'
+                          name='startTime'
+                          type='time'
+                          onChange={e => {
+                              setStartTime(e.target.value)
+                          }} 
+                          className="bg-card dark:bg-slate-800 dark:text-white border-gray-300 dark:border-gray-700 focus:border-red-500 focus:ring-red-500/20 pl-10"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label
+                        htmlFor="endTime"
+                        className="text-sm font-medium text-gray-700"
+                      >
+                        End Time
+                      </Label>
+                      <div className="relative">
+                        <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+                        <Input
+                          id='endTime'
+                          name='endTime'
+                          type='time'
+                          onChange={e => {
+                            setEndTime(e.target.value)
+                          }}
+                          className="bg-card dark:bg-slate-800 dark:text-white border-gray-300 dark:border-gray-700 focus:border-red-500 focus:ring-red-500/20 pl-10"
+                          required
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Description */}
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="description"
+                      className="text-sm font-medium text-gray-700"
+                    >
+                      Description/Special Instructions (if any)
+                    </Label>
+                    <Textarea
+                      id="description"
+                      value={description}
+                      onChange={e => setDescription(e.target.value)}
+                      className="bg-card dark:bg-slate-800 dark:text-white border-gray-300 dark:border-gray-700 focus:border-red-500 focus:ring-red-500/20 min-h-[120px] resize-none"
+                      placeholder="Provide details about the event"
+                    />
+                  </div>
+
+                  {/* Submit Button */}
+                  {!loading &&
+                    <Button
+                      type="submit"
+                      className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-6 text-base shadow-lg hover:shadow-xl transition-all"
+                    >
+                      CREATE EVENT
+                    </Button>
+                  }
+                  {
+                    loading &&
+                    <LoadingButton loading
+                      className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-6 text-base shadow-lg hover:shadow-xl transition-all">
+                      Submitting Event...
+                    </LoadingButton>
+                  }
+                </form>
               </div>
             </div>
-
-            <div className="space-y-2">
-              <Label
-                htmlFor="endTime"
-                className="text-sm font-medium text-gray-700"
-              >
-                End Time
-              </Label>
-              <div className="relative">
-                <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-                <Input
-                  id='endTime'
-                  name='endTime'
-                  type='time'
-                  onChange={e => {
-                    setEndTime(e.target.value)
-                  }}
-                  className="bg-card dark:bg-slate-800 dark:text-white border-gray-300 dark:border-gray-700 focus:border-red-500 focus:ring-red-500/20 pl-10"
-                  required
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Description */}
-          <div className="space-y-2">
-            <Label
-              htmlFor="description"
-              className="text-sm font-medium text-gray-700"
-            >
-              Description/Special Instructions (if any)
-            </Label>
-            <Textarea
-              id="description"
-              value={description}
-              onChange={e => setDescription(e.target.value)}
-              className="bg-card dark:bg-slate-800 dark:text-white border-gray-300 dark:border-gray-700 focus:border-red-500 focus:ring-red-500/20 min-h-[120px] resize-none"
-              placeholder="Provide details about the event"
-            />
-          </div>
-
-          {/* Submit Button */}
-          {!loading &&
-            <Button
-              type="submit"
-              className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-6 text-base shadow-lg hover:shadow-xl transition-all"
-            >
-              CREATE EVENT
-            </Button>
-          }
-          {
-            loading &&
-            <LoadingButton loading
-              className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-6 text-base shadow-lg hover:shadow-xl transition-all">
-              Submitting Event...
-            </LoadingButton>
-          }
-        </form>
-      </div>
-    </div>
+        </div>
+        </ScrollArea>
+    </DialogContent>
   );
 }
+
+/*
+    <DialogContent className='flex min-w-[calc(70vw-2rem)] justify-center'>
+          {loading && (
+            <Spinner
+              className='absolute top-[50%] left-[50%] -translate-x-1/2 -translate-y-1/2'
+              size="xlarge" 
+              text="Creating Event..."
+            />
+          )}
+                    <DialogTitle></DialogTitle>
+                    
+            
+*/

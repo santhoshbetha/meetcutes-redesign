@@ -243,8 +243,8 @@ export function EventsSearch({
         <CardHeader className="pb-0">
           <CardTitle>Search events near your area</CardTitle>
         </CardHeader>
-        <CardContent className="flex flex-col items-center justify-center w-[100%]">
-          <form className="w-[100%] lg:w-[80%]" onSubmit={formik.handleSubmit}>
+        <CardContent className="flex flex-col items-center justify-center w-full">
+          <form className="w-full lg:w-[80%]" onSubmit={formik.handleSubmit}>
             <div className="flex flex-col md:flex-row gap-3">
               <Select
                 required
@@ -381,7 +381,7 @@ export function EventsSearch({
           </form>
         
           {isObjEmpty(searchData) && (searchData?.length == undefined) && (!isLoading) && (
-            <Card className="mt-3 w-[100%] lg:w-[80%]">
+            <Card className="mt-3 w-full lg:w-[80%]">
               <div className="grid gap-4 py-4 text-xl px-3">
                 Searched events will be shown here.
               </div>
@@ -389,7 +389,7 @@ export function EventsSearch({
           )}
         
           {isObjEmpty(searchData) && (searchData?.length == 0) && (!isLoading) && (
-            <Card className="mt-3 w-[100%] lg:w-[80%]">
+            <Card className="mt-3 w-full lg:w-[80%]">
               <CardContent className="">
                 <div className='flex'>
                   No events found of your search criteria.

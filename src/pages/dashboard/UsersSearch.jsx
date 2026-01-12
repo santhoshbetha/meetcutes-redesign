@@ -90,13 +90,13 @@ export function UsersSearch({ user, userhandle, gender, latitude, longitude, que
 
   return (
     <>
-      <Card className="bg-transparent mx-4 mt-2 border-non shadow-none hover:shadow-none">
+      <Card className="bg-transparent mx-4 mt-2 border-none shadow-none hover:shadow-none">
         <CardHeader className="flex flex-row items-center justify-between md:mx-2 lg:mx-10">
           <CardTitle>Search users around you</CardTitle>
         </CardHeader>
-        <CardContent className="flex flex-col items-center justify-center w-[100%] space-y-4">
+        <CardContent className="flex flex-col items-center justify-center w-full space-y-4">
           <form
-            className="w-[100%] md:w-[84%] lg:w-[72%]"
+            className="w-full md:w-[84%] lg:w-[72%]"
             onSubmit={formik.handleSubmit}
           >
             <div className="flex flex-col md:flex-row gap-2">
@@ -122,29 +122,110 @@ export function UsersSearch({ user, userhandle, gender, latitude, longitude, que
                   </SelectGroup>
                 </SelectContent>
               </Select>
+
+              <div className="grid gap-2 md:mb-2 w-full md:w-1/4">
+                <div className="flex items-center">
+                  <Label htmlFor="password">Age From</Label>
+                </div>
+                <Input
+                  required
+                  id="agefrom"
+                  type="number"
+                  min={21}
+                  max={45}
+                  onChange={formik.handleChange}
+                  value={formik.values.agefrom}
+                />
+              </div>
+
+              <div className="grid gap-2 mb-2 w-full md:w-1/4">
+                <div className="flex items-center">
+                  <Label htmlFor="password">Age To</Label>
+                </div>
+                <Input
+                  required
+                  id="ageto"
+                  type="number"
+                  min={getMin()}
+                  max={48}
+                  onChange={formik.handleChange}
+                  value={formik.values.ageto}
+                />
+              </div>
+              {error == "" ? (
+                <Button
+                  type="submit"
+                  className="w-full md:w-1/4 md:mt-5 bg-teal-600 hover:bg-[#0D9488]/90"
+                  variant="secondary"
+                >
+                  Search
+                </Button>
+              ) : (
+                <>
+                  <Button
+                    type="submit"
+                    className="w-full md:w-1/4 md:mt-5 bg-teal-600 hover:bg-[#0D9488]/90"
+                    variant="secondary"
+                    disabled={true}
+                  >
+                    Search
+                  </Button>
+                  {error && <div className="error_msg">{error}</div>}
+                </>
+              )}
             </div>
-            <div className="flex flex-col md:flex-row gap-2 mt-4">
-              <Input
-                required
-                name="agefrom"
-                type="number"
-                placeholder="Age from"
-                value={formik.values.agefrom}
-                onChange={formik.handleChange}
-                className="w-full md:w-1/4 md:mt-5 h-12 rounded-xl px-4"
-              />
-              <Input
-                required
-                name="ageto"
-                type="number"
-                placeholder="Age to"
-                value={formik.values.ageto}
-                onChange={formik.handleChange}
-                className="w-full md:w-1/4 md:mt-5 h-12 rounded-xl px-4"
+          </form>
+
+          {isObjEmpty(searchUsersData) && (searchdone.current == false) && (!isLoading) && (
+            <Card className="mt-3 w-full lg:w-[80%]">
+              <div className="grid gap-4 text-xl px-3">
+                Searched users info will be shown here.
+              </div>
+            </Card>
+          )}
+
+          {isObjEmpty(searchUsersData) && (searchdone.current == true) && (!isLoading) && (
+            <>
+            <Card className="mt-3 w-full lg:w-[80%] border border-red-500">
+              <CardContent className="">
+                <div className='flex '>
+                  No users found of your search criteria.
+                  <button
+                      type="button"
+                      className='text-red-700 rounded bg-transparent border-0 ms-auto'
+                      onClick={(e) => {
+                          setSearchUsersData(null);
+                          searchdone.current = false;
+                      }}
+                  >
+                  <svg xmlns="http://www.w3.org/2000/svg" height="20" width="14" viewBox="0 0 384 512" fill="currentColor">
+                    <path d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z"/></svg>
+                  </button>
+                </div>
+              </CardContent>
+            </Card>
+            </>
+          )}
+
+          <div>
+            <div className="relative h-1 bg-muted/30 rounded-full overflow-hidden">
+              <div
+                className={`h-full bg-gradient-to-r from-primary via-primary/80 to-primary rounded-full transition-all duration-500 ${
+                  isLoading ? 'w-full animate-pulse' : 'w-0'
+                }`}
+                style={{
+                  animation: isLoading ? 'progress 1s ease-in-out infinite' : 'none',
+                }}
               />
             </div>
-            </form>
-          </CardContent>
+            {!isObjEmpty(searchUsersData) && (
+              <UserList
+                users={searchUsersData}
+                setIsLoading={setIsLoading}
+              />
+            )}
+          </div>
+        </CardContent>
       </Card>
     </>
   );

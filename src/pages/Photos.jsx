@@ -312,7 +312,7 @@ export function Photos() {
         <CardHeader className="flex flex-row items-center justify-between md:mx-2 lg:mx-10">
           <CardTitle className="text-2xl">Photos</CardTitle>
         </CardHeader>
-        <CardContent className="flex flex-col items-center justify-center w-[100%]">
+        <CardContent className="flex flex-col items-center justify-center w-full">
           <div className="">
             <form>
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">

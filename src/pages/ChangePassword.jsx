@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/Spinner";
 
 export function ChangePassword() {
   const navigate = useNavigate();
@@ -39,8 +40,16 @@ export function ChangePassword() {
   };
 
   return (
-    <div className="mt-2 flex justify-center">
-      <Card className="bg-card dark:bg-background sm: w-[100%] md:w-[60%] lg:w-[45%] xl:w-[35%] dark:border-blue-900/80 pb-4">
+    <div className="mt-2 flex justify-center relative">
+      <Card className="bg-card dark:bg-background sm: w-[full] md:w-[60%] lg:w-[45%] xl:w-[35%] dark:border-blue-900/80 pb-4 relative">
+        {loading && (
+          <Spinner
+            className="top-[50%] left-[50%] z-99 absolute"
+            size="medium"
+            withText={true}
+            text="Setting New Password..."
+          />
+        )}
         <CardHeader className="pt-4 pb-0">
           <CardTitle className="text-2xl">Set New Password</CardTitle>
         </CardHeader>
@@ -48,10 +57,11 @@ export function ChangePassword() {
           <form onSubmit={handleChangePassSubmit} className="space-y-2">
             <Label htmlFor="password">New Password</Label>
             <Input
-              id="text"
+              id="password"
               type="text"
               placeholder=""
               name="password"
+              className="border-gray-200"
               value={formik.values.password}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
@@ -65,8 +75,9 @@ export function ChangePassword() {
               New Password (Confirm)
             </Label>
             <Input
-              id="text"
+              id="passwordconfirm"
               type="password"
+              className="border-gray-200"
               placeholder=""
               name="passwordconfirm"
               value={formik.values.passwordconfirm}
@@ -88,9 +99,15 @@ export function ChangePassword() {
               >
                 Cancel
               </Button>
-              <Button type="submit" className="ms-auto">
-                Confirm New Password
-              </Button>
+              {formik.errors.password || formik.errors.passwordconfirm ? (
+                <Button type="submit" className="ms-auto" disabled>
+                  Confirm New Password
+                </Button>
+              ) : (
+                <Button type="submit" className="ms-auto">
+                  Confirm New Password
+                </Button>
+              )}
             </div>
           </form>
         </CardContent>

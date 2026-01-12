@@ -42,7 +42,7 @@ const getCity = (stateIn)  => {
     }
 }
 
-export function CreateEvent({ onClose }) {
+export function CreateEvent2({ onClose }) {
   const navigate = useNavigate()
   const isOnline = useOnlineStatus();
   const { userSession, profiledata } = useAuth();
@@ -121,7 +121,7 @@ export function CreateEvent({ onClose }) {
   });
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 grid place-items-center p-4 animate-in fade-in duration-200">
       {loading && (
         <Spinner
           className='fixed top-[50%] left-[50%] z-50 -translate-x-1/2 -translate-y-1/2'
@@ -166,7 +166,7 @@ export function CreateEvent({ onClose }) {
               htmlFor="locationName"
               className="text-sm font-medium text-foreground/80"
             >
-              Location Name
+              Location Namerr
             </Label>
             <Input
               id='location'

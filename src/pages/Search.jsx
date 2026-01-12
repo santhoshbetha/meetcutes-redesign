@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { isObjEmpty } from "../utils/util";
 import { useAuth } from "../context/AuthContext";
 import { searchUser } from "../services/search.service";
+import { Spinner } from "../components/ui/Spinner";
 
 export function Search() {
   const navigate = useNavigate();
@@ -57,7 +58,14 @@ export function Search() {
   return (
     <>
       <div className="mt-3 flex flex-col items-center justify-center gap-2 px-6 sm:px-20 md:px-14">
-        <Card className="bg-card dark:bg-background w-full sm:w-[80%] md:w-[60%] lg:w-[50%] xl:w-[40%] dark:border-blue-900/60 py-3">
+        <Card className="bg-card dark:bg-background w-full sm:w-[80%] md:w-[60%] lg:w-[50%] xl:w-[40%] dark:border-blue-900/60 py-3 relative">
+          {loading && (
+            <Spinner
+              className='absolute top-[50%] left-[50%] -translate-x-1/2 -translate-y-1/2 z-99'
+              size="xlarge" 
+              text="Searching..."
+            />
+          )}
           <CardHeader className="pt-4 pb-0">
             <CardTitle className="text-xl">Search User</CardTitle>
           </CardHeader>
@@ -65,7 +73,7 @@ export function Search() {
             <form onSubmit={handleSearchSubmit}>
               <Label htmlFor="email">Email or Phonenumber or Handle</Label>
               <Input
-                className="mt-2"
+                className="mt-2 border-amber-200"
                 id="searchtext"
                 type="text"
                 placeholder="m@example.com"

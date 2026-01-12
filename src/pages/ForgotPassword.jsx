@@ -31,7 +31,7 @@ export function ForgotPassword() {
       className="mt-3 flex justify-center"
       variant="fullMobileBreakpointPadded"
     >
-      <Card className="bg-card sm: w-[100%] md:w-[60%] lg:w-[45%] xl:w-[35%]">
+      <Card className="bg-card sm: w-full md:w-[60%] lg:w-[45%] xl:w-[35%] border border-accent-foreground/60 pb-3">
         {loading && (
           <Spinner
             className="fixed top-[20vh] left-[50%] z-50 cursor-pointer"
@@ -39,7 +39,7 @@ export function ForgotPassword() {
           />
         )}
         <CardHeader>
-          <CardTitle className="text-black">Reset Password</CardTitle>
+          <CardTitle className="text-black dark:text-white">Reset Password</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleForgotPassSubmit}>
@@ -50,6 +50,7 @@ export function ForgotPassword() {
               name="email"
               placeholder=""
               value={formik.values.email}
+              className="border-amber-100 mt-3"
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
               required
@@ -68,9 +69,15 @@ export function ForgotPassword() {
               >
                 Cancel
               </Button>
-              <Button type="submit" className="ms-auto">
-                Send password reset email
-              </Button>
+              {formik.errors.email && formik.touched.email ? (
+                <Button type="submit" className="ms-auto" disabled>
+                  Send password reset email
+                </Button>
+              ) : (
+                <Button type="submit" className="ms-auto">
+                  Send password reset email
+                </Button>
+              )}
             </div>
           </form>
         </CardContent>

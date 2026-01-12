@@ -178,7 +178,7 @@ export function Signup({ setOpenSignup, setOpenLogin }) {
   });
 
   return (
-    <DialogContent className="sm:max-w-[425px] md:max-w-[725px] pb-0">
+    <DialogContent className="flex max-h-[min(900px,90vh)] min-w-[calc(80vw-2rem)] flex-col gap-0 p-0 sm:max-w-md">
       {loading && (
         <Spinner
           className="fixed top-[50%] left-[50%] z-50 cursor-pointer"
@@ -186,7 +186,7 @@ export function Signup({ setOpenSignup, setOpenLogin }) {
         />
       )}
       <DialogTitle></DialogTitle>
-      <ScrollArea className="h-[80vh] w-full">
+      <ScrollArea className="h-[90vh] w-full">
         <CardHeader>
           <CardTitle className="text-2xl">Signup</CardTitle>
           <CardDescription className="text-xl">
@@ -196,14 +196,15 @@ export function Signup({ setOpenSignup, setOpenLogin }) {
         <CardContent className="w-[95%] mt-4">
           <form onSubmit={formik.handleSubmit}>
             <div className="flex flex-col gap-6">
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
-                <div className="grid gap-2 w-full md:w-80">
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+                <div className="grid gap-2 w-full">
                   <Label htmlFor="firstname">First name</Label>
                   <Input
                     name="firstname"
                     id="firstname"
                     type="text"
                     placeholder=""
+                    className=""
                     required
                     value={formik.values.firstname}
                     onChange={(e) => {
@@ -216,7 +217,7 @@ export function Signup({ setOpenSignup, setOpenLogin }) {
                     <p className="text-red-700">{formik.errors.firstname} </p>
                   ) : null}
                 </div>
-                <div className="grid gap-2 w-full md:w-80">
+                <div className="grid gap-2 w-full">
                   <Label htmlFor="lastname">Last name</Label>
                   <Input
                     name="lastname"
@@ -224,6 +225,7 @@ export function Signup({ setOpenSignup, setOpenLogin }) {
                     type="text"
                     placeholder=""
                     required
+                    className=""
                     value={formik.values.lastname}
                     onChange={(e) => {
                       formik.handleChange(e);
@@ -237,8 +239,8 @@ export function Signup({ setOpenSignup, setOpenLogin }) {
                 </div>
               </div>
 
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
-                <div className="grid gap-2">
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+                <div className="grid gap-2 w-full md:w-80">
                   <Label htmlFor="gender">Gender</Label>
                   <Select
                     required
@@ -391,6 +393,7 @@ export function Signup({ setOpenSignup, setOpenLogin }) {
                   name="phonenumber"
                   type="text"
                   placeholder=""
+                  className=""
                   required
                   value={formik.values.phonenumber}
                   onChange={formik.handleChange}
@@ -402,7 +405,7 @@ export function Signup({ setOpenSignup, setOpenLogin }) {
               </div>
 
               <div className="grid gap-2">
-                <Label htmlFor="email">Email adderss</Label>
+                <Label htmlFor="email">Email address</Label>
                 <Input
                   id="email"
                   type="email"
@@ -459,7 +462,7 @@ export function Signup({ setOpenSignup, setOpenLogin }) {
             <div className="mt-4 text-center text-sm">
               Already a user?{" "}
               <span
-                className="underline underline-offset-4"
+                className="underline underline-offset-4 pb-3 cursor-pointer"
                 onClick={handleAlready}
               >
                 Login

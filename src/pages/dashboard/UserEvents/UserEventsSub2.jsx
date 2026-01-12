@@ -49,7 +49,7 @@ export function UserEventsSub2({ profiledata, userhandle, latitude, longitude })
       </div>
       <CardContent className="space-y-2">
         {isObjEmpty(data) && (
-          <Card className="mt-3 w-[100%] lg:w-[80%] bg-yellow-50 dark:bg-background">
+          <Card className="mt-3 w-full lg:w-[80%] bg-yellow-50 dark:bg-background">
             <div className="py-4 px-4 text-xl">
               Nothing here. Search and register to events in your area.
             </div>

@@ -328,14 +328,14 @@ export function Profile() {
               <Dialog>
                 <DialogTrigger asChild>
                   <Button
-                    onClick={() => setIsChangeLocationModalOpen(true)}
+                 //   onClick={() => setIsChangeLocationModalOpen(true)}
                     className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-5 md:py-6 text-xs md:text-sm shadow-md hover:shadow-lg transition-all hover:scale-[1.02]"
                   >
                     CHANGE LOCATION
                   </Button>
                 </DialogTrigger>
                 <ChangeLocation
-                  onClose={() => setIsChangeLocationModalOpen(false)}
+                //  onClose={() => setIsChangeLocationModalOpen(false)}
                 />
               </Dialog>
 

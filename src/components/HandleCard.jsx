@@ -32,11 +32,11 @@ export function HandleCard() {
   // inline handle change in input to avoid unused param
 
   return (
-    <DialogContent className="w-[90%] sm:max-w-[425px]">
+    <DialogContent className="w-[90%] sm:max-w-[425px] relative">
       <DialogTitle></DialogTitle>
       {loading && (
         <Spinner
-          className="fixed top-[50%] left-[50%] z-50 cursor-pointer"
+          className="absolute top-[50%] left-[50%] z-50 cursor-pointer"
           size="medium"
         />
       )}

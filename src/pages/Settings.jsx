@@ -36,8 +36,16 @@ export function Settings() {
   });
 
   return (
-    <div className="mt-2 flex justify-center">
-      <Card className="bg-card dark:bg-background sm: w-[100%] md:w-[80%] lg:w-[67%] xl:w-[60%] dark:border-blue-900/80">
+    <div className="mt-2 flex justify-center relative">
+      {loading && (
+        <Spinner
+          className="top-[50%] left-[50%] z-50 absolute"
+          size="medium"
+          withText={true}
+          text="Loading..."
+        />
+      )}
+      <Card className="bg-card dark:bg-background sm: w-ful md:w-[80%] lg:w-[67%] xl:w-[60%] dark:border-blue-900/80">
         {confirmPopup && (
           <div className="popup-alert">
             <Alert>
@@ -193,7 +201,7 @@ export function Settings() {
         </CardContent>
         <div className="m-5 border-6 border-red-600 pb-5 pt-4">
           <CardHeader>
-            <CardTitle className="text-black">Danger Zone</CardTitle>
+            <CardTitle className="text-red-600">Danger Zone</CardTitle>
           </CardHeader>
           <CardContent className="">
             <div className="flex flex-row">
