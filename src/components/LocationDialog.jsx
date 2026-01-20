@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { X, MapPin, Navigation } from "lucide-react";
+import { X, MapPin, Navigation, RefreshCw, Target, AlertCircle, CheckCircle, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
@@ -12,14 +12,16 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Separator } from '@/components/ui/separator';
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { coords } from '@/lib/defaultcoords'
 import { isObjEmpty } from "../utils/util";
 import { updateUserInfo } from "../services/user.service";
 import dayjs from "dayjs";
 import { haversine } from "../utils/util";
+import toast from "react-hot-toast";
 
 const delay = ms => new Promise(res => setTimeout(res, ms));
 
@@ -59,7 +61,7 @@ export function LocationDialog({ isOpen, onClose, user, profiledata, setProfiled
     }
   }, [isOpen]);
 
-  const resetCoords = async coords => {
+  const resetCoords = async (coords) => {
     console.log("resetCoords coords::", coords)
     let geodata = {
       latitude: coords.lat,
@@ -67,14 +69,28 @@ export function LocationDialog({ isOpen, onClose, user, profiledata, setProfiled
       defaultcoordsset: true,
       usercoordsset: false,
     };
-    const res = await updateUserInfo(user?.id, geodata);
-    if (res.success) {
-      setProfiledata({ ...profiledata, ...geodata });
-      alert('Reset Coords Successful');
-    } else {
-      alert('Reset Coords Error, try again or contact us.');
+
+    try {
+      const res = await updateUserInfo(user?.id, geodata);
+      if (res.success) {
+        setProfiledata({ ...profiledata, ...geodata });
+        toast.success('Location reset to default successfully!', {
+          position: 'top-center',
+          duration: 4000,
+        });
+        onClose(); // Close dialog after success
+      } else {
+        toast.error(res.msg || 'Failed to reset location. Please try again.', {
+          position: 'top-center',
+        });
+      }
+    } catch (error) {
+      toast.error('An error occurred while resetting location.', {
+        position: 'top-center',
+      });
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   useEffect(() => {
@@ -93,7 +109,10 @@ export function LocationDialog({ isOpen, onClose, user, profiledata, setProfiled
             setLoading(false);
           });
         } else {
-          alert('Error! Only one reset per month is allowed!!');
+          toast.error('Error! Only one reset per month is allowed!', {
+            position: 'top-center',
+            duration: 5000,
+          });
           setLoading(false);
           setShowResetConfirmDialog(false);
           setResetCoordsConfirmClick(false);
@@ -104,7 +123,7 @@ export function LocationDialog({ isOpen, onClose, user, profiledata, setProfiled
     }
   }, [resetCoordsConfirmClick]);
 
-  const saveGeoCodes = async coords => {
+  const saveGeoCodes = async (coords) => {
     let dateofcoordinates = new Date().toISOString().substring(0, 10).toString();
     let geodata = {
       latitude: coords[0],
@@ -113,14 +132,28 @@ export function LocationDialog({ isOpen, onClose, user, profiledata, setProfiled
       usercoordsset: true,
       dateofcoordinates: dateofcoordinates,
     };
-    const res = await updateUserInfo(user?.id, geodata);
-    if (res.success) {
-      setProfiledata({ ...profiledata, ...geodata });
-      alert('Coordinates Set Successful');
-    } else {
-      alert('Location Set Error, try again or contact us.');
+
+    try {
+      const res = await updateUserInfo(user?.id, geodata);
+      if (res.success) {
+        setProfiledata({ ...profiledata, ...geodata });
+        toast.success('Location coordinates saved successfully!', {
+          position: 'top-center',
+          duration: 4000,
+        });
+        onClose(); // Close dialog after success
+      } else {
+        toast.error(res.msg || 'Failed to save coordinates. Please try again.', {
+          position: 'top-center',
+        });
+      }
+    } catch (error) {
+      toast.error('An error occurred while saving coordinates.', {
+        position: 'top-center',
+      });
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   useEffect(() => {
@@ -161,14 +194,15 @@ export function LocationDialog({ isOpen, onClose, user, profiledata, setProfiled
     if (typeof window === "undefined" || !window.L) return;
 
     const L = window.L;
-    const mapContainer = document.getElementById("coordinates-map");
+    // Try to find either map container
+    let mapContainer = document.getElementById("coordinates-map") || document.getElementById("coordinates-map-new");
 
     if (!mapContainer) return;
 
     // Clear existing map
     mapContainer.innerHTML = "";
 
-    const map = L.map("coordinates-map").setView(
+    const map = L.map(mapContainer.id).setView(
       [markerPosition.lat, markerPosition.lng],
       13,
     );
@@ -226,12 +260,36 @@ export function LocationDialog({ isOpen, onClose, user, profiledata, setProfiled
       setIsGettingLocation(false);
       setShowGeoConfirmDialog(true);
     } else {
-      alert('GEO ERROR, CO-ORDINATES ARE FAR FROM YOUR CITY. TRY AGAIN');
+      toast.error('Location error: Coordinates are far from your city. Please try again or set location manually.', {
+        position: 'top-center',
+        duration: 5000,
+      });
+      setIsGettingLocation(false);
     }
   }
 
   function errorsCallback(error) {
     console.warn(`ERROR(${error.code}): ${error.message}`);
+    let errorMessage = 'Unable to get your location. ';
+    switch(error.code) {
+      case error.PERMISSION_DENIED:
+        errorMessage += 'Location access denied. Please enable location permissions.';
+        break;
+      case error.POSITION_UNAVAILABLE:
+        errorMessage += 'Location information is unavailable.';
+        break;
+      case error.TIMEOUT:
+        errorMessage += 'Location request timed out.';
+        break;
+      default:
+        errorMessage += 'Please mark your location manually on the map.';
+        break;
+    }
+    toast.error(errorMessage, {
+      position: 'top-center',
+      duration: 5000,
+    });
+    setIsGettingLocation(false);
   }
 
   var options = {
@@ -250,15 +308,20 @@ export function LocationDialog({ isOpen, onClose, user, profiledata, setProfiled
           navigator.geolocation.getCurrentPosition(successCallback, errorsCallback, options);
         } else if (result.state === 'denied') {
           //If denied then you have to show instructions to enable location
+          toast.error('Location access denied. Please enable location permissions in your browser settings.', {
+            position: 'top-center',
+            duration: 5000,
+          });
         }
         result.onchange = function () {
           //console.log(result.state);
         };
       });
     } else {
-      alert(
-        "Unable to get your location?. Please mark it manually on the map.",
-      );
+      toast.error('Geolocation is not supported by your browser. Please mark your location manually on the map.', {
+        position: 'top-center',
+        duration: 5000,
+      });
     }
   };
 
@@ -279,14 +342,18 @@ export function LocationDialog({ isOpen, onClose, user, profiledata, setProfiled
         (error) => {
           console.error("Error getting location:", error);
           setIsGettingLocation(false);
-          alert(
-            "Unable to get your location?. Please mark it manually on the map.",
-          );
+          toast.error('Unable to get your location. Please mark it manually on the map.', {
+            position: 'top-center',
+            duration: 5000,
+          });
         },
       );
     } else {
       setIsGettingLocation(false);
-      alert("Geolocation is not supported by your browser.");
+      toast.error('Geolocation is not supported by your browser. Please mark your location manually on the map.', {
+        position: 'top-center',
+        duration: 5000,
+      });
     }
   };
 
@@ -299,264 +366,300 @@ export function LocationDialog({ isOpen, onClose, user, profiledata, setProfiled
 
   if (!isOpen) return null;
 
+  // Helper function to get coordinate status
+  const getCoordinateStatus = () => {
+    if (profiledata?.usercoordsset) {
+      return { type: 'custom', label: 'Custom Location Set', color: 'bg-green-500' };
+    } else if (profiledata?.defaultcoordsset) {
+      return { type: 'default', label: 'Default Location', color: 'bg-blue-500' };
+    }
+    return { type: 'none', label: 'No Location Set', color: 'bg-gray-500' };
+  };
+
+  const status = getCoordinateStatus();
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <Card className="w-full max-w-5xl max-h-[90vh] overflow-y-auto shadow-2xl border-border/50 animate-in zoom-in-95 duration-200">
-        <div className="sticky top-0 bg-card border-b border-border/50 px-6 py-1 flex items-center justify-between z-10 bg-teal-400d">
+    <>
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+        <Card className="w-full max-w-6xl max-h-[95vh] overflow-hidden shadow-2xl border-border/50 animate-in zoom-in-95 duration-200 relative">
+          {/* Global Loading Overlay */}
           {loading && (
-            <Spinner className="fixed top-[50%] left-[50%] z-50 cursor-pointer size-10" />
+            <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
+              <div className="text-center">
+                <Spinner size="xlarge" className="mb-4" />
+                <p className="text-sm font-medium text-muted-foreground">Updating your location...</p>
+              </div>
+            </div>
           )}
-          <AlertDialog open={showResetConfirmDialog} onOpenChange={setShowResetConfirmDialog} >
-            <AlertDialogContent>
-              {loading && (
-                <Spinner className="absolute top-[40%] left-[50%] z-50 cursor-pointer size-10" />
-              )}
-              <AlertDialogHeader>
-                <AlertDialogTitle>Press confirm to reset co-ordinates.</AlertDialogTitle>
-                <AlertDialogDescription>
-                  <span className="text-lg font-semibold mb-3">
-                    Only one reset per month is allowed.
-                  </span>
-                  {allowCoordsChange ? (
-                    <></>
-                  ) : (
-                    <>
-                      Your last change was on
-                      <span className="ms-1 text-red-600">
-                        {dayjs(profiledata?.dateofcoordinates).format('MMM D, YYYY')}
-                      </span>
-                      .
-                    </>
+
+          {/* Header */}
+          <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-primary/10 border-b border-border/50 px-6 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <Target className="w-6 h-6 text-primary" />
+                </div>
+              <div>
+                <h2 className="text-2xl font-bold text-foreground">Set GPS Coordinates</h2>
+                <p className="text-sm text-muted-foreground">Pinpoint your exact location for better matches</p>
+                <div className="flex items-center gap-2 mt-2">
+                  <Badge variant="secondary" className={`${status.color} text-white text-xs px-2 py-1`}>
+                    {status.label}
+                  </Badge>
+                  {profiledata?.usercoordsset && (
+                    <span className="text-xs text-muted-foreground">
+                      ({profiledata.latitude?.toFixed(4)}, {profiledata.longitude?.toFixed(4)})
+                    </span>
                   )}
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setResetCoordsConfirmClick(true);
-                  }}
-                >
-                  Confirm33
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-          <AlertDialog open={showGeoConfirmDialog} onOpenChange={setShowGeoConfirmDialog}>
-            <AlertDialogContent>
-              {loading && (
-                <Spinner className="absolute top-[40%] left-[50%] z-50 cursor-pointer size-10" />
-              )}
-              <AlertDialogHeader>
-                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Your location co-ordinates will be set to
-                  <span className="ms-1 text-green-700">
-                    ({markerPosition.lat.toFixed(4)},{" "}
-                    {markerPosition.lng.toFixed(4)})
-                  </span>
-                  . Press to confirm.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>
-                  Cancel
-                </AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setConfirmClick(true);
-                  }}
-                >
-                  Confirm
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-          <div className="">
-            <div className="text-2xl font-bold text-foreground">
-              Set GPS Co-ordinates
-            </div>
-            <div className="text-sm text-red-600 mt-1">
-              (Use this on computer or large screen for accuracy)
-            </div>
-          </div>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-muted rounded-lg transition-colors group"
-            aria-label="Close modal"
-          >
-            <X className="w-5 h-5 text-muted-foreground group-hover:text-foreground" />
-          </button>
-        </div>
-
-        <Separator />
-
-        <div>
-          {!isObjEmpty(profiledata?.usercoordsset) && profiledata?.usercoordsset == true && (
-            <>
-              <div className="px-6" role="">
-                Your co-ordinates are set to
-                <span className="text-orange-600 mx-2">
-                  ({profiledata?.latitude}, {profiledata?.longitude})
-                </span>
-                .
-                <div>
-                  You may reset using button below or email us the co-ordinates.
-                  <Button
-                    className="mt-0 opacity-75"
-                    data-toggle="tooltip"
-                    title="Reset coordinates"
-                    onClick={e => {
-                      e.preventDefault();
-                      setShowResetConfirmDialog(true);
-                    }}
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="20"
-                      height="20"
-                      fill="white"
-                      viewBox="0 0 512 512"
-                    >
-                      <path d="M105.1 202.6c7.7-21.8 20.2-42.3 37.8-59.8c62.5-62.5 163.8-62.5 226.3 0L386.3 160H336c-17.7 0-32 14.3-32 32s14.3 32 32 32H463.5c0 0 0 0 0 0h.4c17.7 0 32-14.3 32-32V64c0-17.7-14.3-32-32-32s-32 14.3-32 32v51.2L414.4 97.6c-87.5-87.5-229.3-87.5-316.8 0C73.2 122 55.6 150.7 44.8 181.4c-5.9 16.7 2.9 34.9 19.5 40.8s34.9-2.9 40.8-19.5zM39 289.3c-5 1.5-9.8 4.2-13.7 8.2c-4 4-6.7 8.8-8.1 14c-.3 1.2-.6 2.5-.8 3.8c-.3 1.7-.4 3.4-.4 5.1V448c0 17.7 14.3 32 32 32s32-14.3 32-32V396.9l17.6 17.5 0 0c87.5 87.4 229.3 87.4 316.7 0c24.4-24.4 42.1-53.1 52.9-83.7c5.9-16.7-2.9-34.9-19.5-40.8s-34.9 2.9-40.8 19.5c-7.7 21.8-20.2 42.3-37.8 59.8c-62.5 62.5-163.8 62.5-226.3 0l-.1-.1L125.6 352H176c17.7 0 32-14.3 32-32s-14.3-32-32-32H48.4c-1.6 0-3.2 .1-4.8 .3s-3.1 .5-4.6 1z" />
-                    </svg>
-                    <span className="text-white ms-1 d-none d-sm-block">Reset</span>
-                  </Button>
                 </div>
               </div>
-              <Separator className="my-4" />
-            </>
-          )}
+            </div>
+            <button
+              onClick={onClose}
+              className="p-2 hover:bg-muted rounded-lg transition-colors group"
+              aria-label="Close modal"
+            >
+              <X className="w-5 h-5 text-muted-foreground group-hover:text-foreground" />
+            </button>
+          </div>
         </div>
 
-        <div className="px-6 space-y-2">
-          <div className="space-y-2">
-            {!isObjEmpty(profiledata?.defaultcoordsset) && profiledata?.defaultcoordsset == true && (
-              <div className="text-sm text-blue-900 dark:text-blue-100">
-                Default co-ordinates are set. Change it through map below or email
-                us the co-ordinates.
+        {/* Alert Dialogs */}
+        <AlertDialog open={showResetConfirmDialog} onOpenChange={setShowResetConfirmDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle className="flex items-center gap-2">
+                <RefreshCw className="w-5 h-5 text-orange-500" />
+                Reset to Default Location
+              </AlertDialogTitle>
+              <AlertDialogDescription className="space-y-3">
+                <p>This will reset your coordinates to the default location for your city.</p>
+                {!allowCoordsChange && (
+                  <Alert className="border-orange-200 bg-orange-50 dark:bg-orange-900/10">
+                    <AlertCircle className="h-4 w-4 text-orange-600" />
+                    <AlertDescription className="text-orange-800 dark:text-orange-200">
+                      Last changed: {dayjs(profiledata?.dateofcoordinates).format('MMM D, YYYY')}
+                      <br />
+                      You can reset again after 30 days.
+                    </AlertDescription>
+                  </Alert>
+                )}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={(e) => {
+                  e.preventDefault();
+                  setResetCoordsConfirmClick(true);
+                }}
+                className="bg-orange-600 hover:bg-orange-700"
+                disabled={!allowCoordsChange}
+              >
+                {allowCoordsChange ? 'Reset Location' : 'Not Available'}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        <AlertDialog open={showGeoConfirmDialog} onOpenChange={setShowGeoConfirmDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle className="flex items-center gap-2">
+                <CheckCircle className="w-5 h-5 text-green-500" />
+                Confirm Location
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                Set your coordinates to:
+                <span className="font-mono text-green-600 dark:text-green-400 ml-2">
+                  ({markerPosition.lat.toFixed(6)}, {markerPosition.lng.toFixed(6)})
+                </span>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={(e) => {
+                  e.preventDefault();
+                  setConfirmClick(true);
+                }}
+                className="bg-green-600 hover:bg-green-700"
+              >
+                Confirm Location
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Content */}
+        <div className="flex flex-col h-[calc(95vh-120px)]">
+          {/* Status and Actions */}
+          {profiledata?.usercoordsset && (
+            <div className="px-6 py-4 border-b border-border/50">
+              <Alert className="border-green-200 bg-green-50 dark:bg-green-900/10">
+                <CheckCircle className="h-4 w-4 text-green-600" />
+                <AlertDescription className="text-green-800 dark:text-green-200">
+                  <strong>Custom location set:</strong> Your coordinates are manually configured.
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="ml-3 h-7"
+                    onClick={() => setShowResetConfirmDialog(true)}
+                  >
+                    <RefreshCw className="w-3 h-3 mr-1" />
+                    Reset
+                  </Button>
+                </AlertDescription>
+              </Alert>
+            </div>
+          )}
+
+          {/* Main Content Area */}
+          <div className="flex-1 overflow-y-auto">
+            {!profiledata?.usercoordsset && (
+              <div className="p-6 space-y-6">
+                {/* Quick Location Button */}
+                <div className="text-center">
+                  <Button
+                    onClick={getCurrentLocation}
+                    disabled={isGettingLocation}
+                    size="lg"
+                    className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-6 shadow-lg hover:shadow-xl transition-all"
+                  >
+                    <Navigation className="w-5 h-5 mr-3" />
+                    {isGettingLocation ? 'Getting Your Location...' : 'Use My Current Location'}
+                  </Button>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Automatically detect and set your GPS coordinates
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-4">
+                  <div className="flex-1 h-px bg-border"></div>
+                  <span className="text-sm text-muted-foreground font-medium">OR</span>
+                  <div className="flex-1 h-px bg-border"></div>
+                </div>
+
+                {/* Manual Location Setting */}
+                <div className="space-y-4">
+                  <div className="text-center">
+                    <h3 className="text-lg font-semibold text-foreground mb-2">Set Location Manually</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Drag the marker on the map to your exact location, then save your coordinates
+                    </p>
+                  </div>
+
+                  {/* Coordinate Display */}
+                  <div className="flex items-center justify-center gap-3 p-4 bg-muted/50 rounded-lg">
+                    <MapPin className="w-5 h-5 text-primary" />
+                    <div className="text-center">
+                      <p className="text-sm text-muted-foreground">Current Marker Position</p>
+                      <p className="font-mono text-lg font-semibold text-foreground">
+                        {markerPosition.lat.toFixed(6)}, {markerPosition.lng.toFixed(6)}
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
 
-            {!isObjEmpty(profiledata?.usercoordsset) && profiledata?.usercoordsset == false && (
-            <Button
-              onClick={getCurrentLocation}
-              disabled={isGettingLocation}
-              className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-6 shadow-md hover:shadow-lg transition-all"
-            >
-              <Navigation className="w-4 h-4 mr-2" />
-              {isGettingLocation
-                ? "Getting location?..."
-                : "GET MY COORDINATES AND SET"}
-            </Button>
+            {/* Map Section */}
+            {!profiledata?.usercoordsset && (
+              <div className="px-6 pb-6">
+                <div className="relative rounded-xl overflow-hidden border border-border shadow-lg bg-muted/20">
+                  <div
+                    id="coordinates-map-new"
+                    className="w-full h-[400px] sm:h-[500px] bg-muted"
+                  ></div>
+
+                  {/* Map Controls */}
+                  <div className="absolute top-4 right-4 flex gap-2">
+                    <button
+                      onClick={() => {
+                        const mapElement = document.getElementById("coordinates-map-new");
+                        if (mapElement) {
+                          if (document.fullscreenElement) {
+                            document.exitFullscreen();
+                          } else {
+                            mapElement.requestFullscreen();
+                          }
+                        }
+                      }}
+                      className="bg-card dark:bg-gray-800 p-2 rounded-lg shadow-md hover:shadow-lg transition-all z-[1000]"
+                      aria-label="Toggle fullscreen"
+                    >
+                      <svg
+                        className="w-5 h-5 text-gray-700 dark:text-gray-300"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+
+                  {/* Map Instructions */}
+                  <div className="absolute bottom-4 left-4 right-4">
+                    <Alert className="border-blue-200 bg-blue-50 dark:bg-blue-900/10">
+                      <Info className="h-4 w-4 text-blue-600" />
+                      <AlertDescription className="text-blue-800 dark:text-blue-200 text-sm">
+                        Click on the map or drag the marker to set your location
+                      </AlertDescription>
+                    </Alert>
+                  </div>
+                </div>
+              </div>
             )}
           </div>
 
-          {!isObjEmpty(profiledata?.usercoordsset) && profiledata?.usercoordsset == false && (
-            <>
-            <div className="space-y-2">
-              <div className="flex items-center gap-4">
-                <div className="flex-1 h-px bg-border"></div>
-                <span className="text-sm text-muted-foreground font-medium">
-                  OR
-                </span>
-                <div className="flex-1 h-px bg-border"></div>
-              </div>
-
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-                <p className="text-sm font-medium text-foreground">
-                  Mark your exact location on below map and then click below "Save
-                  Coordinates" button
-                </p>
+          {/* Footer Actions */}
+          {!profiledata?.usercoordsset && (
+            <div className="px-6 py-4 border-t border-border/50 bg-muted/20">
+              <div className="flex flex-col sm:flex-row gap-3 justify-end">
                 <Button
-                  hidden
-                  onClick={handleSetCoordinates}
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 shadow-md hover:shadow-lg transition-all"
+                  onClick={onClose}
+                  variant="outline"
+                  className="px-6"
                 >
-                  CLICK TO SET
+                  Cancel
+                </Button>
+                <Button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleSetCoordinates();
+                    setShowGeoConfirmDialog(true);
+                  }}
+                  className="bg-primary hover:bg-primary/90 px-6 font-semibold shadow-md hover:shadow-lg transition-all"
+                >
+                  <MapPin className="w-4 h-4 mr-2" />
+                  Save Location
                 </Button>
               </div>
+            </div>
+          )}
 
-              <div className="flex items-center gap-2 justify-center py-2">
-                <MapPin className="w-5 h-5 text-destructive" />
-                <span className="text-sm font-medium text-muted-foreground">
-                  Co-ordinates:
-                </span>
-                <span className="text-base font-bold text-destructive">
-                  ({markerPosition.lat.toFixed(4)},{" "}
-                  {markerPosition.lng.toFixed(4)})
-                </span>
+          {/* Close button for set coordinates */}
+          {profiledata?.usercoordsset && (
+            <div className="px-6 py-4 border-t border-border/50 bg-muted/20">
+              <div className="flex justify-end">
+                <Button
+                  onClick={onClose}
+                  className="px-6"
+                >
+                  Close
+                </Button>
               </div>
             </div>
-
-            <div className="relative rounded-xl overflow-hidden border border-border shadow-lg">
-              <div
-                id="coordinates-map"
-                className="w-full h-[500px] bg-muted"
-              ></div>
-              <button
-                onClick={() => {
-                  const mapElement = document.getElementById("coordinates-map");
-                  if (mapElement) {
-                    if (document.fullscreenElement) {
-                      document.exitFullscreen();
-                    } else {
-                      mapElement.requestFullscreen();
-                    }
-                  }
-                }}
-                className="absolute top-4 right-4 bg-card dark:bg-gray-800 p-2 rounded-lg shadow-md hover:shadow-lg transition-all z-[1000]"
-                aria-label="Toggle fullscreen"
-              >
-                <svg
-                  className="w-5 h-5 text-gray-700 dark:text-gray-300"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"
-                  />
-                </svg>
-              </button>
-            </div>
-
-            <div className="flex justify-end gap-3 pt-4 border-t border-border">
-              <Button
-                onClick={onClose}
-                variant="outline"
-                className="px-6 font-medium bg-transparent"
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  handleSetCoordinates();
-                  setShowGeoConfirmDialog(true);
-                  //onClose();
-                }}
-                className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 font-semibold shadow-md hover:shadow-lg transition-all"
-              >
-                Save Coordinates
-              </Button>
-            </div>
-            </>
           )}
         </div>
       </Card>
     </div>
+    </>
   );
 }
-
-/*
-  //<AlertDialogTrigger asChild>
-  //  <Button variant="outline">Save Coordinates</Button>
-  //</AlertDialogTrigger>
-*/

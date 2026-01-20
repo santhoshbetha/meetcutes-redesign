@@ -1,8 +1,9 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useMemo } from "react";
 import { EventCard } from "./EventCard";
 import EventDetailsDialog from "./EventDetailsDialog";
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight, LayoutGrid } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { ChevronLeft, ChevronRight, LayoutGrid, Filter, Calendar, MapPin } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -12,204 +13,33 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { isObjEmpty } from "../utils/util";
 
-const eventsX = [
-  {
-    id: 1,
-    name: "TARGET",
-    time: "10:23-11:34",
-    date: "Oct 17, 2025",
-    location: "10107 Research Boulevard, Austin",
-    distance: "8.43 miles away",
-    males: 5,
-    females: 7,
-    details:
-      "Join us for a shopping meetup at Target! This is a great opportunity to meet new people while browsing the latest deals. We'll meet at the main entrance and explore the store together. Feel free to bring your shopping list!",
-  },
-  {
-    id: 2,
-    name: "ROSS",
-    time: "03:44-04:55",
-    date: "Oct 15, 2025",
-    location: "1501 E Whitestone Blvd, Cedar Park",
-    distance: "18.17 miles away",
-    males: 3,
-    females: 4,
-    details:
-      "Discover amazing deals at Ross! This casual meetup is perfect for bargain hunters and those who love finding hidden gems. We'll explore the store together and share our best finds. All shopping enthusiasts welcome!",
-  },
-  {
-    id: 3,
-    name: "TARGET",
-    time: "11:03-15:00",
-    date: "Oct 24, 2025",
-    location: "1101 C-Bar Ranch Trail, Cedar Park",
-    distance: "18.27 miles away",
-    males: 8,
-    females: 6,
-    details:
-      "Extended shopping session at Target! With more time to explore, we can check out all departments and grab lunch at the in-store cafe. Perfect for those who want a relaxed shopping experience with new friends.",
-  },
-    {
-    id: 1,
-    name: "TARGET",
-    time: "10:23-11:34",
-    date: "Oct 17, 2025",
-    location: "10107 Research Boulevard, Austin",
-    distance: "8.43 miles away",
-    males: 5,
-    females: 7,
-    details:
-      "Join us for a shopping meetup at Target! This is a great opportunity to meet new people while browsing the latest deals. We'll meet at the main entrance and explore the store together. Feel free to bring your shopping list!",
-  },
-  {
-    id: 2,
-    name: "ROSS",
-    time: "03:44-04:55",
-    date: "Oct 15, 2025",
-    location: "1501 E Whitestone Blvd, Cedar Park",
-    distance: "18.17 miles away",
-    males: 3,
-    females: 4,
-    details:
-      "Discover amazing deals at Ross! This casual meetup is perfect for bargain hunters and those who love finding hidden gems. We'll explore the store together and share our best finds. All shopping enthusiasts welcome!",
-  },
-  {
-    id: 3,
-    name: "TARGET",
-    time: "11:03-15:00",
-    date: "Oct 24, 2025",
-    location: "1101 C-Bar Ranch Trail, Cedar Park",
-    distance: "18.27 miles away",
-    males: 8,
-    females: 6,
-    details:
-      "Extended shopping session at Target! With more time to explore, we can check out all departments and grab lunch at the in-store cafe. Perfect for those who want a relaxed shopping experience with new friends.",
-  },
-    {
-    id: 1,
-    name: "TARGET",
-    time: "10:23-11:34",
-    date: "Oct 17, 2025",
-    location: "10107 Research Boulevard, Austin",
-    distance: "8.43 miles away",
-    males: 5,
-    females: 7,
-    details:
-      "Join us for a shopping meetup at Target! This is a great opportunity to meet new people while browsing the latest deals. We'll meet at the main entrance and explore the store together. Feel free to bring your shopping list!",
-  },
-  {
-    id: 2,
-    name: "ROSS",
-    time: "03:44-04:55",
-    date: "Oct 15, 2025",
-    location: "1501 E Whitestone Blvd, Cedar Park",
-    distance: "18.17 miles away",
-    males: 3,
-    females: 4,
-    details:
-      "Discover amazing deals at Ross! This casual meetup is perfect for bargain hunters and those who love finding hidden gems. We'll explore the store together and share our best finds. All shopping enthusiasts welcome!",
-  },
-  {
-    id: 3,
-    name: "TARGET",
-    time: "11:03-15:00",
-    date: "Oct 24, 2025",
-    location: "1101 C-Bar Ranch Trail, Cedar Park",
-    distance: "18.27 miles away",
-    males: 8,
-    females: 6,
-    details:
-      "Extended shopping session at Target! With more time to explore, we can check out all departments and grab lunch at the in-store cafe. Perfect for those who want a relaxed shopping experience with new friends.",
-  },
-    {
-    id: 1,
-    name: "TARGET",
-    time: "10:23-11:34",
-    date: "Oct 17, 2025",
-    location: "10107 Research Boulevard, Austin",
-    distance: "8.43 miles away",
-    males: 5,
-    females: 7,
-    details:
-      "Join us for a shopping meetup at Target! This is a great opportunity to meet new people while browsing the latest deals. We'll meet at the main entrance and explore the store together. Feel free to bring your shopping list!",
-  },
-  {
-    id: 2,
-    name: "ROSS",
-    time: "03:44-04:55",
-    date: "Oct 15, 2025",
-    location: "1501 E Whitestone Blvd, Cedar Park",
-    distance: "18.17 miles away",
-    males: 3,
-    females: 4,
-    details:
-      "Discover amazing deals at Ross! This casual meetup is perfect for bargain hunters and those who love finding hidden gems. We'll explore the store together and share our best finds. All shopping enthusiasts welcome!",
-  },
-  {
-    id: 3,
-    name: "TARGET",
-    time: "11:03-15:00",
-    date: "Oct 24, 2025",
-    location: "1101 C-Bar Ranch Trail, Cedar Park",
-    distance: "18.27 miles away",
-    males: 8,
-    females: 6,
-    details:
-      "Extended shopping session at Target! With more time to explore, we can check out all departments and grab lunch at the in-store cafe. Perfect for those who want a relaxed shopping experience with new friends.",
-  },
-    {
-    id: 1,
-    name: "TARGET",
-    time: "10:23-11:34",
-    date: "Oct 17, 2025",
-    location: "10107 Research Boulevard, Austin",
-    distance: "8.43 miles away",
-    males: 5,
-    females: 7,
-    details:
-      "Join us for a shopping meetup at Target! This is a great opportunity to meet new people while browsing the latest deals. We'll meet at the main entrance and explore the store together. Feel free to bring your shopping list!",
-  },
-  {
-    id: 2,
-    name: "ROSS",
-    time: "03:44-04:55",
-    date: "Oct 15, 2025",
-    location: "1501 E Whitestone Blvd, Cedar Park",
-    distance: "18.17 miles away",
-    males: 3,
-    females: 4,
-    details:
-      "Discover amazing deals at Ross! This casual meetup is perfect for bargain hunters and those who love finding hidden gems. We'll explore the store together and share our best finds. All shopping enthusiasts welcome!",
-  },
-  {
-    id: 3,
-    name: "TARGET",
-    time: "11:03-15:00",
-    date: "Oct 24, 2025",
-    location: "1101 C-Bar Ranch Trail, Cedar Park",
-    distance: "18.27 miles away",
-    males: 8,
-    females: 6,
-    details:
-      "Extended shopping session at Target! With more time to explore, we can check out all departments and grab lunch at the in-store cafe. Perfect for those who want a relaxed shopping experience with new friends.",
-  },
-];
-
-export function EventList({ events, userhandle, userlatitude, userlongitude, setIsLoading, profiledata }) {
+export function EventList({ events, userlatitude, userlongitude, setIsLoading, profiledata }) {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [sortBy, setSortBy] = useState("Date");
   const eventsPerPage = 8;
   const resultsRef = useRef(null);
 
+  // Memoized sorted events
+  const sortedEvents = useMemo(() => {
+    if (!events) return [];
+    const eventsCopy = [...events];
+    if (sortBy === "Date") {
+      return eventsCopy.sort((a, b) => new Date(a.eventdate || a.date) - new Date(b.eventdate || b.date));
+    } else if (sortBy === "Distance") {
+      return eventsCopy.sort((a, b) => (a.distance || 0) - (b.distance || 0));
+    }
+    return eventsCopy;
+  }, [events, sortBy]);
+
   // Calculate total pages
-  const totalPages = Math.ceil(events?.length / eventsPerPage);
+  const totalPages = Math.ceil(sortedEvents?.length / eventsPerPage);
 
   // Get current page events
   const indexOfLastEvent = currentPage * eventsPerPage;
   const indexOfFirstEvent = indexOfLastEvent - eventsPerPage;
-  const currentEvents = events?.slice(indexOfFirstEvent, indexOfLastEvent);
+  const currentEvents = sortedEvents?.slice(indexOfFirstEvent, indexOfLastEvent);
 
   // Pagination handlers
   const goToPage = page => {
@@ -273,62 +103,78 @@ export function EventList({ events, userhandle, userlatitude, userlongitude, set
   };
 
   return (
-    <div className="w-[90%] mx-auto">
-      {currentEvents?.length > 1 && (
-        <div className="flex justify-between mb-2">
-          <Select
-            className='ms-auto'
-            required
-            name="sortby"
-            onValueChange={(value) => {
-              if (value == "Date") {
-                events.sort((a, b) => new Date(a.eventdate) - new Date(b.eventdate));
-              } else if (value == "Distance") {
-                events.sort((a, b) => a.distance - b.distance);
-              }
-            }}
-          >
-            <SelectTrigger className="w-full md:w-1/4">
-              <SelectValue placeholder="Sort By" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectItem value="Date">Date</SelectItem>
-                <SelectItem value="Distance">Distance</SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-        </div>
-      )}
+    <div className="w-full max-w-7xl mx-auto px-4">
+      {/* Header with stats and sorting */}
+      <div className="mb-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <Calendar className="w-5 h-5 text-primary" />
+              <h2 className="text-2xl font-bold text-foreground">Events</h2>
+            </div>
+            {sortedEvents?.length > 0 && (
+              <Badge variant="secondary" className="px-3 py-1 bg-primary/10 text-primary border-primary/20">
+                {sortedEvents.length} events found
+              </Badge>
+            )}
+          </div>
 
-      {/* Events Grid */}
-      <div className="" ref={resultsRef}>
-        <div
-          className={`col-span-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-2 transition-opacity duration-300 ${
-            false ? 'opacity-50' : 'opacity-100'
-          }`}
-        >
-          {currentEvents?.map((event) => (
-            <EventCard
-              key={event?.id}
-              setSelectedEvent={setSelectedEvent}
-              event={event}
-              userlatitude={userlatitude}
-              userlongitude={userlongitude}
-            />
-          ))}
+          {currentEvents?.length > 1 && (
+            <div className="flex items-center gap-3">
+              <Filter className="w-4 h-4 text-muted-foreground" />
+              <Select
+                value={sortBy}
+                onValueChange={(value) => setSortBy(value)}
+              >
+                <SelectTrigger className="w-40">
+                  <SelectValue placeholder="Sort By" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectItem value="Date">Sort by Date</SelectItem>
+                    <SelectItem value="Distance">Sort by Distance</SelectItem>
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
         </div>
       </div>
-    
+
+      {/* Events Grid */}
+      <div className="mb-8" ref={resultsRef}>
+        {currentEvents?.length > 0 ? (
+          <div
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6 transition-opacity duration-300 opacity-100"
+          >
+            {currentEvents?.map((event) => (
+              <EventCard
+                key={event?.id}
+                setSelectedEvent={setSelectedEvent}
+                event={event}
+                userlatitude={userlatitude}
+                userlongitude={userlongitude}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <MapPin className="w-16 h-16 text-muted-foreground/50 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-muted-foreground mb-2">No events found</h3>
+            <p className="text-sm text-muted-foreground">Try adjusting your search criteria or check back later for new events.</p>
+          </div>
+        )}
+      </div>
+
       {/* Pagination Controls */}
       {totalPages > 1 && (
-        <div className="my-4 flex flex-col sm:flex-row items-center justify-center gap-4">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           {/* Previous Button */}
           <Button
             onClick={goToPrevious}
             disabled={currentPage === 1}
             variant="outline"
-            className="px-4 py-2 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-primary hover:text-primary-foreground transition-all bg-transparent"
+            className="px-4 py-2 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-primary hover:text-primary-foreground transition-all bg-transparent border-primary/20 hover:border-primary"
           >
             <ChevronLeft className="w-4 h-4 mr-1" />
             Previous
@@ -369,7 +215,7 @@ export function EventList({ events, userhandle, userlatitude, userlongitude, set
             onClick={goToNext}
             disabled={currentPage === totalPages}
             variant="outline"
-            className="px-4 py-2 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-primary hover:text-primary-foreground transition-all bg-transparent"
+            className="px-4 py-2 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-primary hover:text-primary-foreground transition-all bg-transparent border-primary/20 hover:border-primary"
           >
             Next
             <ChevronRight className="w-4 h-4 ml-1" />
@@ -384,6 +230,6 @@ export function EventList({ events, userhandle, userlatitude, userlongitude, set
           profiledata={profiledata}
         />
       )}
-     </div>
+    </div>
   );
 }

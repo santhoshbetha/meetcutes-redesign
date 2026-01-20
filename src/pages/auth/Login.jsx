@@ -1,4 +1,4 @@
-import { useState, useContext } from "react";
+import { useState } from "react";
 import { DialogContent, DialogTitle } from "@/components/ui/dialog";
 import {
   CardContent,
@@ -12,23 +12,22 @@ import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/Spinner";
 import * as Yup from "yup";
 import { Formik } from "formik";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import usePasswordToggle from "@/hooks/usePasswordToggle";
 import secureLocalStorage from "react-secure-storage";
 import supabase from "@/lib/supabase";
 
 export function Login({ setOpenLogin }) {
   const navigate = useNavigate();
-  const { pathname } = useLocation();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [PasswordInputType, ToggleIcon] = usePasswordToggle();
 
-  const forgotPassword = (e) => {
+  const forgotPassword = () => {
     setOpenLogin(false);
   };
 
-  const onSignupClick = (e) => {
+  const onSignupClick = () => {
     setOpenLogin(false);
     //setOpenSignup(true)
   };
@@ -47,10 +46,23 @@ export function Login({ setOpenLogin }) {
         }
   
         if (error) {
-            setError(String(error))
+            // Provide user-friendly error messages
+            let errorMessage = "An error occurred during login. Please try again.";
+            
+            if (error.message?.includes("Invalid login credentials") || error.message?.includes("AuthApiError")) {
+                errorMessage = "Invalid email or password. Please check your credentials and try again.";
+            } else if (error.message?.includes("Email not confirmed")) {
+                errorMessage = "Please check your email and click the confirmation link before signing in.";
+            } else if (error.message?.includes("Too many requests")) {
+                errorMessage = "Too many login attempts. Please wait a few minutes before trying again.";
+            } else if (error.message?.includes("User not found")) {
+                errorMessage = "No account found with this email address. Please sign up first.";
+            }
+            
+            setError(errorMessage)
             throw error
         }
-    } catch (error) {
+    } catch {
         setLoading(false);
     } finally {
         setLoading(false);
@@ -65,22 +77,29 @@ export function Login({ setOpenLogin }) {
   });
 
   return (
-    <DialogContent className="w-[90%] sm:max-w-[425px]">
+    <DialogContent className="w-[90%] sm:max-w-[425px] border-0 shadow-2xl bg-gradient-to-br from-card via-card to-card/95 backdrop-blur-sm">
       {loading && (
         <div className='absolute top-[50%] left-[50%] z-50 -translate-x-1/2 -translate-y-1/2'>
           <Spinner withText={false} />
         </div>
       )}
       <DialogTitle></DialogTitle>
-      <CardHeader>
-        <CardTitle className="text-2xl">
-          Login
+      <CardHeader className="pb-6">
+        <div className="flex items-center justify-center mb-4">
+          <div className="w-12 h-12 rounded-full bg-linear-to-r from-orange-400 via-red-500 to-pink-500 flex items-center justify-center shadow-lg">
+            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+          </div>
+        </div>
+        <CardTitle className="text-3xl font-bold text-center bg-linear-to-r from-orange-500 via-red-500 to-pink-500 bg-clip-text text-transparent">
+          Welcome Back
         </CardTitle>
-        <CardDescription>
-          Enter your email below to login to your account
+        <CardDescription className="text-center text-base">
+          Enter your credentials to access your account
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-8 pb-8">
         <Formik
           initialValues={{
             email: "",
@@ -110,69 +129,87 @@ export function Login({ setOpenLogin }) {
           }) => (
             <form onSubmit={handleSubmit}>
               <div className="flex flex-col gap-6">
-                <div className="grid gap-2">
-                  <Label htmlFor="email">Email</Label>
+                <div className="grid gap-3">
+                  <Label htmlFor="email" className="text-sm font-semibold text-foreground">
+                    Email Address
+                  </Label>
                   <Input
                     id="email"
                     type="email"
-                    placeholder="m@example.com"
+                    placeholder="your@email.com"
                     onChange={handleChange}
                     onBlur={handleBlur}
                     value={values.email}
+                    className="h-12 border-2 border-border/50 rounded-xl focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all duration-200 bg-background/50 backdrop-blur-sm"
                     required
                   />
-                  <p className="text-red-700">
+                  <p className="text-red-500 text-sm">
                     {errors.email && touched.email && errors.email}
                   </p>
                 </div>
-                <div className="grid gap-2">
-                  <div className="flex items-center">
-                    <Label htmlFor="password">Password</Label>
+                <div className="grid gap-3">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="password" className="text-sm font-semibold text-foreground">
+                      Password
+                    </Label>
                     <Link
                       to="/forgotpassword"
-                      className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
+                      className="text-sm text-primary hover:text-primary/80 underline-offset-4 hover:underline transition-colors"
                       onClick={forgotPassword}
                     >
-                      Forgot your password?
+                      Forgot password?
                     </Link>
                   </div>
                   <div className="relative">
                     <Input
                       id="password"
                       type={PasswordInputType}
+                      placeholder="Enter your password"
                       onChange={handleChange}
                       onBlur={handleBlur}
                       value={values.password}
+                      className="h-12 pr-12 border-2 border-border/50 rounded-xl focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all duration-200 bg-background/50 backdrop-blur-sm"
                       required
                     />
-                    <span
-                      className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-gray-500
-                                                hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 bg-background"
+                    <button
+                      type="button"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 h-6 w-6 text-muted-foreground hover:text-foreground transition-colors"
                     >
                       {ToggleIcon}
-                    </span>
+                    </button>
                   </div>
-                  <p className="text-red-700">
+                  <p className="text-red-500 text-sm">
                     {errors.password && touched.password && errors.password}
                   </p>
                 </div>
-                {error && <div className="error_msg">{error}</div>}
+                {error && (
+                  <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-xl text-destructive text-sm text-center">
+                    {error}
+                  </div>
+                )}
                 <Button
                   type="submit"
-                  className="w-full"
+                  className="w-full h-12 bg-linear-to-r from-orange-500 via-red-500 to-pink-500 hover:from-orange-600 hover:via-red-600 hover:to-pink-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-[1.02]"
                   disabled={isSubmitting}
                 >
-                  Login
+                  {isSubmitting ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
+                      Signing In...
+                    </>
+                  ) : (
+                    'Sign In'
+                  )}
                 </Button>
               </div>
-              <div className="mt-4 text-center text-sm">
-                Don&apos;t have an account?{" "}
+              <div className="mt-6 text-center text-sm">
+                <span className="text-muted-foreground">Don&apos;t have an account? </span>
                 <Link
                   to="/"
                   onClick={onSignupClick}
-                  className="underline underline-offset-4"
+                  className="text-primary hover:text-primary/80 font-semibold underline-offset-4 hover:underline transition-colors"
                 >
-                  Signup
+                  Sign up here
                 </Link>
               </div>
             </form>

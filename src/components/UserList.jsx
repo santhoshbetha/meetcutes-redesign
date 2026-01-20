@@ -7,7 +7,7 @@ import { UserProfileDialog } from "./UserProfileDialog";
 const sampleProfiles = [
   {
     id: 1,
-    name: "Abbie",
+    firstname: "Abbie",
     age: 23,
     education: "Bachelor's level",
     location: "Asan Nadia, Yishun",
@@ -24,7 +24,7 @@ const sampleProfiles = [
   },
   {
     id: 2,
-    name: "Melody",
+    firstname: "Melody",
     age: 24,
     education: "Intermediate",
     location: "96 Kuti Maratha",
@@ -43,7 +43,7 @@ const sampleProfiles = [
   },
   {
     id: 3,
-    name: "Shannon",
+    firstname: "Shannon",
     age: 23,
     education: "Intermediate",
     location: "24 Marne Telugu Chennai",
@@ -60,7 +60,7 @@ const sampleProfiles = [
   },
   {
     id: 4,
-    name: "Lydia",
+    firstname: "Lydia",
     age: 22,
     education: "Bachelor's level",
     location: "24 Marne Telugu Chennai",
@@ -77,7 +77,7 @@ const sampleProfiles = [
   },
   {
     id: 5,
-    name: "Lydia",
+    firstname: "Lydia",
     age: 22,
     education: "Bachelor's level",
     location: "Achingapakkam Chennai",
@@ -94,7 +94,7 @@ const sampleProfiles = [
   },
   {
     id: 6,
-    name: "Hazel",
+    firstname: "Hazel",
     age: 23,
     education: "Intermediate",
     location: "24 Marne Telugu Chennai",

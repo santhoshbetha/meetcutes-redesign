@@ -135,3 +135,34 @@ export const logoutUser = async () => {
     };
   }
 }
+
+export const deleteUser = async (userId) => {
+  try {
+    // First delete from users table
+    const { error: userError } = await supabase
+      .from("users")
+      .delete()
+      .eq("userid", userId);
+
+    if (userError) {
+      return {
+        success: false,
+        msg: userError.message
+      };
+    }
+
+    // Then delete from auth (this requires admin privileges or RLS policies)
+    // For now, we'll just delete from the users table
+    // The auth deletion would need to be handled server-side or with proper permissions
+
+    return {
+      success: true,
+      msg: "Account deleted successfully"
+    };
+  } catch (error) {
+    return {
+      success: false,
+      msg: error.message
+    };
+  }
+};

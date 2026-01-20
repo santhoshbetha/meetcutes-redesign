@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Container } from "@/components/Container";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -8,10 +8,19 @@ import { useFormik } from "formik";
 import { Button } from "@/components/ui/button";
 import { LoadingButton } from "@/components/ui/LoadingButton";
 import { Spinner } from "@/components/ui/Spinner";
+import { useAuth } from "@/context/AuthContext";
+import { updateUserInfo } from "@/services/user.service";
+import { successAlert, errorAlert } from "@/services/alert.service";
+
+function isObjEmpty(val){
+    return (val == null || val.length <= 0 ||
+        (Object.keys(val).length === 0 && val.constructor === Object)
+    ) ? true : false;
+}
 
 export default function Questionaire() {
   const [loading, setLoading] = useState(false);
-  //const {user, userSession, profiledata, setProfiledata} = useAuth();
+  const {user, profiledata, setProfiledata} = useAuth();
   let [valueschanged, setValueschanged] = useState(false);
   const navigate = useNavigate();
   //const isOnline = useOnlineStatus();
@@ -32,27 +41,68 @@ export default function Questionaire() {
   const [q12value, setQ12Value] = useState(20);
   const [q13value, setQ13Value] = useState(20);
   const [q14value, setQ14Value] = useState(20);
-  const [questionairevalues, setquestionairevalues] = useState({});
 
-  const handleChange1 = (val) => {};
-  const handleChange2 = (val) => {};
-  const handleChange3 = (val) => {};
-  const handleChange4 = (val) => {};
-  const handleChange5 = (val) => {};
-  const handleChange6 = (val) => {};
-  const handleChange7 = (val) => {};
-  const handleChange8 = (val) => {};
-  const handleChange9 = (val) => {};
+  const handleChange1 = (val) => {
+    setQ1Value(val[0]);
+    setValueschanged(true);
+  };
+  const handleChange2 = (val) => {
+    setQ2Value(val[0]);
+    setValueschanged(true);
+  };
+  const handleChange3 = (val) => {
+    setQ3Value(val[0]);
+    setValueschanged(true);
+  };
+  const handleChange4 = (val) => {
+    setQ4Value(val[0]);
+    setValueschanged(true);
+  };
+  const handleChange5 = (val) => {
+    setQ5Value(val[0]);
+    setValueschanged(true);
+  };
+  const handleChange6 = (val) => {
+    setQ6Value(val[0]);
+    setValueschanged(true);
+  };
+  const handleChange7 = (val) => {
+    setQ7Value(val[0]);
+    setValueschanged(true);
+  };
+  const handleChange8 = (val) => {
+    setQ8Value(val[0]);
+    setValueschanged(true);
+  };
+  const handleChange9 = (val) => {
+    setQ9Value(val[0]);
+    setValueschanged(true);
+  };
 
-  const handleChange10 = (val) => {};
+  const handleChange10 = (val) => {
+    setQ10Value(val[0]);
+    setValueschanged(true);
+  };
 
-  const handleChange11 = (val) => {};
+  const handleChange11 = (val) => {
+    setQ11Value(val[0]);
+    setValueschanged(true);
+  };
 
-  const handleChange12 = (val) => {};
+  const handleChange12 = (val) => {
+    setQ12Value(val[0]);
+    setValueschanged(true);
+  };
 
-  const handleChange13 = (val) => {};
+  const handleChange13 = (val) => {
+    setQ13Value(val[0]);
+    setValueschanged(true);
+  };
 
-  const handleChange14 = (val) => {};
+  const handleChange14 = (val) => {
+    setQ14Value(val[0]);
+    setValueschanged(true);
+  };
 
   function handlePopupClose() {
     setConfirmPopup(false);
@@ -66,7 +116,46 @@ export default function Questionaire() {
   const formik = useFormik({
     initialValues: {},
 
-    onSubmit: async (values) => {},
+    onSubmit: async () => {
+      const questionnaireData = {
+        q1: q1value,
+        q2: q2value,
+        q3: q3value,
+        q4: q4value,
+        q5: q5value,
+        q6: q6value,
+        q7: q7value,
+        q8: q8value,
+        q9: q9value,
+        q10: q10value,
+        q11: q11value,
+        q12: q12value,
+        q13: q13value,
+        q14: q14value,
+      };
+      setLoading(true);
+      try {
+        const res = await updateUserInfo(user.id, {
+          questionairevalues: questionnaireData,
+          questionairevaluesset: true,
+        });
+        if (res.success) {
+          setProfiledata({
+            ...profiledata,
+            questionairevalues: questionnaireData,
+            questionairevaluesset: true,
+          });
+          successAlert("", "Questionnaire submitted successfully!");
+          navigate("/dashboard");
+        } else {
+          errorAlert("Error", res.msg);
+        }
+      } catch {
+        errorAlert("Error", "Failed to submit questionnaire.");
+      } finally {
+        setLoading(false);
+      }
+    },
   });
 
   return (
@@ -135,7 +224,19 @@ export default function Questionaire() {
           </button>
         </div>
         <CardHeader>
-          <CardTitle className="text-2xl">Questionaire</CardTitle>
+          <CardTitle className="text-2xl">
+            Questionnaire
+          </CardTitle>
+            {!isObjEmpty(profiledata?.questionairevaluesset) && profiledata?.questionairevaluesset != true && (
+              <h4>
+                  Slide below options as your thoughts align with (be truthful not rightful)
+              </h4>
+            )}
+            {!isObjEmpty(profiledata?.questionairevaluesset) && profiledata?.questionairevaluesset == true && (
+              <h4>
+                  Your questionaire values:
+              </h4>
+            )}
         </CardHeader>
         <CardContent>
           <form
@@ -145,15 +246,15 @@ export default function Questionaire() {
             className=""
             onSubmit={formik.handleSubmit}
           >
-            {true ? (
+            {profiledata?.gender === 'male' ? (
               <>
                 <div className="grid grid-cols-12 gap-1">
                   <div className="col-span-2 text-sm">Android</div>
                   <span className="col-span-8">
                     <Slider
                       className="mt-3"
-                      defaultValue={[q1value]}
-                      onChange={(e) => handleChange1(e.target.value)}
+                      value={[q1value]}
+                      onValueChange={handleChange1}
                       max={100}
                       step={1}
                     />
@@ -165,14 +266,14 @@ export default function Questionaire() {
                   <span className="col-span-8">
                     <Slider
                       className="mt-3"
-                      defaultValue={[q2value]}
-                      onChange={(e) => handleChange2(e.target.value)}
+                      value={[q2value]}
+                      onValueChange={handleChange2}
                       max={100}
                       step={1}
                     />
                   </span>
                   <span className="ms-4 col-span-2 text-sm">
-                    Equal Oppurtunities
+                    Equal Opportunities
                   </span>
                 </div>
                 <div className="grid grid-cols-12 gap-1 mt-4">
@@ -180,8 +281,8 @@ export default function Questionaire() {
                   <span className="col-span-8">
                     <Slider
                       className="mt-3"
-                      defaultValue={[q3value]}
-                      onChange={(e) => handleChange3(e.target.value)}
+                      value={[q3value]}
+                      onValueChange={handleChange3}
                       max={100}
                       step={1}
                     />
@@ -193,8 +294,8 @@ export default function Questionaire() {
                   <span className="col-span-8">
                     <Slider
                       className="mt-3"
-                      defaultValue={[q4value]}
-                      onChange={(e) => handleChange4(e.target.value)}
+                      value={[q4value]}
+                      onValueChange={handleChange4}
                       max={100}
                       step={1}
                     />
@@ -208,8 +309,8 @@ export default function Questionaire() {
                   <span className="col-span-8">
                     <Slider
                       className="mt-3"
-                      defaultValue={[q5value]}
-                      onChange={(e) => handleChange5(e.target.value)}
+                      value={[q5value]}
+                      onValueChange={handleChange5}
                       max={100}
                       step={1}
                     />
@@ -223,8 +324,8 @@ export default function Questionaire() {
                   <span className="col-span-8">
                     <Slider
                       className="mt-3"
-                      defaultValue={[q6value]}
-                      onChange={(e) => handleChange6(e.target.value)}
+                      value={[q6value]}
+                      onValueChange={handleChange6}
                       max={100}
                       step={1}
                     />
@@ -238,8 +339,8 @@ export default function Questionaire() {
                   <span className="col-span-8">
                     <Slider
                       className="mt-3"
-                      defaultValue={[q7value]}
-                      onChange={(e) => handleChange7(e.target.value)}
+                      value={[q7value]}
+                      onValueChange={handleChange7}
                       max={100}
                       step={1}
                     />
@@ -251,8 +352,8 @@ export default function Questionaire() {
                   <span className="col-span-8">
                     <Slider
                       className="mt-3"
-                      defaultValue={[q8value]}
-                      onChange={(e) => handleChange8(e.target.value)}
+                      value={[q8value]}
+                      onValueChange={handleChange8}
                       max={100}
                       step={1}
                     />
@@ -264,8 +365,8 @@ export default function Questionaire() {
                   <span className="col-span-8">
                     <Slider
                       className="mt-3"
-                      defaultValue={[q9value]}
-                      onChange={(e) => handleChange9(e.target.value)}
+                      value={[q9value]}
+                      onValueChange={handleChange9}
                       max={100}
                       step={1}
                     />
@@ -279,8 +380,8 @@ export default function Questionaire() {
                   <span className="col-span-8">
                     <Slider
                       className="mt-3"
-                      defaultValue={[q10value]}
-                      onChange={(e) => handleChange10(e.target.value)}
+                      value={[q10value]}
+                      onValueChange={handleChange10}
                       max={100}
                       step={1}
                     />
@@ -297,8 +398,8 @@ export default function Questionaire() {
                   <span className="col-span-8">
                     <Slider
                       className="mt-3"
-                      defaultValue={[q1value]}
-                      onChange={(e) => handleChange1(e.target.value)}
+                      value={[q1value]}
+                      onValueChange={handleChange1}
                       max={100}
                       step={1}
                     />
@@ -310,8 +411,8 @@ export default function Questionaire() {
                   <span className="col-span-8">
                     <Slider
                       className="mt-3"
-                      defaultValue={[q2value]}
-                      onChange={(e) => handleChange2(e.target.value)}
+                      value={[q2value]}
+                      onValueChange={handleChange2}
                       max={100}
                       step={1}
                     />
@@ -323,8 +424,8 @@ export default function Questionaire() {
                   <span className="col-span-8">
                     <Slider
                       className="mt-3"
-                      defaultValue={[q3value]}
-                      onChange={(e) => handleChange3(e.target.value)}
+                      value={[q3value]}
+                      onValueChange={handleChange3}
                       max={100}
                       step={1}
                     />
@@ -336,8 +437,8 @@ export default function Questionaire() {
                   <span className="col-span-8">
                     <Slider
                       className="mt-3"
-                      defaultValue={[q4value]}
-                      onChange={(e) => handleChange4(e.target.value)}
+                      value={[q4value]}
+                      onValueChange={handleChange4}
                       max={100}
                       step={1}
                     />
@@ -349,8 +450,8 @@ export default function Questionaire() {
                   <span className="col-span-8">
                     <Slider
                       className="mt-3"
-                      defaultValue={[q5value]}
-                      onChange={(e) => handleChange5(e.target.value)}
+                      value={[q5value]}
+                      onValueChange={handleChange5}
                       max={100}
                       step={1}
                     />
@@ -364,8 +465,8 @@ export default function Questionaire() {
                   <span className="col-span-8">
                     <Slider
                       className="mt-3"
-                      defaultValue={[q6value]}
-                      onChange={(e) => handleChange6(e.target.value)}
+                      value={[q6value]}
+                      onValueChange={handleChange6}
                       max={100}
                       step={1}
                     />
@@ -377,8 +478,8 @@ export default function Questionaire() {
                   <span className="col-span-8">
                     <Slider
                       className="mt-3"
-                      defaultValue={[q7value]}
-                      onChange={(e) => handleChange7(e.target.value)}
+                      value={[q7value]}
+                      onValueChange={handleChange7}
                       max={100}
                       step={1}
                     />
@@ -390,8 +491,8 @@ export default function Questionaire() {
                   <span className="col-span-8">
                     <Slider
                       className="mt-3"
-                      defaultValue={[q8value]}
-                      onChange={(e) => handleChange8(e.target.value)}
+                      value={[q8value]}
+                      onValueChange={handleChange8}
                       max={100}
                       step={1}
                     />
@@ -403,14 +504,14 @@ export default function Questionaire() {
                   <span className="col-span-8">
                     <Slider
                       className="mt-3"
-                      defaultValue={[33]}
-                      onChange={(e) => handleChange9(e.target.value)}
+                      value={[q9value]}
+                      onValueChange={handleChange9}
                       max={100}
                       step={1}
                     />
                   </span>
                   <span className="ms-4 col-span-2 text-sm">
-                    Traditional Relationalship
+                    Traditional Relationship
                   </span>
                 </div>
                 <div className="grid grid-cols-12 gap-1 mt-4">
@@ -418,8 +519,8 @@ export default function Questionaire() {
                   <span className="col-span-8">
                     <Slider
                       className="mt-3"
-                      defaultValue={[33]}
-                      onChange={(e) => handleChange10(e.target.value)}
+                      value={[q10value]}
+                      onValueChange={handleChange10}
                       max={100}
                       step={1}
                     />
@@ -431,21 +532,21 @@ export default function Questionaire() {
                   <span className="col-span-8">
                     <Slider
                       className="mt-3"
-                      defaultValue={[33]}
-                      onChange={(e) => handleChange11(e.target.value)}
+                      value={[q11value]}
+                      onValueChange={handleChange11}
                       max={100}
                       step={1}
                     />
                   </span>
-                  <span className="ms-4 col-span-2 text-sm">Pertner</span>
+                  <span className="ms-4 col-span-2 text-sm">Partner</span>
                 </div>
                 <div className="grid grid-cols-12 gap-1 mt-4">
                   <div className="col-span-2 text-sm">End goal Happiness</div>
                   <span className="col-span-8">
                     <Slider
                       className="mt-3"
-                      defaultValue={[33]}
-                      onChange={(e) => handleChange12(e.target.value)}
+                      value={[q12value]}
+                      onValueChange={handleChange12}
                       max={100}
                       step={1}
                     />
@@ -459,8 +560,8 @@ export default function Questionaire() {
                   <span className="col-span-8">
                     <Slider
                       className="mt-3"
-                      defaultValue={[33]}
-                      onChange={(e) => handleChange13(e.target.value)}
+                      value={[q13value]}
+                      onValueChange={handleChange13}
                       max={100}
                       step={1}
                     />
@@ -474,8 +575,8 @@ export default function Questionaire() {
                   <span className="col-span-8">
                     <Slider
                       className="mt-3"
-                      defaultValue={[33]}
-                      onChange={(e) => handleChange14(e.target.value)}
+                      value={[q14value]}
+                      onValueChange={handleChange14}
                       max={100}
                       step={1}
                     />
@@ -484,12 +585,13 @@ export default function Questionaire() {
                 </div>
               </>
             )}
-
-            <div className="flex flex-row mt-3" hidden={!valueschanged}>
-              <Button type="submit" className="ms-auto me-2">
-                Submit
-              </Button>
-            </div>
+            {!isObjEmpty(profiledata?.questionairevaluesset) && profiledata?.questionairevaluesset != true && (
+              <div className="flex flex-row mt-3" hidden={!valueschanged}>
+                <Button type="submit" className="ms-auto me-2">
+                  Submit
+                </Button>
+              </div>
+            )}
           </form>
         </CardContent>
       </Card>

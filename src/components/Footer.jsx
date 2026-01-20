@@ -1,93 +1,140 @@
 import { Link } from "react-router-dom";
+import { Heart, Mail, Phone, MapPin, Twitter, Instagram, Facebook, Youtube } from "lucide-react";
 
 export default function Footer() {
   return (
-    <footer className="bg-gradient-to-b from-card to-background border-t border-border/60">
-      <div className="container mx-auto px-6 py-16 md:px-8 lg:px-12">
-        <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-4">
+    <footer className="bg-gradient-to-b from-card via-card/80 to-background border-t border-border/60 relative overflow-hidden">
+      {/* Background Elements */}
+      <div className="absolute inset-0 opacity-5">
+        <div className="absolute top-10 left-10 w-32 h-32 bg-primary/20 rounded-full blur-xl"></div>
+        <div className="absolute bottom-10 right-10 w-24 h-24 bg-pink-500/20 rounded-full blur-xl"></div>
+      </div>
+
+      <div className="container mx-auto px-6 py-16 md:px-8 lg:px-12 relative z-10">
+        <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-4 max-w-7xl mx-auto">
           {/* Company Info */}
           <div className="space-y-6">
             <div className="space-y-3">
-              <h3
-                className="text-2xl font-bold font-serif bg-gradient-to-r from-primary to-foreground bg-clip-text text-transparent"
-                style={{ fontFamily: "var(--font-playfair)" }}
-              >
-                MeetCutes
-              </h3>
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-primary/10 rounded-xl">
+                  <Heart className="w-6 h-6 text-primary" />
+                </div>
+                <h3
+                  className="text-2xl font-bold font-serif bg-linear-to-r from-primary to-foreground bg-clip-text text-transparent"
+                  style={{ fontFamily: "var(--font-playfair)" }}
+                >
+                  MeetCutes
+                </h3>
+              </div>
               <p className="text-muted-foreground leading-relaxed">
                 Connecting singles in real life, one local event at a time.
+                Find authentic connections at places you already love.
               </p>
+              <div className="flex items-center gap-4 pt-2">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Mail className="w-4 h-4" />
+                  <span>hello@meetcutes.com</span>
+                </div>
+              </div>
             </div>
           </div>
 
           {/* Quick Links */}
           <div className="space-y-6">
-            <h4 className="text-lg font-bold text-foreground">Quick Links</h4>
+            <h4 className="text-lg font-bold text-foreground flex items-center gap-2">
+              <MapPin className="w-5 h-5 text-primary" />
+              Quick Links
+            </h4>
             <nav className="flex flex-col space-y-3">
-              <a
-                href="/about"
-                className="text-muted-foreground hover:text-primary transition-colors duration-300 font-medium"
+              <Link
+                to="/about"
+                className="text-muted-foreground hover:text-primary transition-colors duration-300 font-medium hover:translate-x-1 transform"
               >
                 About Us
-              </a>
-              <a
-                href="/contact"
-                className="text-muted-foreground hover:text-primary transition-colors duration-300 font-medium"
+              </Link>
+              <Link
+                to="/contact"
+                className="text-muted-foreground hover:text-primary transition-colors duration-300 font-medium hover:translate-x-1 transform"
               >
                 Contact
-              </a>
-              <a
-                href="/donate"
-                className="text-muted-foreground hover:text-primary transition-colors duration-300 font-medium"
+              </Link>
+              <Link
+                to="/donate"
+                className="text-muted-foreground hover:text-primary transition-colors duration-300 font-medium hover:translate-x-1 transform"
               >
                 Support Us
-              </a>
+              </Link>
+              <Link
+                to="/blog"
+                className="text-muted-foreground hover:text-primary transition-colors duration-300 font-medium hover:translate-x-1 transform"
+              >
+                Blog
+              </Link>
             </nav>
           </div>
 
           {/* Support */}
           <div className="space-y-6">
-            <h4 className="text-lg font-bold text-foreground">Support</h4>
+            <h4 className="text-lg font-bold text-foreground flex items-center gap-2">
+              <Phone className="w-5 h-5 text-green-500" />
+              Support
+            </h4>
             <nav className="flex flex-col space-y-3">
-              <a
-                href="/help"
-                className="text-muted-foreground hover:text-primary transition-colors duration-300 font-medium"
+              <Link
+                to="/help"
+                className="text-muted-foreground hover:text-primary transition-colors duration-300 font-medium hover:translate-x-1 transform"
               >
                 Help Center
-              </a>
-              <a
-                href="/privacy"
-                className="text-muted-foreground hover:text-primary transition-colors duration-300 font-medium"
+              </Link>
+              <Link
+                to="/privacy"
+                className="text-muted-foreground hover:text-primary transition-colors duration-300 font-medium hover:translate-x-1 transform"
               >
                 Privacy Policy
-              </a>
-              <a
-                href="/terms"
-                className="text-muted-foreground hover:text-primary transition-colors duration-300 font-medium"
+              </Link>
+              <Link
+                to="/terms"
+                className="text-muted-foreground hover:text-primary transition-colors duration-300 font-medium hover:translate-x-1 transform"
               >
                 Terms of Service
-              </a>
+              </Link>
+              <Link
+                to="/safety"
+                className="text-muted-foreground hover:text-primary transition-colors duration-300 font-medium hover:translate-x-1 transform"
+              >
+                Safety Guidelines
+              </Link>
             </nav>
           </div>
 
           {/* Connect */}
           <div className="space-y-6">
-            <h4 className="text-lg font-bold text-foreground">Connect</h4>
-            <div className="space-y-3">
+            <h4 className="text-lg font-bold text-foreground flex items-center gap-2">
+              <Heart className="w-5 h-5 text-red-500" />
+              Connect With Us
+            </h4>
+            <div className="space-y-4">
               <p className="text-muted-foreground text-sm leading-relaxed">
-                Join our community and stay updated with the latest features.
+                Join our community and stay updated with the latest features and events.
               </p>
               <div className="flex gap-3">
-                <button className="p-3 bg-primary/10 hover:bg-primary/20 text-primary rounded-md transition-all duration-300 hover:scale-105">
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/>
-                  </svg>
+                <button className="p-3 bg-white/80 dark:bg-gray-800/80 hover:bg-primary/20 text-primary rounded-xl transition-all duration-300 hover:scale-110 hover:shadow-lg backdrop-blur-sm border border-border/50">
+                  <Facebook className="w-5 h-5" />
                 </button>
-                <button className="p-3 bg-primary/10 hover:bg-primary/20 text-primary rounded-md transition-all duration-300 hover:scale-105">
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M22.46 6c-.77.35-1.6.58-2.46.69.88-.53 1.56-1.37 1.88-2.38-.83.5-1.75.85-2.72 1.05C18.37 4.5 17.26 4 16 4c-2.35 0-4.27 1.92-4.27 4.29 0 .34.04.67.11.98C8.28 9.09 5.11 7.38 3 4.79c-.37.63-.58 1.37-.58 2.15 0 1.49.75 2.81 1.91 3.56-.71 0-1.37-.2-1.95-.5v.03c0 2.08 1.48 3.82 3.44 4.21a4.22 4.22 0 0 1-1.93.07 4.28 4.28 0 0 0 4 2.98 8.521 8.521 0 0 1-5.33 1.84c-.34 0-.68-.02-1.02-.06C3.44 20.29 5.7 21 8.12 21 16 21 20.33 14.46 20.33 8.79c0-.19 0-.37-.01-.56.84-.6 1.56-1.36 2.14-2.23z"/>
-                  </svg>
+                <button className="p-3 bg-white/80 dark:bg-gray-800/80 hover:bg-primary/20 text-primary rounded-xl transition-all duration-300 hover:scale-110 hover:shadow-lg backdrop-blur-sm border border-border/50">
+                  <Instagram className="w-5 h-5" />
                 </button>
+                <button className="p-3 bg-white/80 dark:bg-gray-800/80 hover:bg-primary/20 text-primary rounded-xl transition-all duration-300 hover:scale-110 hover:shadow-lg backdrop-blur-sm border border-border/50">
+                  <Twitter className="w-5 h-5" />
+                </button>
+                <button className="p-3 bg-white/80 dark:bg-gray-800/80 hover:bg-primary/20 text-primary rounded-xl transition-all duration-300 hover:scale-110 hover:shadow-lg backdrop-blur-sm border border-border/50">
+                  <Youtube className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="pt-2">
+                <p className="text-xs text-muted-foreground">
+                  Follow us for dating tips, success stories, and community updates.
+                </p>
               </div>
             </div>
           </div>
@@ -96,22 +143,31 @@ export default function Footer() {
         {/* Bottom Section */}
         <div className="mt-16 pt-8 border-t border-border/50">
           <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-            <p className="text-muted-foreground text-sm font-medium text-center md:text-left">
-              © {new Date().getFullYear()} MeetCutes. All rights reserved. Made with ❤️ for authentic connections.
-            </p>
+            <div className="flex items-center gap-2">
+              <Heart className="w-4 h-4 text-red-500" />
+              <p className="text-muted-foreground text-sm font-medium">
+                © {new Date().getFullYear()} MeetCutes. All rights reserved. Made with ❤️ for authentic connections.
+              </p>
+            </div>
             <div className="flex items-center gap-6">
-              <a
-                href="/security"
+              <Link
+                to="/security"
                 className="text-muted-foreground hover:text-primary text-sm font-medium transition-colors duration-300"
               >
                 Security
-              </a>
-              <a
-                href="/accessibility"
+              </Link>
+              <Link
+                to="/accessibility"
                 className="text-muted-foreground hover:text-primary text-sm font-medium transition-colors duration-300"
               >
                 Accessibility
-              </a>
+              </Link>
+              <Link
+                to="/careers"
+                className="text-muted-foreground hover:text-primary text-sm font-medium transition-colors duration-300"
+              >
+                Careers
+              </Link>
             </div>
           </div>
         </div>

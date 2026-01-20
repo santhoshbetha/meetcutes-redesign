@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { isObjEmpty, haversine } from "@/utils/util";
 import { useUserEvents2 } from "@/hooks/useEvents";
 import secureLocalStorage from "react-secure-storage";
+import { Separator } from '@/components/ui/separator';
 
 export function UserEventsSub2({ profiledata, userhandle, latitude, longitude }) {
   const [loading, setLoading] = useState(false);
@@ -47,6 +48,7 @@ export function UserEventsSub2({ profiledata, userhandle, latitude, longitude })
           <span className="md:text-lg">Your Upcoming Events</span>
         </CardTitle>
       </div>
+      <Separator />
       <CardContent className="space-y-2">
         {isObjEmpty(data) && (
           <Card className="mt-3 w-full lg:w-[80%] bg-yellow-50 dark:bg-background">

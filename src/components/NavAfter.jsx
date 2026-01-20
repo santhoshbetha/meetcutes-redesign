@@ -1,7 +1,7 @@
 import { useState, useContext } from "react";
 import { Button } from "@/components/ui/button";
 import { Bell, Menu, X } from "lucide-react";
-//import ThemeToggle from "@/components/ThemeToggle";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { Link, useNavigate } from "react-router-dom";
 import {
   DropdownMenu,
@@ -50,7 +50,7 @@ const NavAfter = () => {
         <Link to="/" className="flex items-center gap-2">
           <div className="flex items-center">
             <img src="/mc-48-orange2.png" alt="Logo" className="h-10 w-10 mr-2" />
-            <span className="text-4xl pacifico-regular text-white">
+            <span className="text-4xl font-normal tracking-wider bg-linear-to-r from-orange-400 via-red-500 to-pink-500 bg-clip-text text-transparent font-['Bebas_Neue']">
               MeetCutes.us
             </span>
           </div>
@@ -91,7 +91,7 @@ const NavAfter = () => {
 
         {/* Right side actions */}
         <div className="flex items-center gap-3 md:gap-5">
-          {/* <ThemeToggle /> */}
+          <ThemeToggle />
           <div className="relative cursor-pointer group">
             <Bell className="w-6 h-6 text-muted-foreground group-hover:text-foreground transition-colors" />
             <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-[10px] font-semibold rounded-full w-4 h-4 flex items-center justify-center">
@@ -153,6 +153,9 @@ const NavAfter = () => {
             <Link to="#contact" className="block px-3 py-2 text-muted-foreground hover:text-foreground">
               Search
             </Link>
+            <div className="px-3 py-2">
+              <ThemeToggle />
+            </div>
             <div className="flex space-x-2 px-3 pt-2">
               <Button size="sm"
                 className="flex-1"

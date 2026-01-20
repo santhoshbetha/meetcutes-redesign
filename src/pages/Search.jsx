@@ -3,11 +3,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { isObjEmpty } from "../utils/util";
 import { useAuth } from "../context/AuthContext";
 import { searchUser } from "../services/search.service";
 import { Spinner } from "../components/ui/Spinner";
+import { UserCard } from "../components/UserCard";
+import { Search as SearchIcon, Users, AlertCircle, CheckCircle } from "lucide-react";
 
 export function Search() {
   const navigate = useNavigate();
@@ -20,9 +22,9 @@ export function Search() {
   const searchdone = useRef(false);
 
   useEffect(() => {
-      if (!isObjEmpty(userdata)) {
-        setUsercoordsset(userdata?.defaultcoordsset || userdata?.usercoordsset || userdata?.exactcoordsset)
-      }
+    if (!isObjEmpty(userdata)) {
+      setUsercoordsset(userdata?.defaultcoordsset || userdata?.usercoordsset || userdata?.exactcoordsset)
+    }
   }, [userdata]);
 
     const handleSearchSubmit = async (e) => {
@@ -56,106 +58,170 @@ export function Search() {
     }
 
   return (
-    <>
-      <div className="mt-3 flex flex-col items-center justify-center gap-2 px-6 sm:px-20 md:px-14">
-        <Card className="bg-card dark:bg-background w-full sm:w-[80%] md:w-[60%] lg:w-[50%] xl:w-[40%] dark:border-blue-900/60 py-3 relative">
-          {loading && (
-            <Spinner
-              className='absolute top-[50%] left-[50%] -translate-x-1/2 -translate-y-1/2 z-99'
-              size="xlarge" 
-              text="Searching..."
-            />
-          )}
-          <CardHeader className="pt-4 pb-0">
-            <CardTitle className="text-xl">Search User</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSearchSubmit}>
-              <Label htmlFor="email">Email or Phonenumber or Handle</Label>
-              <Input
-                className="mt-2 border-amber-200"
-                id="searchtext"
-                type="text"
-                placeholder="m@example.com"
-                required
-                 value={searchtext}
-                 onChange={(e) => setSearchtext(e.target.value)}
-              />
-              <div className="flex mt-3">
-                <Button
-                  variant="outline"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    navigate(-1)
-                  }}
-                >
-                  Cancel
-                </Button>
-                {profiledata?.userstate == 'active' ?
-                  <Button
-                      type='submit'
-                      className="ms-auto bg-teal-600 hover:bg-[#0D9488]/90"
-                  >
-                      Search
-                  </Button>
-                  :
-                  <Button
-                    type="submit"
-                    className="ms-auto bg-teal-600 hover:bg-[#0D9488]/90"
-                    disabled={true}
-                  >
-                    Search
-                  </Button>
-                }
-              </div>
-            </form>
-          </CardContent>
-        </Card>
-        <br/>
-        {isObjEmpty(userdata) && searchdone.current && (
-          <div className="border-4 border-yellow-500 rounded-lg bg-yellow-200 dark:bg-background p-3">
-            <div className="flex flex-row items-center">
-              No user found
-              <Button
-                type="button"
-                className="text-danger rounded bg-transparent border-0 ms-auto mb-1"
-                variant="secondary"
-                onClick={e => {
-                  searchdone.current = false;
-                  setUserdata(null);
-                }}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  height="20"
-                  width="14"
-                  viewBox="0 0 384 512"
-                  fill="currentColor"
-                >
-                  <path d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z" />
-                </svg>
-              </Button>
-            </div>
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
+      <div className="max-w-4xl mx-auto px-4 md:px-8 py-8 md:py-12">
+        {/* Header */}
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium mb-4">
+            <SearchIcon className="w-4 h-4" />
+            Find Someone
           </div>
-        )}
-        {!isObjEmpty(userdata) && (
-          <Link
-            to={{ pathname: `/user/${userdata?.userid}` }}
-            onClick={() => {
-              localStorage.setItem('userstate', JSON.stringify({ backbutton: false }));
-            }}
-            target="_blank"
-          >
-            <UserCard
-              profile={userdata}
-              userid={userdata?.userid}
-              firstname={userdata?.firstname}
-              age={userdata?.age}
-              setUserdata={setUserdata}
-            />
-          </Link>
-        )}
+          <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
+            Search Users
+          </h1>
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+            Find and connect with other MeetCutes members using their email, phone number, or handle.
+          </p>
+        </div>
+
+        {/* Search Form */}
+        <div className="max-w-2xl mx-auto mb-12">
+          <Card className="shadow-2xl border-0 bg-gradient-to-br from-card via-card to-card/95 backdrop-blur-sm">
+            {loading && (
+              <Spinner
+                className='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50'
+                size="xlarge"
+                text="Searching..."
+              />
+            )}
+            <CardHeader className="text-center pb-6">
+              <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <Users className="w-8 h-8 text-primary" />
+              </div>
+              <CardTitle className="text-2xl md:text-3xl">Search User</CardTitle>
+              <p className="text-muted-foreground mt-2">
+                Enter an email address, phone number, or user handle to find someone
+              </p>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSearchSubmit} className="space-y-6">
+                <div className="space-y-3">
+                  <Label htmlFor="searchtext" className="text-base font-semibold">
+                    Search Query
+                  </Label>
+                  <Input
+                    id="searchtext"
+                    type="text"
+                    placeholder="example@email.com or +1234567890 or @username"
+                    required
+                    value={searchtext}
+                    onChange={(e) => setSearchtext(e.target.value)}
+                    className="h-12 text-base border-2 focus:border-primary/50"
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    Enter a valid email, 10-digit phone number, or user handle (5-15 characters, starts with letter)
+                  </p>
+                </div>
+
+                <div className="flex gap-4 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => navigate(-1)}
+                    className="flex-1 h-12 px-4 py-2 border border-border/60 bg-background shadow-sm hover:bg-accent hover:text-accent-foreground hover:border-accent hover:shadow-md inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-semibold transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 transform hover:scale-[1.02] active:scale-[0.98]"
+                  >
+                    Cancel
+                  </button>
+                  {profiledata?.userstate == 'active' ? (
+                    <button
+                      type='submit'
+                      className="flex-1 h-12 px-4 py-2 bg-primary text-primary-foreground shadow-lg hover:shadow-xl hover:shadow-primary/25 hover:bg-primary/90 inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-semibold transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 transform hover:scale-[1.02] active:scale-[0.98]"
+                    >
+                      <SearchIcon className="w-4 h-4" />
+                      Search
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      className="flex-1 h-12 px-4 py-2 bg-muted text-muted-foreground cursor-not-allowed inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-semibold transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+                      disabled={true}
+                    >
+                      <AlertCircle className="w-4 h-4" />
+                      Activate Profile First
+                    </button>
+                  )}
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Search Results */}
+        <div className="max-w-2xl mx-auto space-y-6">
+          {/* No Results */}
+          {isObjEmpty(userdata) && searchdone.current && (
+            <Card className="border-amber-200 bg-amber-50/50 dark:bg-amber-950/20 dark:border-amber-800/30">
+              <CardContent className="pt-6">
+                <div className="text-center space-y-4">
+                  <div className="w-16 h-16 bg-amber-100 dark:bg-amber-900/30 rounded-2xl flex items-center justify-center mx-auto">
+                    <AlertCircle className="w-8 h-8 text-amber-600 dark:text-amber-400" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-amber-900 dark:text-amber-100 mb-2">
+                      No User Found
+                    </h3>
+                    <p className="text-amber-900/80 dark:text-amber-100/80">
+                      We couldn't find a user matching your search criteria. Please check your input and try again.
+                    </p>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      searchdone.current = false;
+                      setUserdata(null);
+                    }}
+                    className="border-amber-300 text-amber-800 hover:bg-amber-100 dark:border-amber-700 dark:text-amber-200 dark:hover:bg-amber-900/30"
+                  >
+                    Try Another Search
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* User Found */}
+          {!isObjEmpty(userdata) && (
+            <Card className="border-green-200 bg-green-50/50 dark:bg-green-950/20 dark:border-green-800/30">
+              <CardContent className="pt-6">
+                <div className="text-center space-y-4">
+                  <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-2xl flex items-center justify-center mx-auto">
+                    <CheckCircle className="w-8 h-8 text-green-600 dark:text-green-400" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-green-900 dark:text-green-100 mb-2">
+                      User Found!
+                    </h3>
+                    <p className="text-green-900/80 dark:text-green-100/80">
+                      Click below to view their profile and connect.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* User Card */}
+          {!isObjEmpty(userdata) && (
+            <div className="flex justify-center">
+              <Link
+                to={{ pathname: `/user/${userdata?.userid}` }}
+                onClick={() => {
+                  localStorage.setItem('userstate', JSON.stringify({ backbutton: false }));
+                }}
+                className="transform transition-transform hover:scale-105"
+              >
+                <UserCard
+                  profile={userdata}
+                  userid={userdata?.userid}
+                  firstname={userdata?.firstname}
+                  age={userdata?.age}
+                  setUserdata={setUserdata}
+                />
+              </Link>
+            </div>
+          )}
+        </div>
       </div>
-    </>
+    </div>
   );
 }

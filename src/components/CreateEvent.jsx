@@ -26,6 +26,7 @@ import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { postNewEvent } from "@/utils/util";
 import { format } from "date-fns"
 import { useFormik } from "formik";
+import * as Yup from "yup";
 import { useAuth } from "../context/AuthContext";
 import { AutoComplete } from "@/components/AutoComplete";
 import { AutoCompleteDataContext } from "@/context/AutoCompleteDataContext";
@@ -33,14 +34,31 @@ import { cn } from "@/lib/utils"
 import { LoadingButton } from '@/components/ui/loading-button';
 import { DialogTitle, DialogContent } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { MapPin } from "lucide-react";
+
+const validationSchema = Yup.object({
+  location: Yup.string().required("Location name is required"),
+  address1: Yup.string(),
+  state: Yup.string().required("State is required"),
+  city: Yup.string().required("City is required"),
+  zip: Yup.string().required("Zipcode is required").matches(/^\d{5}$/, "Must be 5 digits"),
+  date: Yup.date().required("Date is required").min(new Date(new Date().setHours(0, 0, 0, 0)), "Date must be today or later"),
+  startTime: Yup.string().required("Start time is required"),
+  endTime: Yup.string().required("End time is required").test("is-after-start", "End time must be after start time", function (value) {
+    const { startTime } = this.parent;
+    if (!startTime || !value) return true;
+    return value > startTime;
+  }),
+  description: Yup.string()
+});
 
 const getCity = (stateIn)  => {
-    if (!isObjEmpty(stateIn)) {
-        return cities[stateIn]?.map((city, idx) => {
-                return <SelectItem key={idx} value={city}>{city}</SelectItem>;
-            }
-        );
-    }
+  if (!isObjEmpty(stateIn)) {
+    return cities[stateIn]?.map((city, idx) => {
+            return <SelectItem key={idx} value={city}>{city}</SelectItem>;
+        }
+    );
+  }
 }
 
 export function CreateEvent({ onClose }) {
@@ -49,12 +67,7 @@ export function CreateEvent({ onClose }) {
   const { userSession, profiledata } = useAuth();
   const [alertMsg, setAlertMsg] = useState("");
   const {autocompletedata} = useContext(AutoCompleteDataContext);
-  const [state, setState] = useState("");
-  const [description, setDescription] = useState("")
-  const [date1, setDate1] = useState("")
   const [open, setOpen] = useState(false)
-  const [startTime, setStartTime] = useState("08:00")
-  const [endTime, setEndTime] = useState("09:00")
   const [loading, setLoading] = useState(false);
   let locationid = null;
   const [eventerrpopup, setEventerrpopup] = useState(false);
@@ -65,8 +78,13 @@ export function CreateEvent({ onClose }) {
         address1: "",
         state: "",
         city: "",
-        zip: ""
+        zip: "",
+        date: undefined,
+        startTime: "08:00",
+        endTime: "09:00",
+        description: ""
     },
+    validationSchema,
     
     onSubmit: async (values) => {
         if (!isOnline) {
@@ -85,15 +103,15 @@ export function CreateEvent({ onClose }) {
         });
 
         const postresp = await postNewEvent(
-          formik.values.location,
-          formik.values.address1, //addressOne
-          formik.values.state,
-          formik.values.city, 
-          formik.values.zip, 
-          (new Date(date1)).toISOString().substring(0, 10).toString(),
-          startTime,
-          endTime, 
-          description,
+          values.location,
+          values.address1, //addressOne
+          values.state,
+          values.city, 
+          values.zip, 
+          values.date.toISOString().substring(0, 10).toString(),
+          values.startTime,
+          values.endTime, 
+          values.description,
           profiledata?.userid,
           profiledata?.latitude,
           profiledata?.longitude,
@@ -123,43 +141,49 @@ export function CreateEvent({ onClose }) {
   });
 
   return (
-      <DialogContent className='flex max-h-[min(900px,80vh)] min-w-[calc(70vw-2rem)] flex-col gap-0 p-0 sm:max-w-md'>
+      <DialogContent className='flex max-h-[min(900px,80vh)] min-w-[calc(70vw-2rem)] flex-col gap-0 p-0 sm:max-w-md bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800'>
         <ScrollArea className='flex max-h-full flex-col overflow-hidden'>
         <div className="relative">
             {loading && (
               <Spinner
-                className='absolute top-[50%] left-[50%] -translate-x-1/2 -translate-y-1/2'
+                className='absolute top-[50%] left-[50%] -translate-x-1/2 -translate-y-1/2 z-50'
                 size="xlarge" 
                 text="Creating Event..."
               />
             )}
             <DialogTitle></DialogTitle>
             <div
-              className="w-full max-w-3xlX overflow-y-auto bg-card dark:bg-[#071226] dark:border-none border border-none rounded-2xl shadow-2xl animate-in zoom-in-95 duration-300"
+              className="w-full max-w-3xlX overflow-y-auto bg-transparent border-none rounded-2xl shadow-2xl animate-in zoom-in-95 duration-300"
               onClick={(e) => e.stopPropagation()}
             >
               <div>
                 {/* Header */}
-                <div className="text-center pt-12 pb-8 px-8">
-                  <h2 className="text-3xl md:text-4xl font-bold text-red-600 mb-3">
-                    Create Event
+                <div className="text-center pt-6 pb-4 px-8 bg-linear-to-r from-primary/10 via-primary/5 to-primary/10 rounded-t-2xl">
+                  <div className="flex items-center justify-center mb-2">
+                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                      <CalendarIcon className="w-6 h-6 text-primary" />
+                    </div>
+                  </div>
+                  <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
+                    Create New Event
                   </h2>
-                  <p className="text-gray-600 dark:text-gray-300 text-sm md:text-base">
-                    Fill in the details for your event
+                  <p className="text-muted-foreground text-sm md:text-base max-w-md mx-auto">
+                    Share your event with the community and connect with like-minded people
                   </p>
                 </div>
 
                 {/* Form */}
                 <form 
-                    className="px-8 md:px-12 pb-12 space-y-8"
+                    className="px-8 md:px-12 pb-12 space-y-6 bg-white dark:bg-gray-900 rounded-b-2xl"
                     onSubmit={formik.handleSubmit} 
                 >
                   {/* Location Name */}
                   <div className="space-y-2">
                     <Label
                       htmlFor="locationName"
-                      className="text-sm font-medium text-gray-300"
+                      className="text-sm font-medium text-foreground flex items-center gap-2"
                     >
+                      <MapPin className="w-4 h-4" />
                       Location Name
                     </Label>
                     <Input
@@ -167,10 +191,15 @@ export function CreateEvent({ onClose }) {
                       name='location'
                       type='text'
                       onChange={formik.handleChange}
-                      className="bg-card dark:bg-slate-800 dark:text-white border-gray-300 dark:border-gray-700 focus:border-red-500 focus:ring-red-500/20"
-                      placeholder="e.g., TARGET, Starbucks"
+                      onBlur={formik.handleBlur}
+                      value={formik.values.location}
+                      className="bg-background border-border focus:border-primary focus:ring-primary/20"
+                      placeholder="e.g., TARGET, Starbucks, Central Park"
                       required
                     />
+                    {formik.errors.location && formik.touched.location && (
+                      <p className="text-red-500 text-sm">{formik.errors.location}</p>
+                    )}
                   </div>
 
                   {/* Street Address */}
@@ -192,7 +221,7 @@ export function CreateEvent({ onClose }) {
                     <div className="space-y-2">
                       <Label
                         htmlFor="state"
-                        className="text-sm font-medium text-gray-700"
+                        className="text-sm font-medium text-foreground"
                       >
                         State
                       </Label>
@@ -200,13 +229,14 @@ export function CreateEvent({ onClose }) {
                         required
                         id="state"
                         name="state" 
-                        value={state}
+                        value={formik.values.state}
                         onValueChange={(value) => {
-                            formik.values.state = value
-                            setState(value)
+                            formik.setFieldValue('state', value);
+                            formik.setFieldValue('city', '');
+                            formik.setFieldTouched('state', true);
                         }}
                       >
-                        <SelectTrigger className="bg-card dark:bg-slate-800 dark:text-white border-gray-300 dark:border-gray-700 focus:border-red-500 focus:ring-red-500/20 w-full">
+                        <SelectTrigger className="bg-card dark:bg-slate-800 dark:text-white border-gray-300 dark:border-gray-700 focus:border-primary focus:ring-primary/20 w-full">
                           <SelectValue placeholder="Select state" />
                         </SelectTrigger>
                         <SelectContent>
@@ -227,7 +257,7 @@ export function CreateEvent({ onClose }) {
                           <SelectItem value="Iowa">Iowa</SelectItem>
                           <SelectItem value="Kansas">Kansas</SelectItem>
                           <SelectItem value="Kentucky">Kentucky</SelectItem>
-                          <SelectItem value="Louisiana5">Louisiana</SelectItem>
+                          <SelectItem value="Louisiana">Louisiana</SelectItem>
                           <SelectItem value="Maine">Maine</SelectItem>
                           <SelectItem value="Maryland">Maryland</SelectItem>
                           <SelectItem value="Massachusetts">
@@ -235,17 +265,17 @@ export function CreateEvent({ onClose }) {
                           </SelectItem>
                           <SelectItem value="Michigan">Michigan</SelectItem>
                           <SelectItem value="Minnesota">Minnesota</SelectItem>
-                          <SelectItem value="Mississipi">Mississippi</SelectItem>
+                          <SelectItem value="Mississippi">Mississippi</SelectItem>
                           <SelectItem value="Missouri">Missouri</SelectItem>
                           <SelectItem value="Montana">Montana</SelectItem>
                           <SelectItem value="Nebraska">Nebraska</SelectItem>
                           <SelectItem value="Nevada">Nevada</SelectItem>
-                          <SelectItem value="new Hampshire">
+                          <SelectItem value="New Hampshire">
                             New Hampshire
                           </SelectItem>
                           <SelectItem value="New Jersey">New Jersey</SelectItem>
                           <SelectItem value="New Mexico">New Mexico</SelectItem>
-                          <SelectItem value="New york">New York</SelectItem>
+                          <SelectItem value="New York">New York</SelectItem>
                           <SelectItem value="North Carolina">
                             North Carolina
                           </SelectItem>
@@ -283,6 +313,9 @@ export function CreateEvent({ onClose }) {
                           </SelectItem>
                         </SelectContent>
                       </Select>
+                      {formik.errors.state && formik.touched.state && (
+                        <p className="text-red-500 text-sm">{formik.errors.state}</p>
+                      )}
                     </div>
 
                     <div className="space-y-2">
@@ -296,18 +329,23 @@ export function CreateEvent({ onClose }) {
                         required
                         id="city"
                         name="city" 
+                        value={formik.values.city}
                         onValueChange={(value) => {
-                          //formik.handleChange(value)
-                          formik.values.city = value
+                          formik.setFieldValue('city', value);
+                          formik.setFieldTouched('city', true);
                         }}
+                        disabled={!formik.values.state}
                       >
-                        <SelectTrigger className="bg-card dark:bg-slate-800 dark:text-white border-gray-300 dark:border-gray-700 focus:border-red-500 focus:ring-red-500/20 w-full">
+                        <SelectTrigger className="bg-card dark:bg-slate-800 dark:text-white border-gray-300 dark:border-gray-700 focus:border-primary focus:ring-primary/20 w-full">
                           <SelectValue placeholder="Select city" />
                         </SelectTrigger>
                         <SelectContent>
-                            {getCity(state)}
+                            {getCity(formik.values.state)}
                         </SelectContent>
                       </Select>
+                      {formik.errors.city && formik.touched.city && (
+                        <p className="text-red-500 text-sm">{formik.errors.city}</p>
+                      )}
                     </div>
 
                     <div className="space-y-2">
@@ -322,11 +360,16 @@ export function CreateEvent({ onClose }) {
                         name='zip'
                         type='text'
                         onChange={formik.handleChange}
-                        className="bg-card dark:bg-slate-800 dark:text-white border-gray-300 dark:border-gray-700 focus:border-red-500 focus:ring-red-500/20"
+                        onBlur={formik.handleBlur}
+                        value={formik.values.zip}
+                        className="bg-card dark:bg-slate-800 dark:text-white border-gray-300 dark:border-gray-700 focus:border-primary focus:ring-primary/20"
                         placeholder="95630"
                         maxLength={5}
                         required
                       />
+                      {formik.errors.zip && formik.touched.zip && (
+                        <p className="text-red-500 text-sm">{formik.errors.zip}</p>
+                      )}
                     </div>
                   </div>
 
@@ -345,26 +388,29 @@ export function CreateEvent({ onClose }) {
                                 variant={"outline"}
                                 className={cn(
                                     "w-full justify-start text-left font-normal",
-                                    !date1 && "text-muted-foreground"
+                                    !formik.values.date && "text-muted-foreground"
                                 )}
                             >
                             <CalendarIcon />
-                            {date1 ? format(date1, "PPP") : <span>Event date</span>}
+                            {formik.values.date ? format(formik.values.date, "PPP") : <span>Event date</span>}
                             </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-auto p-0">
                             <Calendar
                                 mode="single"
-                                selected={date1}
-                                //onSelect={setDate1}
+                                selected={formik.values.date}
                                 onSelect={(date) => {
-                                  setDate1(date)
-                                  setOpen(false)
+                                  formik.setFieldValue('date', date);
+                                  formik.setFieldTouched('date', true);
+                                  setOpen(false);
                                 }}
                                 initialFocus
                             />
                         </PopoverContent>
                       </Popover>
+                      {formik.errors.date && formik.touched.date && (
+                        <p className="text-red-500 text-sm">{formik.errors.date}</p>
+                      )}
                     </div>
 
                     <div className="space-y-2">
@@ -380,13 +426,19 @@ export function CreateEvent({ onClose }) {
                           id='startTime'
                           name='startTime'
                           type='time'
-                          onChange={e => {
-                              setStartTime(e.target.value)
-                          }} 
-                          className="bg-card dark:bg-slate-800 dark:text-white border-gray-300 dark:border-gray-700 focus:border-red-500 focus:ring-red-500/20 pl-10"
+                          onChange={(e) => {
+                              formik.setFieldValue('startTime', e.target.value);
+                              formik.setFieldTouched('startTime', true);
+                          }}
+                          onBlur={formik.handleBlur}
+                          value={formik.values.startTime}
+                          className="bg-card dark:bg-slate-800 dark:text-white border-gray-300 dark:border-gray-700 focus:border-primary focus:ring-primary/20 pl-10"
                           required
                         />
                       </div>
+                      {formik.errors.startTime && formik.touched.startTime && (
+                        <p className="text-red-500 text-sm">{formik.errors.startTime}</p>
+                      )}
                     </div>
 
                     <div className="space-y-2">
@@ -402,13 +454,19 @@ export function CreateEvent({ onClose }) {
                           id='endTime'
                           name='endTime'
                           type='time'
-                          onChange={e => {
-                            setEndTime(e.target.value)
+                          onChange={(e) => {
+                            formik.setFieldValue('endTime', e.target.value);
+                            formik.setFieldTouched('endTime', true);
                           }}
-                          className="bg-card dark:bg-slate-800 dark:text-white border-gray-300 dark:border-gray-700 focus:border-red-500 focus:ring-red-500/20 pl-10"
+                          onBlur={formik.handleBlur}
+                          value={formik.values.endTime}
+                          className="bg-card dark:bg-slate-800 dark:text-white border-gray-300 dark:border-gray-700 focus:border-primary focus:ring-primary/20 pl-10"
                           required
                         />
                       </div>
+                      {formik.errors.endTime && formik.touched.endTime && (
+                        <p className="text-red-500 text-sm">{formik.errors.endTime}</p>
+                      )}
                     </div>
                   </div>
 
@@ -422,18 +480,26 @@ export function CreateEvent({ onClose }) {
                     </Label>
                     <Textarea
                       id="description"
-                      value={description}
-                      onChange={e => setDescription(e.target.value)}
-                      className="bg-card dark:bg-slate-800 dark:text-white border-gray-300 dark:border-gray-700 focus:border-red-500 focus:ring-red-500/20 min-h-[120px] resize-none"
+                      name="description"
+                      value={formik.values.description}
+                      onChange={(e) => {
+                        formik.setFieldValue('description', e.target.value);
+                        formik.setFieldTouched('description', true);
+                      }}
+                      onBlur={formik.handleBlur}
+                      className="bg-card dark:bg-slate-800 dark:text-white border-gray-300 dark:border-gray-700 focus:border-primary focus:ring-primary/20 min-h-[120px] resize-none"
                       placeholder="Provide details about the event"
                     />
+                    {formik.errors.description && formik.touched.description && (
+                      <p className="text-red-500 text-sm">{formik.errors.description}</p>
+                    )}
                   </div>
 
                   {/* Submit Button */}
                   {!loading &&
                     <Button
                       type="submit"
-                      className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-6 text-base shadow-lg hover:shadow-xl transition-all"
+                      className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-6 text-base shadow-lg hover:shadow-xl transition-all"
                     >
                       CREATE EVENT
                     </Button>
@@ -441,7 +507,7 @@ export function CreateEvent({ onClose }) {
                   {
                     loading &&
                     <LoadingButton loading
-                      className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-6 text-base shadow-lg hover:shadow-xl transition-all">
+                      className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-6 text-base shadow-lg hover:shadow-xl transition-all">
                       Submitting Event...
                     </LoadingButton>
                   }

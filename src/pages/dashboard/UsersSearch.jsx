@@ -17,6 +17,17 @@ import { UserList } from "@/components/UserList";
 import { SearchAndUserEventsDataContext } from '@/context/SearchAndUserEventsDataContext'
 import { searchUsers } from "../../services/search.service";
 import { isObjEmpty } from "../../utils/util";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { Search, RefreshCw, Filter, Users, Heart, MapPin, SlidersHorizontal } from "lucide-react";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
 let distanceMap = new Map([
   ["5", 8046],
@@ -89,144 +100,279 @@ export function UsersSearch({ user, userhandle, gender, latitude, longitude, que
   });
 
   return (
-    <>
-      <Card className="bg-transparent mx-4 mt-2 border-none shadow-none hover:shadow-none">
-        <CardHeader className="flex flex-row items-center justify-between md:mx-2 lg:mx-10">
-          <CardTitle>Search users around you</CardTitle>
+    <div className="max-w-[1600px] mx-auto px-4 md:px-8 py-4 md:py-6">
+      {/* Header Section */}
+      <div className="mb-6">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
+              Find Connections
+            </h1>
+            <p className="text-muted-foreground">
+              Discover amazing people and build meaningful relationships
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => window.location.reload()}
+              className="hidden md:flex"
+            >
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Refresh
+            </Button>
+          </div>
+        </div>
+
+        {/* Error Banner */}
+        {error && (
+          <Card className="border-destructive/50 bg-destructive/5 mb-4">
+            <CardContent className="pt-4">
+              <div className="flex items-center gap-2 text-destructive">
+                <div className="w-5 h-5 rounded-full bg-destructive/10 flex items-center justify-center">
+                  <span className="text-xs">!</span>
+                </div>
+                <p className="text-sm font-medium">{error}</p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+
+      {/* Search Form */}
+      <Card className="mb-6 shadow-lg bg-card/50 dark:bg-card/40 backdrop-blur-sm border-2 border-border">
+        <CardHeader className="pb-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                <Heart className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <CardTitle className="text-lg">Search Preferences</CardTitle>
+                <p className="text-sm text-muted-foreground">Find people who match your interests</p>
+              </div>
+            </div>
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="outline" size="sm" className="md:hidden">
+                  <SlidersHorizontal className="w-4 h-4 mr-2" />
+                  Filters
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="bottom" className="h-[80vh]">
+                <SheetHeader>
+                  <SheetTitle>Search Preferences</SheetTitle>
+                  <SheetDescription>
+                    Customize your search to find the perfect matches
+                  </SheetDescription>
+                </SheetHeader>
+                <div className="mt-6 space-y-4">
+                  <div className="space-y-4">
+                    <div>
+                      <Label className="text-sm font-medium">Distance</Label>
+                      <Select
+                        value={formik.values.searchdistance}
+                        onValueChange={(value) => {
+                          formik.setFieldValue('searchdistance', value);
+                        }}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select distance" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="5">5 Miles</SelectItem>
+                          <SelectItem value="10">10 Miles</SelectItem>
+                          <SelectItem value="25">25 Miles</SelectItem>
+                          <SelectItem value="50">50 Miles</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label className="text-sm font-medium">Age From</Label>
+                        <Input
+                          type="number"
+                          min="21"
+                          max="99"
+                          value={formik.values.agefrom}
+                          onChange={(e) => {
+                            formik.setFieldValue('agefrom', parseInt(e.target.value) || 21);
+                          }}
+                          placeholder="21"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-sm font-medium">Age To</Label>
+                        <Input
+                          type="number"
+                          min="21"
+                          max="99"
+                          value={formik.values.ageto}
+                          onChange={(e) => {
+                            formik.setFieldValue('ageto', parseInt(e.target.value) || 21);
+                          }}
+                          placeholder="99"
+                        />
+                      </div>
+                    </div>
+
+                    <Button type="submit" className="w-full" disabled={isLoading}>
+                      {isLoading ? (
+                        <>
+                          <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                          Searching...
+                        </>
+                      ) : (
+                        <>
+                          <Search className="w-4 h-4 mr-2" />
+                          Find Matches
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              </SheetContent>
+            </Sheet>
+          </div>
         </CardHeader>
-        <CardContent className="flex flex-col items-center justify-center w-full space-y-4">
-          <form
-            className="w-full md:w-[84%] lg:w-[72%]"
-            onSubmit={formik.handleSubmit}
-          >
-            <div className="flex flex-col md:flex-row gap-2">
-              <Select
-                required
-                name="searchdistance"
-                onValueChange={(value) => {
-                  formik.values.searchdistance = value;
-                }}
-              >
-                <SelectTrigger className="w-full md:w-1/4 md:mt-5 h-12 rounded-xl px-4">
-                  <SelectValue placeholder="Select distance" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
+        <CardContent>
+          <form onSubmit={formik.handleSubmit} className="space-y-6">
+            {/* Desktop Filters */}
+            <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {/* Distance Filter */}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium flex items-center gap-2">
+                  <MapPin className="w-4 h-4" />
+                  Distance
+                </Label>
+                <Select
+                  required
+                  name="searchdistance"
+                  value={formik.values.searchdistance}
+                  onValueChange={(value) => {
+                    formik.setFieldValue('searchdistance', value);
+                  }}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select distance" />
+                  </SelectTrigger>
+                  <SelectContent>
                     <SelectItem value="5">5 Miles</SelectItem>
                     <SelectItem value="10">10 Miles</SelectItem>
                     <SelectItem value="25">25 Miles</SelectItem>
                     <SelectItem value="50">50 Miles</SelectItem>
                     <SelectItem value="75">75 Miles</SelectItem>
                     <SelectItem value="100">100 Miles</SelectItem>
-                    <SelectItem value="200">200 Miles</SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
+                  </SelectContent>
+                </Select>
+              </div>
 
-              <div className="grid gap-2 md:mb-2 w-full md:w-1/4">
-                <div className="flex items-center">
-                  <Label htmlFor="password">Age From</Label>
-                </div>
+              {/* Age From */}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Age From</Label>
                 <Input
-                  required
-                  id="agefrom"
                   type="number"
-                  min={21}
-                  max={45}
-                  onChange={formik.handleChange}
+                  min="21"
+                  max="99"
                   value={formik.values.agefrom}
+                  onChange={(e) => {
+                    formik.setFieldValue('agefrom', parseInt(e.target.value) || 21);
+                  }}
+                  placeholder="21"
+                  className="h-10"
                 />
               </div>
 
-              <div className="grid gap-2 mb-2 w-full md:w-1/4">
-                <div className="flex items-center">
-                  <Label htmlFor="password">Age To</Label>
-                </div>
+              {/* Age To */}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Age To</Label>
                 <Input
-                  required
-                  id="ageto"
                   type="number"
-                  min={getMin()}
-                  max={48}
-                  onChange={formik.handleChange}
+                  min="21"
+                  max="99"
                   value={formik.values.ageto}
+                  onChange={(e) => {
+                    formik.setFieldValue('ageto', parseInt(e.target.value) || 21);
+                  }}
+                  placeholder="99"
+                  className="h-10"
                 />
               </div>
-              {error == "" ? (
-                <Button
-                  type="submit"
-                  className="w-full md:w-1/4 md:mt-5 bg-teal-600 hover:bg-[#0D9488]/90"
-                  variant="secondary"
-                >
-                  Search
+
+              {/* Search Button */}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium opacity-0">Search</Label>
+                <Button type="submit" className="w-full h-10" disabled={isLoading}>
+                  {isLoading ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                      Searching...
+                    </>
+                  ) : (
+                    <>
+                      <Search className="w-4 h-4 mr-2" />
+                      Find Matches
+                    </>
+                  )}
                 </Button>
-              ) : (
-                <>
-                  <Button
-                    type="submit"
-                    className="w-full md:w-1/4 md:mt-5 bg-teal-600 hover:bg-[#0D9488]/90"
-                    variant="secondary"
-                    disabled={true}
-                  >
-                    Search
-                  </Button>
-                  {error && <div className="error_msg">{error}</div>}
-                </>
-              )}
+              </div>
+            </div>
+
+            {/* Mobile Search Button */}
+            <div className="md:hidden">
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                    Searching...
+                  </>
+                ) : (
+                  <>
+                    <Search className="w-4 h-4 mr-2" />
+                    Find Matches
+                  </>
+                )}
+              </Button>
             </div>
           </form>
-
-          {isObjEmpty(searchUsersData) && (searchdone.current == false) && (!isLoading) && (
-            <Card className="mt-3 w-full lg:w-[80%]">
-              <div className="grid gap-4 text-xl px-3">
-                Searched users info will be shown here.
-              </div>
-            </Card>
-          )}
-
-          {isObjEmpty(searchUsersData) && (searchdone.current == true) && (!isLoading) && (
-            <>
-            <Card className="mt-3 w-full lg:w-[80%] border border-red-500">
-              <CardContent className="">
-                <div className='flex '>
-                  No users found of your search criteria.
-                  <button
-                      type="button"
-                      className='text-red-700 rounded bg-transparent border-0 ms-auto'
-                      onClick={(e) => {
-                          setSearchUsersData(null);
-                          searchdone.current = false;
-                      }}
-                  >
-                  <svg xmlns="http://www.w3.org/2000/svg" height="20" width="14" viewBox="0 0 384 512" fill="currentColor">
-                    <path d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z"/></svg>
-                  </button>
-                </div>
-              </CardContent>
-            </Card>
-            </>
-          )}
-
-          <div>
-            <div className="relative h-1 bg-muted/30 rounded-full overflow-hidden">
-              <div
-                className={`h-full bg-gradient-to-r from-primary via-primary/80 to-primary rounded-full transition-all duration-500 ${
-                  isLoading ? 'w-full animate-pulse' : 'w-0'
-                }`}
-                style={{
-                  animation: isLoading ? 'progress 1s ease-in-out infinite' : 'none',
-                }}
-              />
-            </div>
-            {!isObjEmpty(searchUsersData) && (
-              <UserList
-                users={searchUsersData}
-                setIsLoading={setIsLoading}
-              />
-            )}
-          </div>
         </CardContent>
       </Card>
-    </>
+
+      {/* Results Section */}
+      <div className="space-y-4">
+        {searchdone.current && (
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <h2 className="text-lg font-semibold text-foreground">Search Results</h2>
+              {searchUsersData && (
+                <Badge variant="secondary" className="ml-2 text-sm px-3 py-1 bg-primary/10 text-primary border-primary/20">
+                  {Array.isArray(searchUsersData) ? searchUsersData.length : 0} matches found
+                </Badge>
+              )}
+            </div>
+            {searchUsersData && Array.isArray(searchUsersData) && searchUsersData.length > 0 && (
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm">
+                  <Filter className="w-4 h-4 mr-2" />
+                  Sort
+                </Button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* User List */}
+        <div className="min-h-[400px]">
+          {!isObjEmpty(searchUsersData) && (
+            <UserList
+              users={searchUsersData}
+              setIsLoading={setIsLoading}
+            />
+          )}
+        </div>
+      </div>
+    </div>
   );
 } 

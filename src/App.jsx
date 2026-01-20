@@ -11,16 +11,18 @@ import { Dashboard } from "@/pages/dashboard/Dashboard";
 import { ChangePassword } from "@/pages/ChangePassword";
 import { ForgotPassword } from "@/pages/ForgotPassword";
 import { Settings } from "@/pages/Settings";
+import EventDetails from "@/pages/EventDetails";
 import NavBefore from "@/components/NavBefore";
 import NavAfter from "@/components/Navafter";
 import { useAuth } from "./context/AuthContext";
 import { SearchAndUserEventsDataContextProvider } from './context/SearchAndUserEventsDataContext';
 import { AutoCompleteDataContextProvider } from './context/AutoCompleteDataContext';
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { GlobalLoadingProvider } from './context/GlobalLoadingContext';
+import { Toaster } from "react-hot-toast";
+import GlobalLoadingSpinner from './components/GlobalLoadingSpinner';
 
 function App() {
-  const { user, profiledata } = useAuth();
+  const { user } = useAuth();
   const [openLogin, setOpenLogin] = useState(false);
   const [openSignup, setOpenSignup] = useState(false);
 
@@ -46,10 +48,12 @@ function App() {
 
   return (
     <>
-      <div className="App">
-        <AutoCompleteDataContextProvider>
-        <ToastContainer/>
-        <SearchAndUserEventsDataContextProvider>
+      <GlobalLoadingProvider>
+        <div className="App">
+          <AutoCompleteDataContextProvider>
+          <Toaster />
+          <GlobalLoadingSpinner />
+          <SearchAndUserEventsDataContextProvider>
         {user ?
           <NavAfter /> :
           <NavBefore
@@ -76,10 +80,12 @@ function App() {
           <Route path="/forgotpassword" element={<ForgotPassword />} />
 
           <Route path="/settings" element={<Settings />} />
+          <Route path="/event/:id" element={<EventDetails />} />
         </Routes>
         </SearchAndUserEventsDataContextProvider>
         </AutoCompleteDataContextProvider>
       </div>
+      </GlobalLoadingProvider>
     </>
   );
 }

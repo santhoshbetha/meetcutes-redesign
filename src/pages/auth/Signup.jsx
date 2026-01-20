@@ -178,7 +178,7 @@ export function Signup({ setOpenSignup, setOpenLogin }) {
   });
 
   return (
-    <DialogContent className="flex max-h-[min(900px,90vh)] min-w-[calc(80vw-2rem)] flex-col gap-0 p-0 sm:max-w-md">
+    <DialogContent className="flex max-h-[min(900px,90vh)] min-w-[350px] flex-col gap-0 p-0 max-w-md border-0 shadow-2xl bg-gradient-to-br from-card via-card to-card/95 backdrop-blur-sm">
       {loading && (
         <Spinner
           className="fixed top-[50%] left-[50%] z-50 cursor-pointer"
@@ -187,13 +187,22 @@ export function Signup({ setOpenSignup, setOpenLogin }) {
       )}
       <DialogTitle></DialogTitle>
       <ScrollArea className="h-[90vh] w-full">
-        <CardHeader>
-          <CardTitle className="text-2xl">Signup</CardTitle>
-          <CardDescription className="text-xl">
-            Fill up below to signup
+        <CardHeader className="pb-6 px-8 pt-8">
+          <div className="flex items-center justify-center mb-4">
+            <div className="w-12 h-12 rounded-full bg-linear-to-r from-orange-400 via-red-500 to-pink-500 flex items-center justify-center shadow-lg">
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+              </svg>
+            </div>
+          </div>
+          <CardTitle className="text-3xl font-bold text-center bg-linear-to-r from-orange-500 via-red-500 to-pink-500 bg-clip-text text-transparent">
+            Join MeetCutes
+          </CardTitle>
+          <CardDescription className="text-center text-base">
+            Create your account and start connecting
           </CardDescription>
         </CardHeader>
-        <CardContent className="w-[95%] mt-4">
+        <CardContent className="w-[95%] mt-4 px-8 pb-8">
           <form onSubmit={formik.handleSubmit}>
             <div className="flex flex-col gap-6">
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
@@ -240,7 +249,7 @@ export function Signup({ setOpenSignup, setOpenLogin }) {
               </div>
 
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-                <div className="grid gap-2 w-full md:w-80">
+                <div className="grid gap-2 w-full">
                   <Label htmlFor="gender">Gender</Label>
                   <Select
                     required
@@ -248,7 +257,7 @@ export function Signup({ setOpenSignup, setOpenLogin }) {
                       formik.values.gender = value;
                     }}
                   >
-                    <SelectTrigger className="w-full md:w-80">
+                    <SelectTrigger className="w-full">
                       <SelectValue placeholder="Select your gender" />
                     </SelectTrigger>
                     <SelectContent>
@@ -259,7 +268,7 @@ export function Signup({ setOpenSignup, setOpenLogin }) {
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="grid gap-2 w-full md:w-80">
+                <div className="grid gap-2 w-full">
                   <Label htmlFor="dob">Date of Birth</Label>
                   <Input
                     type="date"
@@ -274,8 +283,8 @@ export function Signup({ setOpenSignup, setOpenLogin }) {
                 </div>
               </div>
 
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
-                <div className="grid gap-2">
+              <div className="flex flex-col md:flex-row md:items-center gap-6">
+                <div className="grid gap-2 w-full">
                   <Label htmlFor="state">State</Label>
                   <Select
                     required
@@ -286,7 +295,7 @@ export function Signup({ setOpenSignup, setOpenLogin }) {
                       setState(value);
                     }}
                   >
-                    <SelectTrigger className="w-full md:w-80">
+                    <SelectTrigger className="w-full">
                       <SelectValue placeholder="Select your state" />
                     </SelectTrigger>
                     <SelectContent>
@@ -366,7 +375,7 @@ export function Signup({ setOpenSignup, setOpenLogin }) {
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="grid gap-2">
+                <div className="grid gap-2 w-full">
                   <Label htmlFor="city">City</Label>
                   <Select
                     required
@@ -376,7 +385,7 @@ export function Signup({ setOpenSignup, setOpenLogin }) {
                       formik.values.city = value;
                     }}
                   >
-                    <SelectTrigger className="w-full mr-52">
+                    <SelectTrigger className="w-full">
                       <SelectValue placeholder="Select your city" />
                     </SelectTrigger>
                     <SelectContent>
@@ -455,17 +464,20 @@ export function Signup({ setOpenSignup, setOpenLogin }) {
                 ) : null}
               </div>
 
-              <Button type="submit" className="w-full">
-                Signup
+              <Button
+                type="submit"
+                className="w-full h-12 bg-linear-to-r from-orange-500 via-red-500 to-pink-500 hover:from-orange-600 hover:via-red-600 hover:to-pink-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-[1.02]"
+              >
+                Create Account
               </Button>
             </div>
-            <div className="mt-4 text-center text-sm">
-              Already a user?{" "}
+            <div className="mt-6 text-center text-sm">
+              <span className="text-muted-foreground">Already have an account? </span>
               <span
-                className="underline underline-offset-4 pb-3 cursor-pointer"
+                className="text-primary hover:text-primary/80 font-semibold underline-offset-4 hover:underline transition-colors cursor-pointer"
                 onClick={handleAlready}
               >
-                Login
+                Sign in here
               </span>
             </div>
           </form>

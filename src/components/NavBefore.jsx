@@ -10,17 +10,17 @@ const NavBefore = ({ openLogin, setOpenLogin, openSignup, setOpenSignup }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   return (
     <header className="border-b border-border bg-card">
-      <div className="container mx-auto flex h-16 items-center justify-between px-4 md:px-6">
+      <div className="container mx-auto relative flex h-16 items-center px-4 md:px-6">
         <Link to="/" className="flex items-center gap-2">
           <div className="flex items-center gap-1">
             <img src="/mc-48-orange2.png" alt="Logo" className="h-10 w-10" />
-            <span className="text-4xl pacifico-regular text-dark dark:text-white">
+            <span className="text-4xl font-normal tracking-wider bg-linear-to-r from-orange-400 via-red-500 to-pink-500 bg-clip-text text-transparent font-['Bebas_Neue']">
               MeetCutes.us
             </span>
           </div>
         </Link>
 
-        <nav className="hidden items-center gap-6 lg:flex">
+        <nav className="absolute left-1/2 transform -translate-x-1/2 hidden items-center gap-6 lg:flex">
           <Link
             to="/about"
             className="text-sm font-medium text-foreground hover:text-primary transition-colors"
@@ -41,7 +41,7 @@ const NavBefore = ({ openLogin, setOpenLogin, openSignup, setOpenSignup }) => {
           </Link>
         </nav>
 
-        <div className="items-center gap-3 hidden lg:flex">
+        <div className="items-center gap-3 hidden lg:flex ml-auto">
           <Dialog open={openLogin} onOpenChange={setOpenLogin}>
             <DialogTrigger asChild>
               <Button
@@ -61,14 +61,16 @@ const NavBefore = ({ openLogin, setOpenLogin, openSignup, setOpenSignup }) => {
           </Dialog>
         </div>
 
-        {/* Mobile menu icon */}
-        <div className="lg:hidden p-2 hover:bg-muted rounded-lg transition-colors">
-          <button
-            className="p-2 hover:bg-muted rounded-lg transition-colors"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-          >
-            {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="w-5 h-5 text-muted-foreground" />}
-          </button>
+        {/* Mobile menu */}
+        <div className="flex items-center gap-2">
+          <div className="lg:hidden p-2 hover:bg-muted rounded-lg transition-colors">
+            <button
+              className="p-2 hover:bg-muted rounded-lg transition-colors"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+            >
+              {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="w-5 h-5 text-muted-foreground" />}
+            </button>
+          </div>
         </div>
 
       </div>

@@ -1,4 +1,4 @@
-import { toast } from "react-toastify";
+import toast from "react-hot-toast";
 
 export const alertService = {
   successAlert,
@@ -18,29 +18,23 @@ export const alertType = {
 
 export function errorAlert(title, message) {
   //alert({ type: alertType.error, message, title });
-  toast.error(message, {
-    position: "top-right",
-  });
+  toast.error(message);
 }
 
 export function successAlert(title, message) {
   //alert({ type: alertType.success, message, title });
-  toast.success(message, {
-    position: "top-right",
-  });
+  toast.success(message);
 }
 
 export function infoAlert(title, message) {
   //alert({ type: alertType.info, message, title });
-  toast.info(message, {
-    position: "top-right",
-  });
+  toast(message);
 }
 
 export function warn(title, message) {
   //alert({ ...options, type: alertType.warning, message, title });
-  toast.warning(message, {
-    position: "top-right",
+  toast(message, {
+    icon: '⚠️',
   });
 }
 

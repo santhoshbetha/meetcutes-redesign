@@ -23,7 +23,7 @@ export function EventCard({ setSelectedEvent, event, userlatitude, userlongitude
           <h3 className="text-2xl font-bold text-foreground group-hover:text-primary transition-colors duration-300 mb-2">
             {event?.locationdata?.locationname}
           </h3>
-          <div className="w-12 h-1 bg-gradient-to-r from-primary to-primary/60 rounded-full"></div>
+          <div className="w-12 h-1 bg-linear-to-r from-primary to-primary/60 rounded-full"></div>
         </div>
 
         <div className="space-y-4">

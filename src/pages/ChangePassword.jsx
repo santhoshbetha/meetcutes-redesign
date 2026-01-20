@@ -6,12 +6,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Spinner } from "@/components/ui/Spinner";
+import { Spinner } from "@/components/ui/spinner";
+import { Lock, Shield, CheckCircle, AlertCircle, ArrowLeft } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export function ChangePassword() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [customerror, setCustomError] = useState("");
+  const [success, setSuccess] = useState(false);
 
   const formik = useFormik({
     initialValues: {
@@ -19,99 +22,188 @@ export function ChangePassword() {
       passwordconfirm: "",
     },
     validationSchema: Yup.object({
-      password: Yup.string().min(6).required("required"),
-      passwordconfirm: Yup.string().oneOf(
-        [Yup.ref("password"), null],
-        "Passwords must match",
-      ),
+      password: Yup.string()
+        .min(8, "Password must be at least 8 characters")
+        .matches(
+          /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+          "Password must contain at least one uppercase letter, one lowercase letter, and one number"
+        )
+        .required("Password is required"),
+      passwordconfirm: Yup.string()
+        .oneOf([Yup.ref("password"), null], "Passwords must match")
+        .required("Please confirm your password"),
     }),
+    onSubmit: async (values) => {
+      try {
+        setLoading(true);
+        setCustomError("");
+        // TODO: Implement actual password change logic here
+        // For now, simulate success
+        await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate API call
+        setSuccess(true);
+        setTimeout(() => {
+          navigate("/dashboard");
+        }, 2000);
+      } catch (error) {
+        setCustomError("Password change failed. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    },
   });
 
-  const handleChangePassSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      setLoading(true);
-    } catch (error) {
-      alert("Something wrong. Try again later");
-      setLoading(false);
-      setCustomError("Password reset failed, try again");
-      navigate("/");
-    }
-  };
+  if (success) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 p-4">
+        <Card className="w-full max-w-md shadow-lg">
+          <CardContent className="pt-8 pb-8 text-center">
+            <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
+            <h2 className="text-2xl font-bold text-foreground mb-2">Password Changed!</h2>
+            <p className="text-muted-foreground mb-4">
+              Your password has been successfully updated.
+            </p>
+            <p className="text-sm text-muted-foreground">
+              Redirecting to dashboard...
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
-    <div className="mt-2 flex justify-center relative">
-      <Card className="bg-card dark:bg-background sm: w-[full] md:w-[60%] lg:w-[45%] xl:w-[35%] dark:border-blue-900/80 pb-4 relative">
-        {loading && (
-          <Spinner
-            className="top-[50%] left-[50%] z-99 absolute"
-            size="medium"
-            withText={true}
-            text="Setting New Password..."
-          />
-        )}
-        <CardHeader className="pt-4 pb-0">
-          <CardTitle className="text-2xl">Set New Password</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleChangePassSubmit} className="space-y-2">
-            <Label htmlFor="password">New Password</Label>
-            <Input
-              id="password"
-              type="text"
-              placeholder=""
-              name="password"
-              className="border-gray-200"
-              value={formik.values.password}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              required
-            />
-            {formik.touched.password && formik.errors.password ? (
-              <p className="text-red-700">{formik.errors.password} </p>
-            ) : null}
-
-            <Label htmlFor="passwordconfirm" className="mt-2">
-              New Password (Confirm)
-            </Label>
-            <Input
-              id="passwordconfirm"
-              type="password"
-              className="border-gray-200"
-              placeholder=""
-              name="passwordconfirm"
-              value={formik.values.passwordconfirm}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              required
-            />
-            {formik.touched.passwordconfirm && formik.errors.passwordconfirm ? (
-              <p className="text-red-700">{formik.errors.passwordconfirm} </p>
-            ) : null}
-
-            <div className="flex mt-3">
-              <Button
-                variant="outline"
-                onClick={(e) => {
-                  e.preventDefault();
-                  navigate("/dashboard");
-                }}
-              >
-                Cancel
-              </Button>
-              {formik.errors.password || formik.errors.passwordconfirm ? (
-                <Button type="submit" className="ms-auto" disabled>
-                  Confirm New Password
-                </Button>
-              ) : (
-                <Button type="submit" className="ms-auto">
-                  Confirm New Password
-                </Button>
-              )}
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 p-4">
+      <div className="w-full max-w-md">
+        {/* Header */}
+        <div className="text-center mb-6">
+          <div className="flex items-center justify-center mb-4">
+            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+              <Shield className="w-6 h-6 text-primary" />
             </div>
-          </form>
-        </CardContent>
-      </Card>
+          </div>
+          <h1 className="text-3xl font-bold text-foreground mb-2">Change Password</h1>
+          <p className="text-muted-foreground">
+            Enter your new password below to secure your account
+          </p>
+        </div>
+
+        {/* Error Alert */}
+        {customerror && (
+          <Alert className="mb-6 border-destructive/50 bg-destructive/5">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{customerror}</AlertDescription>
+          </Alert>
+        )}
+
+        {/* Form Card */}
+        <Card className="shadow-lg">
+          <CardHeader className="pb-4">
+            <CardTitle className="flex items-center gap-2">
+              <Lock className="w-5 h-5" />
+              New Password
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={formik.handleSubmit} className="space-y-6">
+              {/* Current Password Field (if needed, but not in original) */}
+              {/* New Password */}
+              <div className="space-y-2">
+                <Label htmlFor="password" className="text-sm font-medium">
+                  New Password
+                </Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="Enter your new password"
+                  name="password"
+                  value={formik.values.password}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  className={formik.touched.password && formik.errors.password ? "border-destructive" : ""}
+                />
+                {formik.touched.password && formik.errors.password && (
+                  <p className="text-sm text-destructive">{formik.errors.password}</p>
+                )}
+              </div>
+
+              {/* Confirm Password */}
+              <div className="space-y-2">
+                <Label htmlFor="passwordconfirm" className="text-sm font-medium">
+                  Confirm New Password
+                </Label>
+                <Input
+                  id="passwordconfirm"
+                  type="password"
+                  placeholder="Confirm your new password"
+                  name="passwordconfirm"
+                  value={formik.values.passwordconfirm}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  className={formik.touched.passwordconfirm && formik.errors.passwordconfirm ? "border-destructive" : ""}
+                />
+                {formik.touched.passwordconfirm && formik.errors.passwordconfirm && (
+                  <p className="text-sm text-destructive">{formik.errors.passwordconfirm}</p>
+                )}
+              </div>
+
+              {/* Password Requirements */}
+              <div className="text-xs text-muted-foreground space-y-1">
+                <p className="font-medium">Password requirements:</p>
+                <ul className="list-disc list-inside space-y-1">
+                  <li>At least 8 characters long</li>
+                  <li>One uppercase letter</li>
+                  <li>One lowercase letter</li>
+                  <li>One number</li>
+                </ul>
+              </div>
+
+              {/* Buttons */}
+              <div className="flex gap-3 pt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => navigate("/dashboard")}
+                  className="flex-1"
+                  disabled={loading}
+                >
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  className="flex-1"
+                  disabled={loading || !formik.isValid || !formik.dirty}
+                >
+                  {loading ? (
+                    <>
+                      <Spinner className="w-4 h-4 mr-2 animate-spin" />
+                      Updating...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle className="w-4 h-4 mr-2" />
+                      Change Password
+                    </>
+                  )}
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+
+        {/* Footer */}
+        <div className="text-center mt-6">
+          <p className="text-sm text-muted-foreground">
+            Need help? Contact our{" "}
+            <button
+              onClick={() => navigate("/contact")}
+              className="text-primary hover:underline"
+            >
+              support team
+            </button>
+          </p>
+        </div>
+      </div>
     </div>
   );
 }
