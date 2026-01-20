@@ -340,7 +340,7 @@ export function EventsSearch({
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
+    <div className="min-h-screen bg-linear-to-br from-background via-background to-muted/20">
       <div className="max-w-[1600px] mx-auto px-4 md:px-8 py-4 md:py-6">
         {/* Header Section */}
         <div className="mb-8">

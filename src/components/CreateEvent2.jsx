@@ -131,7 +131,7 @@ export function CreateEvent2({ onClose }) {
       
       <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl border-border/50 animate-in zoom-in-95 duration-200 pt-0 dark:border-3">
       <div
-        className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto light:bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50
+        className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto light:bg-linear-to-br from-amber-50 via-orange-50 to-yellow-50
                 dark: border-4 dark:bg-background
                 rounded-2xl shadow-2xl animate-in zoom-in-95 duration-300"
         onClick={(e) => e.stopPropagation()}

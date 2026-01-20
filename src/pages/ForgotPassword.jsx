@@ -28,7 +28,7 @@ export function ForgotPassword() {
       className="mt-3 flex justify-center"
       variant="fullMobileBreakpointPadded"
     >
-      <Card className="bg-gradient-to-br from-card via-card to-card/95 backdrop-blur-sm border-0 shadow-2xl w-full max-w-md">
+      <Card className="bg-linear-to-br from-card via-card to-card/95 backdrop-blur-sm border-0 shadow-2xl w-full max-w-md">
         <CardHeader className="pb-6 px-8 pt-8">
           <div className="flex items-center justify-center mb-4">
             <div className="w-12 h-12 rounded-full bg-linear-to-r from-orange-400 via-red-500 to-pink-500 flex items-center justify-center shadow-lg">

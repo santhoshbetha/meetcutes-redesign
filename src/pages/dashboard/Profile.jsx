@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Edit2, Mail, Phone, Settings, Calendar } from "lucide-react";
+import { Edit2, Mail, Phone, Settings, Calendar, Eye, Users } from "lucide-react";
 import { FaFacebook, FaInstagram, FaLinkedin } from "react-icons/fa";
 import { LocationDialog } from "@/components/LocationDialog";
 import { ChangeLocation } from "@/components/ChangeLocation";
@@ -125,7 +125,7 @@ export function Profile() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
+    <div className="min-h-screen bg-linear-to-br from-background via-background to-muted/20">
       <main className="max-w-[1600px] mx-auto px-4 md:px-8 py-6 md:py-8">
         {/* Header Section */}
         <div className="mb-8">
@@ -141,8 +141,8 @@ export function Profile() {
 
         <div className="grid grid-cols-1 lg:grid-cols-[350px_1fr] gap-6 md:gap-8">
           {/* Profile Picture & Basic Info Card */}
-          <Card className="relative overflow-hidden shadow-xl border-2 border-border bg-gradient-to-br from-card via-card to-card/95 backdrop-blur-sm h-fit">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10 pointer-events-none" />
+          <Card className="relative overflow-hidden shadow-xl border-2 border-border bg-linear-to-br from-card via-card to-card/95 backdrop-blur-sm h-fit">
+            <div className="absolute inset-0 bg-linear-to-br from-primary/5 via-transparent to-primary/10 pointer-events-none" />
             <CardContent className="p-6 relative">
               <div className="text-center">
                 {/* Profile Picture */}
@@ -177,6 +177,36 @@ export function Profile() {
                       @{profiledata.userhandle}
                     </p>
                   )}
+                </div>
+
+                {/* Visibility Preference */}
+                <div className="mt-4 pt-4 border-t border-border/50">
+                  <div className="flex items-center justify-center gap-2 text-sm">
+                    {profiledata?.visibilityPreference === 'events-only' && (
+                      <>
+                        <Calendar className="w-4 h-4 text-primary" />
+                        <span className="text-muted-foreground">Events Only</span>
+                      </>
+                    )}
+                    {profiledata?.visibilityPreference === 'online-only' && (
+                      <>
+                        <Users className="w-4 h-4 text-primary" />
+                        <span className="text-muted-foreground">Online Only</span>
+                      </>
+                    )}
+                    {profiledata?.visibilityPreference === 'both' && (
+                      <>
+                        <Eye className="w-4 h-4 text-primary" />
+                        <span className="text-muted-foreground">Visible Everywhere</span>
+                      </>
+                    )}
+                    {(!profiledata?.visibilityPreference || profiledata?.visibilityPreference === '') && (
+                      <>
+                        <Eye className="w-4 h-4 text-primary" />
+                        <span className="text-muted-foreground">Visible Everywhere</span>
+                      </>
+                    )}
+                  </div>
                 </div>
 
                 {/* Quick Stats */}

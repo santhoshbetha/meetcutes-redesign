@@ -58,25 +58,25 @@ export function Search() {
     }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
-      <div className="max-w-4xl mx-auto px-4 md:px-8 py-8 md:py-12">
+    <div className="min-h-screen bg-linear-to-br from-background via-background to-muted/20">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 md:px-8 py-6 sm:py-8 md:py-12">
         {/* Header */}
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium mb-4">
+        <div className="text-center mb-8 sm:mb-12">
+          <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-3 sm:px-4 py-2 rounded-full text-sm font-medium mb-4">
             <SearchIcon className="w-4 h-4" />
             Find Someone
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-3 sm:mb-4">
             Search Users
           </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+          <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed px-4">
             Find and connect with other MeetCutes members using their email, phone number, or handle.
           </p>
         </div>
 
         {/* Search Form */}
-        <div className="max-w-2xl mx-auto mb-12">
-          <Card className="shadow-2xl border-0 bg-gradient-to-br from-card via-card to-card/95 backdrop-blur-sm">
+        <div className="max-w-2xl mx-auto mb-8 sm:mb-12">
+          <Card className="shadow-2xl border-0 bg-linear-to-br from-card via-card to-card/95 backdrop-blur-sm">
             {loading && (
               <Spinner
                 className='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50'
@@ -84,19 +84,19 @@ export function Search() {
                 text="Searching..."
               />
             )}
-            <CardHeader className="text-center pb-6">
-              <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <Users className="w-8 h-8 text-primary" />
+            <CardHeader className="text-center pb-4 sm:pb-6">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 bg-primary/10 rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                <Users className="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
               </div>
-              <CardTitle className="text-2xl md:text-3xl">Search User</CardTitle>
-              <p className="text-muted-foreground mt-2">
+              <CardTitle className="text-xl sm:text-2xl md:text-3xl">Search User</CardTitle>
+              <p className="text-sm sm:text-base text-muted-foreground mt-2 px-4">
                 Enter an email address, phone number, or user handle to find someone
               </p>
             </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSearchSubmit} className="space-y-6">
-                <div className="space-y-3">
-                  <Label htmlFor="searchtext" className="text-base font-semibold">
+            <CardContent className="px-4 sm:px-6">
+              <form onSubmit={handleSearchSubmit} className="space-y-4 sm:space-y-6">
+                <div className="space-y-2 sm:space-y-3">
+                  <Label htmlFor="searchtext" className="text-sm sm:text-base font-semibold">
                     Search Query
                   </Label>
                   <Input
@@ -106,25 +106,25 @@ export function Search() {
                     required
                     value={searchtext}
                     onChange={(e) => setSearchtext(e.target.value)}
-                    className="h-12 text-base border-2 focus:border-primary/50"
+                    className="h-10 sm:h-12 text-sm sm:text-base border-2 focus:border-primary/50"
                   />
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-xs sm:text-sm text-muted-foreground px-2">
                     Enter a valid email, 10-digit phone number, or user handle (5-15 characters, starts with letter)
                   </p>
                 </div>
 
-                <div className="flex gap-4 pt-4">
+                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-3 sm:pt-4">
                   <button
                     type="button"
                     onClick={() => navigate(-1)}
-                    className="flex-1 h-12 px-4 py-2 border border-border/60 bg-background shadow-sm hover:bg-accent hover:text-accent-foreground hover:border-accent hover:shadow-md inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-semibold transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 transform hover:scale-[1.02] active:scale-[0.98]"
+                    className="flex-1 h-10 sm:h-12 px-4 py-2 border border-border/60 bg-background shadow-sm hover:bg-accent hover:text-accent-foreground hover:border-accent hover:shadow-md inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-semibold transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 transform hover:scale-[1.02] active:scale-[0.98]"
                   >
                     Cancel
                   </button>
                   {profiledata?.userstate == 'active' ? (
                     <button
                       type='submit'
-                      className="flex-1 h-12 px-4 py-2 bg-primary text-primary-foreground shadow-lg hover:shadow-xl hover:shadow-primary/25 hover:bg-primary/90 inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-semibold transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 transform hover:scale-[1.02] active:scale-[0.98]"
+                      className="flex-1 h-10 sm:h-12 px-4 py-2 bg-primary text-primary-foreground shadow-lg hover:shadow-xl hover:shadow-primary/25 hover:bg-primary/90 inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-semibold transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 transform hover:scale-[1.02] active:scale-[0.98]"
                     >
                       <SearchIcon className="w-4 h-4" />
                       Search
@@ -132,7 +132,7 @@ export function Search() {
                   ) : (
                     <button
                       type="button"
-                      className="flex-1 h-12 px-4 py-2 bg-muted text-muted-foreground cursor-not-allowed inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-semibold transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+                      className="flex-1 h-10 sm:h-12 px-4 py-2 bg-muted text-muted-foreground cursor-not-allowed inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-semibold transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
                       disabled={true}
                     >
                       <AlertCircle className="w-4 h-4" />

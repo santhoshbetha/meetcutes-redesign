@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/Spinner";
+import { MeetCutesSpinner } from "@/components/ui/MeetCutesSpinner";
 import * as Yup from "yup";
 import { Formik } from "formik";
 import { Link, useNavigate } from "react-router-dom";
@@ -77,10 +78,10 @@ export function Login({ setOpenLogin }) {
   });
 
   return (
-    <DialogContent className="w-[90%] sm:max-w-[425px] border-0 shadow-2xl bg-gradient-to-br from-card via-card to-card/95 backdrop-blur-sm">
+    <DialogContent className="w-[90%] sm:max-w-[425px] border-0 shadow-2xl bg-linear-to-br from-card via-card to-card/95 backdrop-blur-sm">
       {loading && (
         <div className='absolute top-[50%] left-[50%] z-50 -translate-x-1/2 -translate-y-1/2'>
-          <Spinner withText={false} />
+          <MeetCutesSpinner size="large" />
         </div>
       )}
       <DialogTitle></DialogTitle>

@@ -28,7 +28,7 @@ export function Donate() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
+    <div className="min-h-screen bg-linear-to-br from-background via-background to-muted/20">
       <Container className="py-8 md:py-12">
         {/* Header */}
         <div className="text-center mb-12">
@@ -47,7 +47,7 @@ export function Donate() {
 
         {/* Main Donation Card */}
         <div className="max-w-2xl mx-auto mb-12">
-          <Card className="shadow-2xl border-0 bg-gradient-to-br from-emerald-50 via-green-50 to-teal-50 dark:from-emerald-950/20 dark:via-green-950/20 dark:to-teal-950/20">
+          <Card className="shadow-2xl border-0 bg-linear-to-br from-emerald-50 via-green-50 to-teal-50 dark:from-emerald-950/20 dark:via-green-950/20 dark:to-teal-950/20">
             <CardHeader className="text-center pb-6">
               <div className="w-20 h-20 bg-emerald-100 dark:bg-emerald-900/30 rounded-3xl flex items-center justify-center mx-auto mb-6">
                 <DollarSign className="w-10 h-10 text-emerald-600 dark:text-emerald-400" />

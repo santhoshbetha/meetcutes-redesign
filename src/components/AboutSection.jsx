@@ -11,23 +11,23 @@ export default function AboutSection() {
           <div className="absolute bottom-20 left-20 w-24 h-24 bg-pink-500/20 rounded-full blur-xl"></div>
         </div>
 
-        <div className="container mx-auto px-6 py-16 md:py-24 md:px-8 lg:px-12 relative z-10">
-          <div className="grid lg:grid-cols-2 gap-20 items-start max-w-7xl mx-auto">
+        <div className="container mx-auto px-4 sm:px-6 py-12 sm:py-16 md:py-24 md:px-8 lg:px-12 relative z-10">
+          <div className="grid lg:grid-cols-2 gap-12 sm:gap-16 lg:gap-20 items-start max-w-7xl mx-auto">
             {/* Left - Video Section */}
-            <div className="space-y-8">
-              <div className="bg-gradient-to-br from-background to-card border border-border/60 rounded-3xl p-12 flex items-center justify-center aspect-video shadow-xl hover:shadow-2xl transition-all duration-500 group cursor-pointer">
-                <div className="text-center space-y-6">
+            <div className="space-y-6 sm:space-y-8">
+              <div className="bg-linear-to-br from-background to-card border border-border/60 rounded-2xl sm:rounded-3xl p-8 sm:p-12 flex items-center justify-center aspect-video shadow-xl hover:shadow-2xl transition-all duration-500 group cursor-pointer">
+                <div className="text-center space-y-4 sm:space-y-6">
                   <div className="flex items-center justify-center gap-3">
-                    <div className="p-4 bg-primary/10 rounded-full group-hover:bg-primary/20 transition-colors duration-300">
-                      <Heart className="w-10 h-10 text-primary" />
+                    <div className="p-3 sm:p-4 bg-primary/10 rounded-full group-hover:bg-primary/20 transition-colors duration-300">
+                      <Heart className="w-8 h-8 sm:w-10 sm:h-10 text-primary" />
                     </div>
                   </div>
-                  <div className="bg-gradient-to-br from-muted via-muted/80 to-muted/50 rounded-2xl p-16 flex items-center justify-center shadow-inner group-hover:shadow-lg transition-shadow duration-300">
+                  <div className="bg-linear-to-br from-muted via-muted/80 to-muted/50 rounded-xl sm:rounded-2xl p-12 sm:p-16 flex items-center justify-center shadow-inner group-hover:shadow-lg transition-shadow duration-300">
                     <div className="text-center">
-                      <div className="p-6 bg-primary/10 rounded-full mb-6 inline-block group-hover:bg-primary/20 transition-colors duration-300">
-                        <Play className="w-20 h-20 text-primary ml-2" />
+                      <div className="p-4 sm:p-6 bg-primary/10 rounded-full mb-4 sm:mb-6 inline-block group-hover:bg-primary/20 transition-colors duration-300">
+                        <Play className="w-16 h-16 sm:w-20 sm:h-20 text-primary ml-2" />
                       </div>
-                      <p className="text-lg font-semibold text-foreground">Watch Demo Video</p>
+                      <p className="text-base sm:text-lg font-semibold text-foreground">Watch Demo Video</p>
                       <p className="text-sm text-muted-foreground mt-2">See how MeetCutes works</p>
                     </div>
                   </div>
@@ -35,21 +35,21 @@ export default function AboutSection() {
               </div>
 
               {/* Stats */}
-              <div className="grid grid-cols-3 gap-4">
-                <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl p-6 text-center shadow-sm hover:shadow-md transition-shadow duration-300">
-                  <Users className="w-8 h-8 text-primary mx-auto mb-2" />
-                  <div className="text-2xl font-bold text-foreground">Growing</div>
-                  <div className="text-sm text-muted-foreground">Community</div>
+              <div className="grid grid-cols-3 gap-3 sm:gap-4">
+                <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl sm:rounded-2xl p-4 sm:p-6 text-center shadow-sm hover:shadow-md transition-shadow duration-300">
+                  <Users className="w-6 h-6 sm:w-8 sm:h-8 text-primary mx-auto mb-2" />
+                  <div className="text-lg sm:text-2xl font-bold text-foreground">Growing</div>
+                  <div className="text-xs sm:text-sm text-muted-foreground">Community</div>
                 </div>
-                <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl p-6 text-center shadow-sm hover:shadow-md transition-shadow duration-300">
-                  <MapPin className="w-8 h-8 text-green-500 mx-auto mb-2" />
-                  <div className="text-2xl font-bold text-foreground">Local</div>
-                  <div className="text-sm text-muted-foreground">Events Daily</div>
+                <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl sm:rounded-2xl p-4 sm:p-6 text-center shadow-sm hover:shadow-md transition-shadow duration-300">
+                  <MapPin className="w-6 h-6 sm:w-8 sm:h-8 text-green-500 mx-auto mb-2" />
+                  <div className="text-lg sm:text-2xl font-bold text-foreground">Local</div>
+                  <div className="text-xs sm:text-sm text-muted-foreground">Events Daily</div>
                 </div>
-                <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl p-6 text-center shadow-sm hover:shadow-md transition-shadow duration-300">
-                  <Sparkles className="w-8 h-8 text-yellow-500 mx-auto mb-2" />
-                  <div className="text-2xl font-bold text-foreground">Real</div>
-                  <div className="text-sm text-muted-foreground">Connections</div>
+                <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl sm:rounded-2xl p-4 sm:p-6 text-center shadow-sm hover:shadow-md transition-shadow duration-300">
+                  <Sparkles className="w-6 h-6 sm:w-8 sm:h-8 text-yellow-500 mx-auto mb-2" />
+                  <div className="text-lg sm:text-2xl font-bold text-foreground">Real</div>
+                  <div className="text-xs sm:text-sm text-muted-foreground">Connections</div>
                 </div>
               </div>
             </div>

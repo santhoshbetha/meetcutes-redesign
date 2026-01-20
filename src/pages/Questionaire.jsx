@@ -160,7 +160,7 @@ export default function Questionaire() {
 
   return (
     <Container variant="fullMobileBreakpointPadded">
-      <Card className="bg-card dark:bg-background pt-3">
+      <Card className="bg-card dark:bg-background pt-2 pb-6">
         {loading && (
           <Spinner
             className="fixed top-[50%] left-[50%] z-50 cursor-pointer"

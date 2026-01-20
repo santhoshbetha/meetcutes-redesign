@@ -12,6 +12,8 @@ import { ChangePassword } from "@/pages/ChangePassword";
 import { ForgotPassword } from "@/pages/ForgotPassword";
 import { Settings } from "@/pages/Settings";
 import EventDetails from "@/pages/EventDetails";
+import { UserProfile } from "@/pages/UserProfile";
+import { PageNotFound } from "@/pages/PageNotFound";
 import NavBefore from "@/components/NavBefore";
 import NavAfter from "@/components/Navafter";
 import { useAuth } from "./context/AuthContext";
@@ -81,6 +83,8 @@ function App() {
 
           <Route path="/settings" element={<Settings />} />
           <Route path="/event/:id" element={<EventDetails />} />
+          <Route path="/user/:userid" element={<UserProfile />} />
+          <Route path="*" element={<PageNotFound />} />
         </Routes>
         </SearchAndUserEventsDataContextProvider>
         </AutoCompleteDataContextProvider>

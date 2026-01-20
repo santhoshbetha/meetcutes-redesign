@@ -38,9 +38,13 @@ export const searchUsers = async (searchinput) => {
       msg: error?.message,
     };
   }
+
+  // Filter out users who have set visibility to 'events-only'
+  const filteredData = data?.filter(user => user.visibilityPreference !== 'events-only') || [];
+
   return {
     success: true,
-    data: data,
+    data: filteredData,
   };
 };
 
@@ -59,7 +63,7 @@ export const searchUser = async (searchtext) => {
         .select(
           "userid, userhandle, firstname, age, gender, userstate,\
                                             latitude, longitude, onlyhundredmileevisiblity, \
-                                            defaultcoordsset, usercoordsset, exactcoordsset, timeoflogin",
+                                            defaultcoordsset, usercoordsset, exactcoordsset, timeoflogin, visibilityPreference",
         )
         .textSearch("phonenumber", Number(searchtext))
         .eq("phonenumbersearch", true)
@@ -71,7 +75,7 @@ export const searchUser = async (searchtext) => {
         .select(
           "userid, userhandle, firstname, age, gender, userstate,\
                                         latitude, longitude, onlyhundredmileevisiblity, \
-                                        defaultcoordsset, usercoordsset, exactcoordsset, timeoflogin",
+                                        defaultcoordsset, usercoordsset, exactcoordsset, timeoflogin, visibilityPreference",
         )
         //   .textSearch('userid', searchtext.toLowerCase())
         .eq("emailsearch", true)
@@ -83,7 +87,7 @@ export const searchUser = async (searchtext) => {
         .select(
           "userid, userhandle, firstname, age, gender, userstate,\
                                         latitude, longitude, onlyhundredmileevisiblity, \
-                                        defaultcoordsset, usercoordsset, exactcoordsset, timeoflogin",
+                                        defaultcoordsset, usercoordsset, exactcoordsset, timeoflogin, visibilityPreference",
         )
         //   .textSearch('userhandle', searchtext)
         .eq("userhandlesearch", true)
@@ -97,6 +101,15 @@ export const searchUser = async (searchtext) => {
         msg: dataout.error?.message
       };
     }
+
+    // Filter out users who have set visibility to 'events-only'
+    if (dataout.data && dataout.data.visibilityPreference === 'events-only') {
+      return {
+        success: false,
+        msg: 'User not found or not visible in search'
+      };
+    }
+
     return {
       success: true,
       data: dataout.data

@@ -3,9 +3,10 @@ import { Clock, Calendar, MapPin, X, Users, Heart, CheckCircle, AlertCircle, Ext
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Spinner } from "@/components/ui/spinner";
 import { isObjEmpty } from "../utils/util";
 
-export default function EventDetailsDialog({ event, onClose, profiledata }) {
+export default function EventDetailsDialog({ event, onClose, profiledata, loading = false }) {
   const [eventDetails, setEventDetails] = useState(event || {});
   const [isRegistered, setIsRegistered] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
@@ -80,6 +81,15 @@ export default function EventDetailsDialog({ event, onClose, profiledata }) {
   return (
     <div className="fixed inset-0 z-50 grid place-items-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="relative w-full max-w-2xl bg-background rounded-2xl shadow-2xl animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto dark:border-3">
+        {/* Global Loading Overlay */}
+        {loading && (
+          <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center rounded-2xl">
+            <div className="text-center">
+              <Spinner size="xlarge" className="mb-4" />
+              <p className="text-sm font-medium text-muted-foreground">Loading event details...</p>
+            </div>
+          </div>
+        )}
         <div className="p-6 md:p-8">
           <div className="flex justify-between items-start mb-6">
             {/* Event Title */}

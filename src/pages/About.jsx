@@ -5,7 +5,7 @@ import { Heart, Users, Calendar, Shield, Star, MapPin, Coffee, Sparkles } from "
 
 export function About() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
+    <div className="min-h-screen bg-linear-to-br from-background via-background to-muted/20">
       <main className="max-w-6xl mx-auto px-4 md:px-8 py-8 md:py-12">
         {/* Hero Section */}
         <div className="text-center mb-12">
@@ -269,7 +269,7 @@ export function About() {
                   <div className="p-4 bg-rose-100/50 dark:bg-rose-900/20 rounded-lg border border-rose-200 dark:border-rose-800/30">
                     <h4 className="font-semibold text-rose-900 dark:text-rose-100 mb-2">🚫 Not at Bars/Pubs</h4>
                     <p className="text-sm text-rose-900/80 dark:text-rose-100/80">
-                      Events are held at appropriate venues like cafes and parks
+                      Events are held at appropriate venues like stores, cafes and parks
                     </p>
                   </div>
                 </div>

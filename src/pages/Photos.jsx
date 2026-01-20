@@ -252,7 +252,7 @@ export function Photos() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background">
+    <div className="min-h-screen bg-linear-to-br from-background via-muted/20 to-background">
       {loadingImages && (
         <Spinner
           className="top-[50%] left-[50%] z-50 absolute"

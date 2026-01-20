@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
+import { Spinner } from "@/components/ui/spinner";
 import { useAuth } from "../context/AuthContext";
 import { isObjEmpty } from "../utils/util";
 import toast from "react-hot-toast";
@@ -176,7 +177,7 @@ export default function EventDetails() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 flex items-center justify-center">
+      <div className="min-h-screen bg-linear-to-br from-background via-background to-muted/20 flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-primary/20 border-t-primary rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-muted-foreground">Loading event details...</p>
@@ -187,7 +188,7 @@ export default function EventDetails() {
 
   if (!event) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 flex items-center justify-center">
+      <div className="min-h-screen bg-linear-to-br from-background via-background to-muted/20 flex items-center justify-center">
         <Card className="p-8 text-center max-w-md">
           <h2 className="text-2xl font-bold text-foreground mb-4">Event Not Found</h2>
           <p className="text-muted-foreground mb-6">The event you're looking for doesn't exist or has been removed.</p>
@@ -201,6 +202,17 @@ export default function EventDetails() {
 
   return (
     <div className="min-h-screen bg-linear-to-br from-background via-background to-muted/20">
+      {/* Global Loading Overlay for Operations */}
+      {(isRegistering || isPostingComment) && (
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
+          <div className="text-center">
+            <Spinner size="xlarge" className="mb-4" />
+            <p className="text-sm font-medium text-muted-foreground">
+              {isRegistering ? (isRegistered ? 'Unregistering from event...' : 'Registering for event...') : 'Posting comment...'}
+            </p>
+          </div>
+        </div>
+      )}
       <div className="max-w-4xl mx-auto px-4 md:px-8 py-6">
         {/* Header */}
         <div className="mb-8">

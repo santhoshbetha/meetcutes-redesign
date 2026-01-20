@@ -1,25 +1,32 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Spinner } from "@/components/ui/Spinner";
-import { LoadingButton } from "@/components/ui/LoadingButton";
 import { useFormik } from "formik";
 import toast from "react-hot-toast";
 import { Separator } from "@/components/ui/separator";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Shield,
   Settings as SettingsIcon,
   AlertTriangle,
-  Trash2,
   User,
   MapPin,
   Target,
   Brain,
-  Edit
+  Edit,
+  Users,
+  Calendar,
+  Search
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { updateUserInfo, deleteUser } from "@/services/user.service";
@@ -39,6 +46,7 @@ export function Settings() {
   const [phonenumbersearch, setPhonenumbersearch] = useState(profiledata?.phonenumbersearch ?? false);
   const [userhandlesearch, setUserhandlesearch] = useState(profiledata?.userhandlesearch ?? false);
   const [onlyhundredmileevisiblity, setOnlyhundredmileevisiblity] = useState(profiledata?.onlyhundredmileevisiblity ?? true);
+  const [visibilityPreference, setVisibilityPreference] = useState(profiledata?.visibilitypreference ?? 'both');
 
   let [valueschanged, setValueschanged] = useState(false);
   const [confirmClick, setConfirmClick] = useState(false);
@@ -100,7 +108,8 @@ export function Settings() {
         emailsearch === profiledata?.emailsearch &&
         phonenumbersearch === profiledata?.phonenumbersearch &&
         userhandlesearch === profiledata?.userhandlesearch &&
-        onlyhundredmileevisiblity === profiledata?.onlyhundredmileevisiblity
+        onlyhundredmileevisiblity === profiledata?.onlyhundredmileevisiblity &&
+        visibilityPreference === (profiledata?.visibilitypreference || 'both')
       ) {
         setValueschanged(false);
         return;
@@ -111,6 +120,7 @@ export function Settings() {
         phonenumbersearch: phonenumbersearch,
         userhandlesearch: userhandlesearch,
         onlyhundredmileevisiblity: onlyhundredmileevisiblity,
+        visibilitypreference: visibilityPreference,
       };
 
       if (valueschanged) {
@@ -282,6 +292,66 @@ export function Settings() {
               </Card>
             </div>
 
+            <Separator className="my-6" />
+
+            <div className="flex items-center gap-3 mb-6">
+              <Target className="w-5 h-5 text-primary" />
+              <h2 className="text-xl font-semibold text-foreground">Activity Preferences</h2>
+            </div>
+
+            <div className="space-y-4">
+              <Card className="border border-border/50 hover:border-border transition-colors">
+                <CardContent className="p-4">
+                  <div className="space-y-3">
+                    <div className="space-y-1">
+                      <h3 className="font-medium text-foreground">Visibility Preference</h3>
+                      <p className="text-sm text-muted-foreground">Choose how you want to interact on MeetCutes</p>
+                    </div>
+                    <Select
+                      value={visibilityPreference}
+                      onValueChange={(value) => {
+                        setVisibilityPreference(value);
+                        setValueschanged(true);
+                      }}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select preference" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="events-only">
+                          <div className="flex items-center gap-2">
+                            <Calendar className="w-4 h-4" />
+                            <div>
+                              <div className="font-medium">Events Only</div>
+                              <div className="text-xs text-muted-foreground">Attend events, not visible in user searches</div>
+                            </div>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="online-only">
+                          <div className="flex items-center gap-2">
+                            <Search className="w-4 h-4" />
+                            <div>
+                              <div className="font-medium">Online Only</div>
+                              <div className="text-xs text-muted-foreground">Visible in searches, not interested in events</div>
+                            </div>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="both">
+                          <div className="flex items-center gap-2">
+                            <Users className="w-4 h-4" />
+                            <div>
+                              <div className="font-medium">Both Events & Online</div>
+                              <div className="text-xs text-muted-foreground">Participate in events and be visible in searches</div>
+                            </div>
+                          </div>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
             {valueschanged && (
               <div className="flex justify-end gap-3 pt-4">
                 <Button
@@ -292,6 +362,7 @@ export function Settings() {
                     setPhonenumbersearch(profiledata.phonenumbersearch || false);
                     setUserhandlesearch(profiledata.userhandlesearch || false);
                     setOnlyhundredmileevisiblity(profiledata.onlyhundredmileevisiblity || false);
+                    setVisibilityPreference(profiledata.visibilitypreference || 'both');
                     setValueschanged(false);
                   }}
                   disabled={!valueschanged}

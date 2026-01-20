@@ -33,7 +33,7 @@ export function Contact() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
+    <div className="min-h-screen bg-linear-to-br from-background via-background to-muted/20">
       <Container className="py-8 md:py-12">
         {/* Header */}
         <div className="text-center mb-12">

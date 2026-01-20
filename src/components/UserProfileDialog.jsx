@@ -6,6 +6,10 @@ import {
   Flag,
   ChevronLeft,
   ChevronRight,
+  Eye,
+  Users,
+  Calendar,
+  ExternalLink,
 } from "lucide-react";
 import { FaFacebook, FaInstagram, FaLinkedin } from "react-icons/fa";
 import { useState } from "react";
@@ -37,18 +41,27 @@ export function UserProfileDialog({ user, onClose }) {
         {/* Header */}
         <div className="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border px-6 py-4 flex items-center justify-between rounded-t-2xl z-10">
           <h2 className="text-2xl font-bold text-foreground">{user.name}</h2>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-muted rounded-md transition-colors"
-            aria-label="Close profile"
-          >
-            <X className="w-5 h-5 text-muted-foreground hover:text-foreground" />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => window.open(`/user/${user?.userid || user?.id}`, '_blank')}
+              className="p-2 hover:bg-muted rounded-md transition-colors group"
+              title="Open in new tab"
+            >
+              <ExternalLink className="w-5 h-5 text-muted-foreground hover:text-foreground group-hover:scale-110 transition-transform" />
+            </button>
+            <button
+              onClick={onClose}
+              className="p-2 hover:bg-muted rounded-md transition-colors"
+              aria-label="Close profile"
+            >
+              <X className="w-5 h-5 text-muted-foreground hover:text-foreground" />
+            </button>
+          </div>
         </div>
 
         {/* Profile Image */}
         <div className="px-6 pt-2">
-          <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-gradient-to-br from-muted to-muted/50 shadow-lg group">
+          <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-linear-to-br from-muted to-muted/50 shadow-lg group">
             {/* Carousel Images */}
             <div className="relative w-full h-full">
               {images.map((image, index) => (
@@ -126,6 +139,36 @@ export function UserProfileDialog({ user, onClose }) {
             <button className="p-2 hover:bg-destructive/10 rounded-md transition-colors group">
               <Flag className="w-5 h-5 text-destructive group-hover:scale-110 transition-transform" />
             </button>
+          </div>
+
+          {/* Visibility Preference */}
+          <div className="mt-3 pt-3 border-t border-border/50">
+            <div className="flex items-center justify-center gap-2 text-sm">
+              {user?.visibilityPreference === 'events-only' && (
+                <>
+                  <Calendar className="w-4 h-4 text-primary" />
+                  <span className="text-muted-foreground">Events Only</span>
+                </>
+              )}
+              {user?.visibilityPreference === 'online-only' && (
+                <>
+                  <Users className="w-4 h-4 text-primary" />
+                  <span className="text-muted-foreground">Online Only</span>
+                </>
+              )}
+              {user?.visibilityPreference === 'both' && (
+                <>
+                  <Eye className="w-4 h-4 text-primary" />
+                  <span className="text-muted-foreground">Visible Everywhere</span>
+                </>
+              )}
+              {(!user?.visibilityPreference || user?.visibilityPreference === '') && (
+                <>
+                  <Eye className="w-4 h-4 text-primary" />
+                  <span className="text-muted-foreground">Visible Everywhere</span>
+                </>
+              )}
+            </div>
           </div>
 
           {/* Contact Information */}

@@ -62,8 +62,8 @@ const NavBefore = ({ openLogin, setOpenLogin, openSignup, setOpenSignup }) => {
         </div>
 
         {/* Mobile menu */}
-        <div className="flex items-center gap-2">
-          <div className="lg:hidden p-2 hover:bg-muted rounded-lg transition-colors">
+        <div className="flex items-center gap-2 ml-auto lg:hidden">
+          <div className="p-2 hover:bg-muted rounded-lg transition-colors">
             <button
               className="p-2 hover:bg-muted rounded-lg transition-colors"
               onClick={() => setIsMenuOpen(!isMenuOpen)}

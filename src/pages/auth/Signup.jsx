@@ -18,6 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/Spinner"
+import { MeetCutesSpinner } from "@/components/ui/MeetCutesSpinner"
 import { useNavigate, Link } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -29,6 +30,7 @@ import { successAlert, errorAlert } from "@/services/alert.service";
 import { coords } from "@/lib/defaultcoords";
 import { cities } from "@/lib/cities"
 import supabase from "@/lib/supabase";
+import { Eye, Users, Calendar } from "lucide-react";
 
 function isEmpty(val) {
   return val === undefined || val == null || val.length <= 0 ? true : false;
@@ -58,7 +60,7 @@ export function Signup({ setOpenSignup, setOpenLogin }) {
   const [PasswordInputType, ToggleIcon] = usePasswordToggle();
   const [dobDate, setDobDate] = useState(new Date("2002-01-01"));
 
-  const forgotPassword = (e) => {
+  const forgotPassword = () => {
     setOpenSignup(false);
   };
 
@@ -98,8 +100,8 @@ export function Signup({ setOpenSignup, setOpenLogin }) {
             latitude: coords[formik.values.state.trim()][formik.values.city.trim()].lat,
             longitude: coords[formik.values.state.trim()][formik.values.city.trim()].lng,
             dateoflocation: dateofcreation,
-            dateofcoordinates: dateofcreation
-
+            dateofcoordinates: dateofcreation,
+            visibilityPreference: formik.values.visibilityPreference
         }
         try {
             setLoading(true);
@@ -120,7 +122,7 @@ export function Signup({ setOpenSignup, setOpenLogin }) {
             if (!error) {
                 if (data?.user?.id) {
                     navigate('/')
-                    const { error } = await supabase.auth.signOut();
+                    const { error: _signOutError } = await supabase.auth.signOut();
                     successAlert('', `Signup Successful!`);
                     successAlert('', `Verify email to confirm signup.`);
                 } 
@@ -128,10 +130,10 @@ export function Signup({ setOpenSignup, setOpenLogin }) {
 
             setOpenSignup(false);  //this closes "register" popup window
             setLoading(false)
-        } catch (error) {
+        } catch (_error) {
             errorAlert('Error registering', "Please try again. If the error persists, contact support.");
             setLoading(false)
-            throw error;
+            throw _error;
         } finally {
             actions.setSubmitting(false)
             setLoading(false)
@@ -154,6 +156,7 @@ export function Signup({ setOpenSignup, setOpenLogin }) {
       phonenumber: "",
       email: "",
       password: "",
+      visibilityPreference: "both",
     },
     validationSchema: Yup.object({
       firstname: Yup.string()
@@ -178,11 +181,11 @@ export function Signup({ setOpenSignup, setOpenLogin }) {
   });
 
   return (
-    <DialogContent className="flex max-h-[min(900px,90vh)] min-w-[350px] flex-col gap-0 p-0 max-w-md border-0 shadow-2xl bg-gradient-to-br from-card via-card to-card/95 backdrop-blur-sm">
+    <DialogContent className="flex max-h-[min(900px,90vh)] min-w-[350px] flex-col gap-0 p-0 max-w-md border-0 shadow-2xl bg-linear-to-br from-card via-card to-card/95 backdrop-blur-sm">
       {loading && (
-        <Spinner
+        <MeetCutesSpinner
           className="fixed top-[50%] left-[50%] z-50 cursor-pointer"
-          size="medium"
+          size="large"
         />
       )}
       <DialogTitle></DialogTitle>
@@ -462,6 +465,47 @@ export function Signup({ setOpenSignup, setOpenLogin }) {
                 {formik.touched.password && formik.errors.password ? (
                   <p className="text-red-700">{formik.errors.password} </p>
                 ) : null}
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="visibilityPreference">Visibility Preference</Label>
+                <Select
+                  name="visibilityPreference"
+                  onValueChange={(value) => {
+                    formik.values.visibilityPreference = value;
+                  }}
+                  defaultValue="both"
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select visibility preference" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectLabel>How others can find you</SelectLabel>
+                      <SelectItem value="both">
+                        <div className="flex items-center gap-2">
+                          <Eye className="w-4 h-4 text-primary" />
+                          <span>Visible Everywhere</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="online-only">
+                        <div className="flex items-center gap-2">
+                          <Users className="w-4 h-4 text-primary" />
+                          <span>Online Only</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="events-only">
+                        <div className="flex items-center gap-2">
+                          <Calendar className="w-4 h-4 text-primary" />
+                          <span>Events Only</span>
+                        </div>
+                      </SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  Choose how others can discover your profile: in searches, events, or both.
+                </p>
               </div>
 
               <Button
