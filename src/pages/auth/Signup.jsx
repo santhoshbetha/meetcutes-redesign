@@ -468,7 +468,7 @@ export function Signup({ setOpenSignup, setOpenLogin }) {
               </div>
 
               <div className="grid gap-2">
-                <Label htmlFor="visibilityPreference">Visibility Preference</Label>
+                <Label htmlFor="visibilityPreference">Visibility Preference (<span className="font-semibold opacity-50 text-red-600">can be changed later</span>)</Label>
                 <Select
                   name="visibilityPreference"
                   onValueChange={(value) => {

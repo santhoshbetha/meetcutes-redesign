@@ -60,7 +60,7 @@ export function UserCard({ setSelectedUser, profile }) {
       <div className="p-0">
         <div className="flex gap-3 sm:gap-4 mb-3 sm:mb-4">
           {/* Profile Image */}
-          <div className="relative flex-shrink-0">
+          <div className="relative shrink-0">
             <div className={`w-16 h-16 sm:w-20 sm:h-20 rounded-xl sm:rounded-2xl overflow-hidden shadow-lg group-hover:shadow-xl transition-shadow duration-300 ${avatarClass}`}>
               {profile?.image ? (
                 <img
@@ -95,13 +95,13 @@ export function UserCard({ setSelectedUser, profile }) {
               <h4 className="font-bold text-base sm:text-lg text-foreground group-hover:text-primary transition-colors duration-300 truncate">
                 {profile?.firstname} {profile?.lastname?.charAt(0)}.
               </h4>
-              <div className="inline-flex items-center px-1.5 sm:px-2 py-0.5 sm:py-1 bg-primary/10 text-primary rounded-full text-xs font-semibold ml-2 flex-shrink-0">
+              <div className="inline-flex items-center px-1.5 sm:px-2 py-0.5 sm:py-1 bg-primary/10 text-primary rounded-full text-xs font-semibold ml-2 shrink-0">
                 {profile?.age}
               </div>
             </div>
 
             <div className="flex items-center gap-1 text-muted-foreground mb-2 sm:mb-3">
-              <MapPin className="w-3 h-3 flex-shrink-0" />
+              <MapPin className="w-3 h-3 shrink-0" />
               <span className="text-xs sm:text-sm font-medium truncate">
                 {profile?.city}, {profile?.state}
               </span>

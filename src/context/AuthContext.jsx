@@ -41,6 +41,13 @@ export const AuthProvider = ({children}) => {
               //setUser(session?.user ?? null);
               setUserSession(session);
               updateUserData(session?.user)
+              
+              // Set dark mode as default for logged-in users if no theme preference exists
+              const savedTheme = localStorage.getItem("theme");
+              if (!savedTheme) {
+                  localStorage.setItem("theme", "dark");
+                  document.documentElement.classList.add("dark");
+              }
           } else {
               setAuth(null);
               //setUser(null);

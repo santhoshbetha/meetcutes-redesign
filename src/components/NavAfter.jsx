@@ -1,6 +1,6 @@
 import { useState, useContext } from "react";
 import { Button } from "@/components/ui/button";
-import { Bell, Menu, X } from "lucide-react";
+import { Bell, Menu, X, LogOut } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Link, useNavigate } from "react-router-dom";
 import {
@@ -15,6 +15,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import secureLocalStorage from "react-secure-storage";
 import { successAlert } from "@/services/alert.service";
 import { logoutUser } from "../services/user.service";
+import { useAuth } from "@/context/AuthContext";
 import { AutoCompleteDataContext } from "@/context/AutoCompleteDataContext";
 import { SearchAndUserEventsDataContext } from "@/context/SearchAndUserEventsDataContext";
 
@@ -24,6 +25,7 @@ const NavAfter = () => {
   const queryClient = useQueryClient();
   const {setAutoCompletedata} = useContext(AutoCompleteDataContext);
   const {setSearchUsersData} = useContext(SearchAndUserEventsDataContext);
+  const { user, profiledata } = useAuth();
 
   async function onLogout() {
     const res = await logoutUser();
@@ -32,6 +34,8 @@ const NavAfter = () => {
           setSearchUsersData(null)
           secureLocalStorage.clear()
           setAutoCompletedata(null)
+          // Force dark mode for homepage after logout
+          document.documentElement.classList.add("dark");
           navigate('/')
           successAlert('', 'Logout Successful');
       } else {
@@ -39,6 +43,8 @@ const NavAfter = () => {
           setSearchUsersData(null)
           secureLocalStorage.clear()
           setAutoCompletedata(null)
+          // Force dark mode for homepage after logout
+          document.documentElement.classList.add("dark");
           navigate('/')
       }
       queryClient.clear();
@@ -102,7 +108,7 @@ const NavAfter = () => {
             className="hidden lg:flex bg-destructive hover:bg-destructive/90 text-destructive-foreground px-4 md:px-6 font-medium shadow-sm text-sm"
             onClick={onLogout}
           >
-            Logout
+            <LogOut className="w-4 h-4" />
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -113,6 +119,13 @@ const NavAfter = () => {
               </Avatar>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
+              <div className="px-2 py-1.5 text-sm font-medium text-foreground">
+                {profiledata?.firstname} {profiledata?.lastname}
+              </div>
+              <div className="px-2 py-1.5 text-xs text-muted-foreground">
+                {user?.email || 'email@example.com'}
+              </div>
+              <DropdownMenuSeparator />
               <DropdownMenuItem>
                 <Link to="/photos">Photos</Link>
               </DropdownMenuItem>
@@ -161,7 +174,7 @@ const NavAfter = () => {
                 className="flex-1"
                 onClick={onLogout}
               >
-                Logout
+                <LogOut className="w-4 h-4" />
               </Button>
             </div>
           </div>

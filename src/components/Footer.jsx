@@ -3,7 +3,7 @@ import { Heart, Mail, Phone, MapPin, Twitter, Instagram, Facebook, Youtube } fro
 
 export default function Footer() {
   return (
-    <footer className="bg-gradient-to-b from-card via-card/80 to-background border-t border-border/60 relative overflow-hidden">
+    <footer className="bg-linear-to-b from-card via-card/80 to-background border-t border-border/60 relative overflow-hidden">
       {/* Background Elements */}
       <div className="absolute inset-0 opacity-5">
         <div className="absolute top-10 left-10 w-32 h-32 bg-primary/20 rounded-full blur-xl"></div>

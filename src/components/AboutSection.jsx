@@ -1,10 +1,19 @@
+import { useEffect } from "react";
 import { Play, Heart, Users, MapPin, Clock, Sparkles } from "lucide-react";
+import video22 from '../../public/meetcutes.mp4'
 
 export default function AboutSection() {
+  useEffect(() => {
+    const video = document.getElementById('myVideo');
+    if (video) {
+      video.currentTime = 0;
+    }
+  }, []);
+
   return (
     <>
       {/* Video and Content Section */}
-      <section className="bg-gradient-to-b from-card via-background to-card/50 border-y border-border/60 relative overflow-hidden">
+      <section className="bg-linear-to-b from-card via-background to-card/50 border-y border-border/60 relative overflow-hidden">
         {/* Background Elements */}
         <div className="absolute inset-0 opacity-5">
           <div className="absolute top-20 right-20 w-32 h-32 bg-primary/20 rounded-full blur-xl"></div>
@@ -14,24 +23,17 @@ export default function AboutSection() {
         <div className="container mx-auto px-4 sm:px-6 py-12 sm:py-16 md:py-24 md:px-8 lg:px-12 relative z-10">
           <div className="grid lg:grid-cols-2 gap-12 sm:gap-16 lg:gap-20 items-start max-w-7xl mx-auto">
             {/* Left - Video Section */}
-            <div className="space-y-6 sm:space-y-8">
-              <div className="bg-linear-to-br from-background to-card border border-border/60 rounded-2xl sm:rounded-3xl p-8 sm:p-12 flex items-center justify-center aspect-video shadow-xl hover:shadow-2xl transition-all duration-500 group cursor-pointer">
-                <div className="text-center space-y-4 sm:space-y-6">
-                  <div className="flex items-center justify-center gap-3">
-                    <div className="p-3 sm:p-4 bg-primary/10 rounded-full group-hover:bg-primary/20 transition-colors duration-300">
-                      <Heart className="w-8 h-8 sm:w-10 sm:h-10 text-primary" />
-                    </div>
-                  </div>
-                  <div className="bg-linear-to-br from-muted via-muted/80 to-muted/50 rounded-xl sm:rounded-2xl p-12 sm:p-16 flex items-center justify-center shadow-inner group-hover:shadow-lg transition-shadow duration-300">
-                    <div className="text-center">
-                      <div className="p-4 sm:p-6 bg-primary/10 rounded-full mb-4 sm:mb-6 inline-block group-hover:bg-primary/20 transition-colors duration-300">
-                        <Play className="w-16 h-16 sm:w-20 sm:h-20 text-primary ml-2" />
-                      </div>
-                      <p className="text-base sm:text-lg font-semibold text-foreground">Watch Demo Video</p>
-                      <p className="text-sm text-muted-foreground mt-2">See how MeetCutes works</p>
-                    </div>
-                  </div>
-                </div>
+            <div className="space-y-6 sm:space-y-8 hidden lg:block">
+              <div className="bg-linear-to-br from-background to-card border border-border/60 rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-500 group">
+                <video 
+                  id="myVideo"
+                  className="w-full h-full object-cover aspect-video"
+                  controls
+                  poster="/professional-headshot-of-a-young-man-with-brown-ha.jpg"
+                >
+                  <source src={video22} type="video/mp4"/>
+                  Your browser does not support the video tag.
+                </video>
               </div>
 
               {/* Stats */}

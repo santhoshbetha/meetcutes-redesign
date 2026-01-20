@@ -46,7 +46,7 @@ export function EventCard({ setSelectedEvent, event, userlatitude, userlongitude
       <div className="relative p-6">
         {/* Header with icon and title */}
         <div className="flex items-start gap-2 sm:gap-3 mb-3 sm:mb-4">
-          <div className="p-2 sm:p-3 bg-linear-to-br from-primary/20 to-primary/10 rounded-lg sm:rounded-xl border border-primary/20 flex-shrink-0">
+          <div className="p-2 sm:p-3 bg-linear-to-br from-primary/20 to-primary/10 rounded-lg sm:rounded-xl border border-primary/20 shrink-0">
             {getEventIcon(event?.locationdata?.locationname)}
           </div>
           <div className="flex-1 min-w-0">
@@ -60,7 +60,7 @@ export function EventCard({ setSelectedEvent, event, userlatitude, userlongitude
         {/* Event details */}
         <div className="space-y-2 sm:space-y-3 mb-3 sm:mb-4">
           <div className="flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-2 bg-background/60 rounded-lg border border-border/30 hover:bg-background/80 transition-colors">
-            <div className="p-1.5 sm:p-2 bg-primary/15 rounded-lg flex-shrink-0">
+            <div className="p-1.5 sm:p-2 bg-primary/15 rounded-lg shrink-0">
               <Clock className="w-3 h-3 sm:w-4 sm:h-4 text-primary" />
             </div>
             <span className="text-xs sm:text-sm font-semibold text-foreground truncate">
@@ -69,7 +69,7 @@ export function EventCard({ setSelectedEvent, event, userlatitude, userlongitude
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-2 bg-background/60 rounded-lg border border-border/30 hover:bg-background/80 transition-colors">
-            <div className="p-1.5 sm:p-2 bg-blue-500/15 rounded-lg flex-shrink-0">
+            <div className="p-1.5 sm:p-2 bg-blue-500/15 rounded-lg shrink-0">
               <Calendar className="w-3 h-3 sm:w-4 sm:h-4 text-blue-600" />
             </div>
             <span className="text-xs sm:text-sm font-semibold text-foreground truncate">
@@ -78,7 +78,7 @@ export function EventCard({ setSelectedEvent, event, userlatitude, userlongitude
           </div>
 
           <div className="flex items-start gap-2 sm:gap-3 px-2 sm:px-3 py-2 bg-background/60 rounded-lg border border-border/30 hover:bg-background/80 transition-colors">
-            <div className="p-1.5 sm:p-2 bg-green-500/15 rounded-lg mt-0.5 flex-shrink-0">
+            <div className="p-1.5 sm:p-2 bg-green-500/15 rounded-lg mt-0.5 shrink-0">
               <MapPin className="w-3 h-3 sm:w-4 sm:h-4 text-green-600" />
             </div>
             <span className="text-xs sm:text-sm font-medium text-foreground leading-relaxed line-clamp-2">

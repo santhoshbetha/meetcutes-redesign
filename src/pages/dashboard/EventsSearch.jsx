@@ -406,7 +406,7 @@ export function EventsSearch({
             <Card className="border-destructive/50 bg-destructive/5 mb-6 max-w-2xl mx-auto backdrop-blur-sm">
               <CardContent className="pt-4">
                 <div className="flex items-center gap-3 text-destructive">
-                  <div className="w-6 h-6 rounded-full bg-destructive/10 flex items-center justify-center flex-shrink-0">
+                  <div className="w-6 h-6 rounded-full bg-destructive/10 flex items-center justify-center shrink-0">
                     <span className="text-sm font-bold">!</span>
                   </div>
                   <p className="text-sm font-medium">{error}</p>

@@ -47,16 +47,16 @@ export function Dashboard() {
       description: "Manage your profile information"
     },
     {
-      id: "search",
-      label: "Search Events",
-      icon: Search,
-      description: "Find and discover events"
-    },
-    {
       id: "events",
       label: "My Events",
       icon: Calendar,
       description: "Manage your created events"
+    },
+    {
+      id: "search",
+      label: "Search Events",
+      icon: Search,
+      description: "Find and discover events"
     },
     {
       id: "users",
@@ -238,7 +238,7 @@ export function Dashboard() {
                       : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                   }`}
                 >
-                  <Icon className="w-5 h-5 flex-shrink-0" />
+                  <Icon className="w-5 h-5 shrink-0" />
                   <div className="flex-1 min-w-0">
                     <div className="font-medium text-sm">{item.label}</div>
                     <div className={`text-xs mt-0.5 ${
@@ -259,7 +259,7 @@ export function Dashboard() {
               onClick={handleLogout}
               className="w-full flex items-center gap-3 px-3 py-3 rounded-lg text-left transition-colors text-muted-foreground hover:text-foreground hover:bg-muted/50"
             >
-              <LogOut className="w-5 h-5 flex-shrink-0" />
+              <LogOut className="w-5 h-5 shrink-0" />
               <div className="flex-1 min-w-0">
                 <div className="font-medium text-sm">Logout</div>
                 <div className="text-xs mt-0.5 text-muted-foreground">

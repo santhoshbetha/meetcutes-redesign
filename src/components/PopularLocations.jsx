@@ -31,7 +31,7 @@ export function PopularLocations() {
   };
 
   return (
-    <section className="bg-gradient-to-b from-background via-card/30 to-background border-y border-border/60 relative overflow-hidden">
+    <section className="bg-linear-to-b from-background via-card/30 to-background border-y border-border/60 relative overflow-hidden">
       {/* Background Elements */}
       <div className="absolute inset-0 opacity-5">
         <div className="absolute top-10 left-10 w-40 h-40 bg-primary/20 rounded-full blur-2xl"></div>

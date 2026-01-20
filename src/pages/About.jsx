@@ -85,28 +85,28 @@ export function About() {
                     that dominates modern dating apps.
                   </p>
                   <p className="text-blue-900/90 dark:text-blue-100/90 leading-relaxed">
-                    Instead, we bring people together at local events, coffee shops, parks, and community venues where
+                    Instead, we bring people together at local events, grocery stores, coffee shops, parks, and community venues where
                     authentic conversations can naturally unfold. No more wasted time - just real connections with people
                     who share your values and intentions.
                   </p>
                 </div>
                 <div className="space-y-4">
                   <div className="flex items-start gap-3">
-                    <MapPin className="w-5 h-5 text-blue-600 mt-1 flex-shrink-0" />
+                    <MapPin className="w-5 h-5 text-blue-600 mt-1 shrink-0" />
                     <div>
                       <h4 className="font-semibold text-blue-900 dark:text-blue-100">Local Events</h4>
                       <p className="text-sm text-blue-900/80 dark:text-blue-100/80">Find and create events in your area</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <Coffee className="w-5 h-5 text-blue-600 mt-1 flex-shrink-0" />
+                    <Coffee className="w-5 h-5 text-blue-600 mt-1 shrink-0" />
                     <div>
                       <h4 className="font-semibold text-blue-900 dark:text-blue-100">Natural Settings</h4>
                       <p className="text-sm text-blue-900/80 dark:text-blue-100/80">Meet at cafes, parks, and community spaces</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <Users className="w-5 h-5 text-blue-600 mt-1 flex-shrink-0" />
+                    <Users className="w-5 h-5 text-blue-600 mt-1 shrink-0" />
                     <div>
                       <h4 className="font-semibold text-blue-900 dark:text-blue-100">Verified Community</h4>
                       <p className="text-sm text-blue-900/80 dark:text-blue-100/80">Connect with genuine, like-minded people</p>
@@ -194,19 +194,19 @@ export function About() {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div className="space-y-4">
                   <div className="flex items-start gap-3">
-                    <div className="w-2 h-2 bg-emerald-500 rounded-full mt-2 flex-shrink-0"></div>
+                    <div className="w-2 h-2 bg-emerald-500 rounded-full mt-2 shrink-0"></div>
                     <p className="text-emerald-900/90 dark:text-emerald-100/90">
                       <strong>Working Professionals:</strong> People with 9-5 jobs who have limited time for socializing
                     </p>
                   </div>
                   <div className="flex items-start gap-3">
-                    <div className="w-2 h-2 bg-emerald-500 rounded-full mt-2 flex-shrink-0"></div>
+                    <div className="w-2 h-2 bg-emerald-500 rounded-full mt-2 shrink-0"></div>
                     <p className="text-emerald-900/90 dark:text-emerald-100/90">
                       <strong>Serious Daters:</strong> Those seeking meaningful relationships and long-term partnerships
                     </p>
                   </div>
                   <div className="flex items-start gap-3">
-                    <div className="w-2 h-2 bg-emerald-500 rounded-full mt-2 flex-shrink-0"></div>
+                    <div className="w-2 h-2 bg-emerald-500 rounded-full mt-2 shrink-0"></div>
                     <p className="text-emerald-900/90 dark:text-emerald-100/90">
                       <strong>Authentic People:</strong> Individuals who value genuine connections over superficial interactions
                     </p>
@@ -214,13 +214,13 @@ export function About() {
                 </div>
                 <div className="space-y-4">
                   <div className="flex items-start gap-3">
-                    <div className="w-2 h-2 bg-emerald-500 rounded-full mt-2 flex-shrink-0"></div>
+                    <div className="w-2 h-2 bg-emerald-500 rounded-full mt-2 shrink-0"></div>
                     <p className="text-emerald-900/90 dark:text-emerald-100/90">
                       <strong>Family-Oriented:</strong> People looking to build families and create lasting bonds
                     </p>
                   </div>
                   <div className="flex items-start gap-3">
-                    <div className="w-2 h-2 bg-emerald-500 rounded-full mt-2 flex-shrink-0"></div>
+                    <div className="w-2 h-2 bg-emerald-500 rounded-full mt-2 shrink-0"></div>
                     <p className="text-emerald-900/90 dark:text-emerald-100/90">
                       <strong>Hardworking Individuals:</strong> Those who work hard and want to find equally committed partners
                     </p>
