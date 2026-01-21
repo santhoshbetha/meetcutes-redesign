@@ -342,7 +342,7 @@ export default function EventDetails() {
                 ) : (
                   <div className="flex items-center gap-2">
                     <Heart className={`w-5 h-5 ${isRegistered ? 'fill-current' : ''}`} />
-                    {isRegistered ? 'UNREGISTER FROM EVENT' : 'REGISTER FOR EVENT'}
+                    {isRegistered ? 'UNREGISTER FROM EVENT' : 'REGISTER FOR THIS EVENT'}
                   </div>
                 )}
               </Button>

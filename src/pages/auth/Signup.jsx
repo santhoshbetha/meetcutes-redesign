@@ -93,6 +93,7 @@ export function Signup({ setOpenSignup, setOpenLogin }) {
             dateofbirth: dateofbirth,
             age: age,
             gender: formik.values.gender,
+            ethnicity: formik.values.ethnicity,
             email: formik.values.email.trim().toLowerCase(),
             phonenumber: formik.values.phonenumber.trim(),
             city: formik.values.city,
@@ -153,6 +154,7 @@ export function Signup({ setOpenSignup, setOpenLogin }) {
       dob: "",
       state: "",
       city: "",
+      ethnicity: "",
       phonenumber: "",
       email: "",
       password: "",
@@ -396,6 +398,32 @@ export function Signup({ setOpenSignup, setOpenLogin }) {
                     </SelectContent>
                   </Select>
                 </div>
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="ethnicity">Ethnicity</Label>
+                <Select
+                  required
+                  onValueChange={(value) => {
+                    formik.values.ethnicity = value;
+                  }}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select your ethnicity" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectItem value="Asian">Asian</SelectItem>
+                      <SelectItem value="Black / African American">Black / African American</SelectItem>
+                      <SelectItem value="Hispanic / Latino">Hispanic / Latino</SelectItem>
+                      <SelectItem value="Middle Eastern">Middle Eastern</SelectItem>
+                      <SelectItem value="Native American">Native American</SelectItem>
+                      <SelectItem value="Pacific Islander">Pacific Islander</SelectItem>
+                      <SelectItem value="White / Caucasian">White / Caucasian</SelectItem>
+                      <SelectItem value="East Indian">East Indian</SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="grid gap-2">

@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect, useContext, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { UsersSearch } from "./UsersSearch";
 import { SearchAndUserEventsDataContext } from '@/context/SearchAndUserEventsDataContext';
 import { AutoCompleteDataContext } from '@/context/AutoCompleteDataContext';
@@ -7,6 +7,7 @@ import { UserEventsMain } from "./UserEvents/UserEventsMain";
 import { Profile } from "./Profile";
 import { EventsSearch } from "./EventsSearch";
 import { Settings } from "../Settings";
+import { Photos } from "../Photos";
 import { useAuth } from "../../context/AuthContext";
 import { isObjEmpty } from "../../utils/util";
 import { updateUserInfo, logoutUser } from "../../services/user.service";
@@ -24,14 +25,16 @@ import {
   X,
   Home,
   Settings as SettingsIcon,
-  LogOut
+  LogOut,
+  Camera
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 
 export function Dashboard() {
   const {user, profiledata, setProfiledata} = useAuth();
-  const [activeTab, setActiveTab] = useState("profile");
+  const [searchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState(searchParams.get('tab') || "profile");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
   const profiledataupdate = useRef(0);
@@ -45,6 +48,12 @@ export function Dashboard() {
       label: "My Profile",
       icon: User,
       description: "Manage your profile information"
+    },
+    {
+      id: "photos",
+      label: "My Photos",
+      icon: Camera,
+      description: "Upload and manage your photos"
     },
     {
       id: "events",
@@ -77,6 +86,20 @@ export function Dashboard() {
       navigate('/')
     } 
   }, [user, navigate]);
+
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab && ['profile', 'photos', 'events', 'search', 'users', 'settings'].includes(tab)) {
+      setActiveTab(tab);
+    }
+  }, [searchParams]);
+
+  const handleTabChange = (tabId) => {
+    setActiveTab(tabId);
+    const newSearchParams = new URLSearchParams(searchParams);
+    newSearchParams.set('tab', tabId);
+    navigate(`/dashboard?${newSearchParams.toString()}`, { replace: true });
+  };
 
   const loadAutoCompletedata = useCallback(async (latitude, longitude) => {
     const distance = 241401; // 150 miles
@@ -229,7 +252,7 @@ export function Dashboard() {
                 <button
                   key={item.id}
                   onClick={() => {
-                    setActiveTab(item.id);
+                    handleTabChange(item.id);
                     setSidebarOpen(false);
                   }}
                   className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg text-left transition-colors ${
@@ -344,6 +367,8 @@ export function Dashboard() {
               userstate={profiledata?.userstate}
               onetimepaymentrequired={profiledata?.onetimefeesrequired && !profiledata?.onetimefeespaid}
             />
+          ) : activeTab === "photos" ? (
+            <Photos />
           ) : activeTab === "profile" ? (
             <Profile />
           ) : activeTab === "settings" ? (
@@ -369,7 +394,7 @@ export function Dashboard() {
             return (
               <button
                 key={item.id}
-                onClick={() => setActiveTab(item.id)}
+                onClick={() => handleTabChange(item.id)}
                 className={`flex flex-col items-center justify-center p-2 rounded-lg transition-colors min-w-0 flex-1 ${
                   activeTab === item.id
                     ? "bg-primary text-primary-foreground"

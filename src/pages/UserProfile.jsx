@@ -1,12 +1,14 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Edit2, Mail, Phone, Settings, Calendar, Eye, Users, MapPin, Flag } from "lucide-react";
+import { Edit2, Mail, Phone, Settings, Calendar, Eye, Users, MapPin, Flag, ChevronLeft, ChevronRight } from "lucide-react";
 import { FaFacebook, FaInstagram, FaLinkedin } from "react-icons/fa";
 import { Spinner } from '@/components/ui/Spinner';
 import { getUserProfile } from "@/services/user.service";
 import { isObjEmpty } from "@/utils/util";
+
+const CDNURL = 'https://yrxymkmmfrkrfccmutvr.supabase.co/storage/v1/object/public/meetfirst/images';
 
 export function UserProfile() {
   const { userid } = useParams();
@@ -14,6 +16,43 @@ export function UserProfile() {
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [imageUseCover, setImageUseCover] = useState({});
+  const carouselRef = useRef(null);
+
+  // Filter out null/empty images and ensure we have valid images
+  const validImages = userData?.images?.filter(img => img && typeof img === 'string' && img.trim() !== '') || [];
+  const hasImages = validImages.length > 0;
+
+  const nextImage = () => {
+    if (!validImages.length) return;
+    setCurrentImageIndex((prev) => (prev + 1) % validImages.length);
+  };
+
+  const prevImage = () => {
+    if (!validImages.length) return;
+    setCurrentImageIndex((prev) => (prev - 1 + validImages.length) % validImages.length);
+  };
+
+  const goToImage = (index) => {
+    setCurrentImageIndex(index);
+  };
+
+  const onImageLoad = (index, e) => {
+    try {
+      const nw = e.target.naturalWidth || 0;
+      const nh = e.target.naturalHeight || 0;
+      const rect = carouselRef.current?.getBoundingClientRect();
+      const cw = rect?.width || 720;
+      const ch = rect?.height || 420;
+      // if the natural image is smaller than the container in either dimension,
+      // use cover to visually fill the space
+      const useCover = nw < cw * window.devicePixelRatio || nh < ch * window.devicePixelRatio;
+      setImageUseCover((prev) => ({ ...prev, [index]: useCover }));
+    } catch (err) {
+      // ignore
+    }
+  };
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -63,7 +102,14 @@ export function UserProfile() {
 
   return (
     <div className="min-h-screen bg-linear-to-br from-background via-background to-muted/20">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 md:px-8 py-6 sm:py-8 md:py-12">
+      <div className="relative max-w-4xl mx-auto px-4 sm:px-6 md:px-8 py-6 sm:py-8 md:py-12">
+        <button
+          title="Flag user"
+          onClick={() => console.log('Flag user', userData?.userid)}
+          className="absolute right-4 top-4 p-2 rounded-md hover:bg-muted/50 transition-colors"
+        >
+          <Flag className="w-5 h-5 text-destructive" />
+        </button>
         {/* Header */}
         <div className="text-center mb-8 sm:mb-12">
           <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-3 sm:px-4 py-2 rounded-full text-sm font-medium mb-4">
@@ -78,18 +124,96 @@ export function UserProfile() {
           </p>
         </div>
 
+        {/* Large Instagram-style Carousel (shows above profile/grid) */}
+        {hasImages && (
+          <div className="mb-8">
+            <div className="max-w-4xl mx-auto rounded-xl overflow-hidden shadow-2xl">
+              <div ref={carouselRef} className="mx-auto w-full max-w-[720px] h-[420px] sm:h-[480px] md:h-[540px] relative bg-linear-to-br from-muted to-muted/50 flex items-center justify-center">
+                {/* Carousel Images - show full image (object-contain) so not cropped */}
+                <div className="relative w-full h-full flex items-center justify-center">
+                  {validImages.map((image, index) => (
+                    <div
+                      key={index}
+                      className={`absolute inset-0 transition-opacity duration-500 flex items-center justify-center ${
+                        index === currentImageIndex ? "opacity-100" : "opacity-0"
+                      }`}
+                    >
+                      <img
+                        src={image.startsWith('http') ? image : `${CDNURL}/${userData?.shortid || userData?.userid || ''}/${image}`}
+                        alt={`${userData?.firstname} - Photo ${index + 1}`}
+                        className={`max-w-full max-h-full ${imageUseCover[index] ? 'object-cover' : 'object-contain'}`}
+                        onLoad={(e) => onImageLoad(index, e)}
+                        onError={(e) => { e.target.src = "/professional-headshot-of-a-young-man-with-brown-ha.jpg"; }}
+                      />
+                    </div>
+                  ))}
+                </div>
+
+                {/* Navigation Arrows */}
+                {validImages.length > 1 && (
+                  <>
+                    <button
+                      onClick={prevImage}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 p-2 bg-black/40 hover:bg-black/60 text-white rounded-full opacity-90 transition-all duration-200 hover:scale-105"
+                      aria-label="Previous image"
+                    >
+                      <ChevronLeft className="w-6 h-6" />
+                    </button>
+                    <button
+                      onClick={nextImage}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 p-2 bg-black/40 hover:bg-black/60 text-white rounded-full opacity-90 transition-all duration-200 hover:scale-105"
+                      aria-label="Next image"
+                    >
+                      <ChevronRight className="w-6 h-6" />
+                    </button>
+                  </>
+                )}
+
+                {/* Dot Indicators */}
+                {validImages.length > 1 && (
+                  <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2">
+                    {validImages.map((_, index) => (
+                      <button
+                        key={index}
+                        onClick={() => goToImage(index)}
+                        className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                          index === currentImageIndex ? "bg-white w-3" : "bg-white/50 hover:bg-white/75"
+                        }`}
+                        aria-label={`Go to image ${index + 1}`}
+                      />
+                    ))}
+                  </div>
+                )}
+
+                {/* Image Counter */}
+                {validImages.length > 1 && (
+                  <div className="absolute top-3 right-3 px-3 py-1 bg-black/40 text-white text-sm rounded-full">
+                    {currentImageIndex + 1} / {validImages.length}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
           {/* Profile Card */}
           <div className="lg:col-span-1">
             <Card className="shadow-xl border-2 border-border bg-card/95 backdrop-blur-sm">
               <CardContent className="pt-6">
                 <div className="flex flex-col items-center space-y-4">
-                  {/* Profile Image */}
-                  <div className="relative w-32 h-32 rounded-full overflow-hidden ring-4 ring-primary/20 shadow-2xl">
+                  {/* Profile Image Carousel */}
+                  <div className="relative w-28 h-28 rounded-full overflow-hidden ring-4 ring-primary/20 shadow-2xl">
                     <img
-                      src="/professional-headshot-of-a-young-man-with-brown-ha.jpg"
-                      alt="Profile picture"
+                        src={
+                        validImages[0]
+                          ? (validImages[0].startsWith('http')
+                              ? validImages[0]
+                              : `https://yrxymkmmfrkrfccmutvr.supabase.co/storage/v1/object/public/meetfirst/images/${userData?.shortid || userData?.userid || ''}/${validImages[0]}`)
+                          : '/professional-headshot-of-a-young-man-with-brown-ha.jpg'
+                      }
+                      alt={`${userData?.firstname} - Profile`}
                       className="w-full h-full object-cover"
+                      onError={(e) => { e.target.src = '/professional-headshot-of-a-young-man-with-brown-ha.jpg'; }}
                     />
                   </div>
 
@@ -289,17 +413,10 @@ export function UserProfile() {
             {/* Action Buttons */}
             <Card className="shadow-xl border-2 border-primary/30 bg-primary/5">
               <CardContent className="pt-6">
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <Button
-                    onClick={() => navigate('/search')}
-                    variant="outline"
-                    className="flex-1"
-                  >
-                    Back to Search
-                  </Button>
+                <div className="flex justify-center">
                   <Button
                     onClick={() => navigate('/dashboard')}
-                    className="flex-1 bg-primary hover:bg-primary/90"
+                    className="bg-primary hover:bg-primary/90"
                   >
                     Go to Dashboard
                   </Button>

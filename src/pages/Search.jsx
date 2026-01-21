@@ -103,7 +103,6 @@ export function Search() {
                     id="searchtext"
                     type="text"
                     placeholder="example@email.com or +1234567890 or @username"
-                    required
                     value={searchtext}
                     onChange={(e) => setSearchtext(e.target.value)}
                     className="h-10 sm:h-12 text-sm sm:text-base border-2 focus:border-primary/50"
@@ -181,6 +180,27 @@ export function Search() {
 
           {/* User Found */}
           {!isObjEmpty(userdata) && (
+            <Card className="border-green-200 bg-green-50/50 dark:bg-green-950/20 dark:border-green-800/30">
+              <CardContent className="pt-6">
+                <div className="text-center space-y-4">
+                  <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-2xl flex items-center justify-center mx-auto">
+                    <CheckCircle className="w-8 h-8 text-green-600 dark:text-green-400" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-green-900 dark:text-green-100 mb-2">
+                      User Found!
+                    </h3>
+                    <p className="text-green-900/80 dark:text-green-100/80">
+                      Click below to view their profile and connect.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* User Found */}
+          {!Array.isArray(userdata) && !isObjEmpty(userdata) && (
             <Card className="border-green-200 bg-green-50/50 dark:bg-green-950/20 dark:border-green-800/30">
               <CardContent className="pt-6">
                 <div className="text-center space-y-4">

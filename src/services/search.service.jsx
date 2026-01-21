@@ -21,6 +21,7 @@ export const searchUsers = async (searchinput) => {
     lat: lat,
     long: lng,
     searchdistance: searchinput?.searchdistance,
+    ethnicity: searchinput?.ethnicity,
   };
 
   const { data, error } = await supabase.rpc("search_by_distance", {
@@ -40,7 +41,12 @@ export const searchUsers = async (searchinput) => {
   }
 
   // Filter out users who have set visibility to 'events-only'
-  const filteredData = data?.filter(user => user.visibilityPreference !== 'events-only') || [];
+  let filteredData = data?.filter(user => user.visibilityPreference !== 'events-only') || [];
+
+  // Filter by ethnicity if provided
+  if (cols.ethnicity && cols.ethnicity.length > 0 && !cols.ethnicity.includes("all")) {
+    filteredData = filteredData.filter(user => cols.ethnicity.includes(user.ethnicity));
+  }
 
   return {
     success: true,

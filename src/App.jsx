@@ -5,7 +5,7 @@ import { About } from "@/pages/About";
 import { Contact } from "@/pages/Contact";
 import { Donate } from "@/pages/Donate";
 import { Search } from "@/pages/Search";
-import { Photos } from "@/pages/Photos";
+import Photos from "@/pages/Photos";
 import Questionaire from "@/pages/Questionaire";
 import { Dashboard } from "@/pages/dashboard/Dashboard";
 import { ChangePassword } from "@/pages/ChangePassword";
@@ -14,6 +14,9 @@ import { Settings } from "@/pages/Settings";
 import EventDetails from "@/pages/EventDetails";
 import { UserProfile } from "@/pages/UserProfile";
 import { PageNotFound } from "@/pages/PageNotFound";
+import { Terms } from "@/pages/Terms";
+import { Privacy } from "@/pages/Privacy";
+import { TermsPopup } from "@/pages/TermsPopup";
 import NavBefore from "@/components/NavBefore";
 import NavAfter from "@/components/Navafter";
 import { useAuth } from "./context/AuthContext";
@@ -24,7 +27,7 @@ import { Toaster } from "react-hot-toast";
 import GlobalLoadingSpinner from './components/GlobalLoadingSpinner';
 
 function App() {
-  const { user } = useAuth();
+  const { user, profiledata } = useAuth();
   const [openLogin, setOpenLogin] = useState(false);
   const [openSignup, setOpenSignup] = useState(false);
 
@@ -82,10 +85,18 @@ function App() {
           <Route path="/forgotpassword" element={<ForgotPassword />} />
 
           <Route path="/settings" element={<Settings />} />
+          <Route path="/terms" element={<Terms />} />
+          <Route path="/privacy" element={<Privacy />} />
           <Route path="/event/:id" element={<EventDetails />} />
           <Route path="/user/:userid" element={<UserProfile />} />
           <Route path="*" element={<PageNotFound />} />
         </Routes>
+        
+        {/* Terms Popup - shows after login if terms not accepted */}
+        {user && profiledata && profiledata.termsaccepted === false && (
+          <TermsPopup />
+        )}
+        
         </SearchAndUserEventsDataContextProvider>
         </AutoCompleteDataContextProvider>
       </div>

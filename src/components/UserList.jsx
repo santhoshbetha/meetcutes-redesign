@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { UserCard } from "./UserCard";
 import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
 import { ChevronLeft, ChevronRight, LayoutGrid } from 'lucide-react';
 import { UserProfileDialog } from "./UserProfileDialog";
 
@@ -112,18 +113,20 @@ const sampleProfiles = [
   },
 ];
 
-export function UserList() {
+export function UserList({ users, isLoading }) {
   const [selectedUser, setSelectedUser] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const usersPerPage = 8;
 
+  console.log('UserList users::', users);
+
   // Calculate total pages
-  const totalPages = Math.ceil(sampleProfiles.length / usersPerPage);
+  const totalPages = Math.ceil(users.length / usersPerPage);
 
   // Get current users
   const indexOfLastUser = currentPage * usersPerPage;
   const indexOfFirstUser = indexOfLastUser - usersPerPage;
-  const currentUsers = sampleProfiles.slice(indexOfFirstUser, indexOfLastUser);
+  const currentUsers = users.slice(indexOfFirstUser, indexOfLastUser);
 
   // Pagination handlers
   const goToPrevious = () => {
@@ -176,7 +179,18 @@ export function UserList() {
 
   return (
     <>
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+      {/* Loading Progress Bar */}
+      {isLoading && (
+        <div className="mb-6">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin"></div>
+            <span className="text-sm text-muted-foreground">Searching for matches...</span>
+          </div>
+          <Progress value={undefined} className="w-full h-2" />
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
         {currentUsers.map((profile) => (
           <UserCard setSelectedUser={setSelectedUser} profile={profile} />
         ))}

@@ -2,18 +2,21 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Edit2, Mail, Phone, Settings, Calendar, Eye, Users } from "lucide-react";
+import { Edit2, Mail, Phone, Settings, Calendar, Eye, Users, ChevronLeft, ChevronRight } from "lucide-react";
 import { FaFacebook, FaInstagram, FaLinkedin } from "react-icons/fa";
 import { LocationDialog } from "@/components/LocationDialog";
 import { ChangeLocation } from "@/components/ChangeLocation";
-import { Dialog, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogTrigger, DialogContent } from "@/components/ui/dialog";
 import { Spinner } from '@/components/ui/Spinner';
 import { Editable } from "@/components/Editable";
 import { HandleCard } from "@/components/HandleCard";
 import { EditableBio } from "@/components/EditableBio";
+import { CreateEvent } from "@/components/CreateEvent";
+import { ImageUploader } from "@/components/ImageUploader";
 import { useAuth } from "@/context/AuthContext";
 import { isObjEmpty } from "@/utils/util";
 import { updateUserInfo } from "@/services/user.service";
+import { uploadImage } from "@/services/image.service";
 import { useOnlineStatus } from '@/hooks/useOnlineStatus';
 
 export function Profile() {
@@ -26,7 +29,26 @@ export function Profile() {
   const [linkedin, setLinkedIn] = useState(isObjEmpty(profiledata?.linkedin) ? "" : profiledata?.linkedin);
   const [reload, setReload] = useState(false);
   const [change, setChange] = useState(false);
+  const [createEventOpen, setCreateEventOpen] = useState(false);
+  const [editingProfileImage, setEditingProfileImage] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const isOnline = useOnlineStatus();
+
+  // Filter out null/empty images and ensure we have valid images
+  const validImages = profiledata?.images?.filter(img => img && typeof img === 'string' && img.trim() !== '') || [];
+  const hasImages = validImages.length > 0;
+
+  const nextImage = () => {
+    setCurrentImageIndex((prev) => (prev + 1) % validImages.length);
+  };
+
+  const prevImage = () => {
+    setCurrentImageIndex((prev) => (prev - 1 + validImages.length) % validImages.length);
+  };
+
+  const goToImage = (index) => {
+    setCurrentImageIndex(index);
+  };
 
   //console.log('Profile render', profiledata);
 
@@ -124,6 +146,54 @@ export function Profile() {
       }
   };
 
+  const handleProfileImageCropped = async (blob) => {
+    if (!isOnline) {
+      alert('You are offline. Check your internet connection');
+      return;
+    }
+
+    setEditingProfileImage(true);
+
+    try {
+      const timestamp = Date.now();
+      const file = new File([blob], 'profile-image.jpg', { type: 'image/jpeg' });
+
+      const res = await uploadImage(profiledata?.userid, file, 1, timestamp);
+
+      if (res.success) {
+        let imagesObj = profiledata?.images ? [...profiledata.images] : [];
+
+        // Ensure array has at least 1 slot
+        while (imagesObj.length < 1) {
+          imagesObj.push('');
+        }
+
+        // Update the first image slot
+        imagesObj[0] = `first?t=${timestamp}`;
+
+        const updateData = { images: imagesObj };
+        const res2 = await updateUserInfo(user?.id, updateData);
+
+        if (res2.success) {
+          setProfiledata({
+            ...profiledata,
+            images: imagesObj,
+          });
+          setEditingProfileImage(false);
+        } else {
+          alert(res2.msg || 'Failed to update profile');
+          setEditingProfileImage(false);
+        }
+      } else {
+        alert(res.msg || 'Failed to upload image');
+        setEditingProfileImage(false);
+      }
+    } catch (error) {
+      alert('An error occurred while uploading the image');
+      setEditingProfileImage(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-linear-to-br from-background via-background to-muted/20">
       <main className="max-w-[1600px] mx-auto px-4 md:px-8 py-6 md:py-8">
@@ -147,16 +217,39 @@ export function Profile() {
               <div className="text-center">
                 {/* Profile Picture */}
                 <div className="relative w-24 h-24 md:w-28 md:h-28 mx-auto mb-4">
-                  <div className="w-full h-full rounded-full overflow-hidden ring-4 ring-primary/20 shadow-2xl">
-                    <img
-                      src="/professional-headshot-of-a-young-man-with-brown-ha.jpg"
-                      alt="Profile picture"
-                      className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
-                    />
+                  <div 
+                    className="w-full h-full rounded-full overflow-hidden ring-4 ring-primary/20 shadow-2xl cursor-pointer"
+                    onClick={() => setEditingProfileImage(true)}
+                  >
+                    {editingProfileImage ? (
+                      <ImageUploader
+                        onImageCropped={handleProfileImageCropped}
+                        minimal={true}
+                        className="w-full h-full rounded-full"
+                      />
+                    ) : (
+                      <>
+                        {profiledata?.images && profiledata.images[0] ? (
+                          <img
+                            src={`https://yrxymkmmfrkrfccmutvr.supabase.co/storage/v1/object/public/meetfirst/images/${profiledata.userid}/${profiledata.images[0]}`}
+                            alt="Profile picture"
+                            className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                          />
+                        ) : (
+                          <img
+                            src="/professional-headshot-of-a-young-man-with-brown-ha.jpg"
+                            alt="Profile picture"
+                            className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                          />
+                        )}
+                      </>
+                    )}
                   </div>
-                  <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-primary rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-shadow cursor-pointer group">
-                    <Edit2 className="w-4 h-4 text-primary-foreground group-hover:scale-110 transition-transform" />
-                  </div>
+                  {!editingProfileImage && (
+                    <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-primary rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-shadow cursor-pointer group" onClick={() => setEditingProfileImage(true)}>
+                      <Edit2 className="w-4 h-4 text-primary-foreground group-hover:scale-110 transition-transform" />
+                    </div>
+                  )}
                 </div>
 
                 {/* Name and Location */}
@@ -466,7 +559,7 @@ export function Profile() {
             <CardContent className="space-y-4">
               <div className="space-y-3">
                 <Button
-                  onClick={() => navigate('/dashboard?tab=settings')}
+                  onClick={() => navigate('/settings')}
                   variant="outline"
                   className="w-full justify-start h-12"
                 >
@@ -475,7 +568,7 @@ export function Profile() {
                 </Button>
 
                 <Button
-                  onClick={() => navigate('/change-password')}
+                  onClick={() => navigate('/changepassword')}
                   variant="outline"
                   className="w-full justify-start h-12"
                 >
@@ -484,7 +577,7 @@ export function Profile() {
                 </Button>
 
                 <Button
-                  onClick={() => navigate('/questionaire')}
+                  onClick={() => navigate('/preferences')}
                   variant="outline"
                   className="w-full justify-start h-12"
                 >
@@ -525,14 +618,20 @@ export function Profile() {
                 Find Connections
               </Button>
 
-              <Button
-                onClick={() => navigate('/create-event')}
-                variant="ghost"
-                className="w-full justify-start h-12 hover:bg-primary/10 hover:text-primary transition-all duration-200 group"
-              >
-                <Edit2 className="w-4 h-4 mr-3 group-hover:scale-110 transition-transform" />
-                Create Event
-              </Button>
+              <Dialog open={createEventOpen} onOpenChange={setCreateEventOpen}>
+                <DialogTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start h-12 hover:bg-primary/10 hover:text-primary transition-all duration-200 group"
+                  >
+                    <Edit2 className="w-4 h-4 mr-3 group-hover:scale-110 transition-transform" />
+                    Create Event
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-4xl max-h-[90vh] p-0">
+                  <CreateEvent onClose={() => setCreateEventOpen(false)} />
+                </DialogContent>
+              </Dialog>
             </CardContent>
           </Card>
         </div>

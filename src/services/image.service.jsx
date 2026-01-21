@@ -72,20 +72,41 @@ export const getImage = async (userid, imagename) => {
 export const uploadImage = async (userid, file, imageid) => {
   let imagename;
   switch (imageid) {
+    case 0:
+      imagename = 'face.png';
+      break;
     case 1:
-      imagename = "first";
+      imagename = 'first';
       break;
     case 2:
-      imagename = "second";
+      imagename = 'second';
       break;
     case 3:
-      imagename = "third";
+      imagename = 'third';
       break;
-    case 0:
-      imagename = "face.png";
+    case 4:
+      imagename = 'fourth';
+      break;
+    case 5:
+      imagename = 'fifth';
+      break;
+    case 6:
+      imagename = 'sixth';
+      break;
+    case 7:
+      imagename = 'seventh';
+      break;
+    case 8:
+      imagename = 'eighth';
+      break;
+    case 9:
+      imagename = 'ninth';
+      break;
+    case 10:
+      imagename = 'tenth';
       break;
     default:
-      imagename = "other";
+      imagename = 'other';
       break;
   }
   try {
@@ -138,11 +159,51 @@ export const uploadFaceImage = async (userid, file) => {
   }
 };
 
-export const deleteImage = async (userid, imagename) => {
+export const deleteImage = async (userid, imageid) => {
+  let imagename;
+  switch (imageid) {
+    case 0:
+      imagename = 'face.png';
+      break;
+    case 1:
+      imagename = 'first';
+      break;
+    case 2:
+      imagename = 'second';
+      break;
+    case 3:
+      imagename = 'third';
+      break;
+    case 4:
+      imagename = 'fourth';
+      break;
+    case 5:
+      imagename = 'fifth';
+      break;
+    case 6:
+      imagename = 'sixth';
+      break;
+    case 7:
+      imagename = 'seventh';
+      break;
+    case 8:
+      imagename = 'eighth';
+      break;
+    case 9:
+      imagename = 'ninth';
+      break;
+    case 10:
+      imagename = 'tenth';
+      break;
+    default:
+      imagename = 'other';
+      break;
+  }
+
   try {
     const { data, error } = await supabase.storage
       .from("meetfirst")
-      .remove(["images/OHHrvhkQmg/second"]);
+      .remove([`images/${userid}/${imagename}`]);
 
     if (error) {
       return {

@@ -426,7 +426,7 @@ export function EventsSearch({
               </div>
               <div>
                 <CardTitle className="text-xl">Find Your Perfect Event</CardTitle>
-                <p className="text-sm text-muted-foreground">Customize your search to discover events that match your interests</p>
+                <p className="text-sm text-muted-foreground">Discover events in your area</p>
               </div>
             </div>
             <Sheet>

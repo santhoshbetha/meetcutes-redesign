@@ -1,5 +1,9 @@
 import { Card } from "@/components/ui/card";
 import { MapPin, Heart, Coffee, Music, Camera, BookOpen, Gamepad2, Plane, Utensils } from "lucide-react";
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+
+dayjs.extend(relativeTime);
 
 export function UserCard({ setSelectedUser, profile }) {
   // Generate a more detailed dummy avatar based on user data
@@ -27,6 +31,26 @@ export function UserCard({ setSelectedUser, profile }) {
     const patternIndex = (profile?.age || 0) % patterns.length;
 
     return `${patterns[patternIndex]} ${colors[colorIndex]}`;
+  };
+
+  // Format the last login time
+  const formatLastLogin = (timeoflogin) => {
+    if (!timeoflogin) return 'recently';
+    
+    const loginTime = dayjs(timeoflogin);
+    const now = dayjs();
+    const diffInHours = now.diff(loginTime, 'hour');
+    
+    if (diffInHours < 1) {
+      return 'just now';
+    } else if (diffInHours < 24) {
+      return `${diffInHours}h ago`;
+    } else if (diffInHours < 48) {
+      return 'yesterday';
+    } else {
+      const diffInDays = now.diff(loginTime, 'day');
+      return `${diffInDays}d ago`;
+    }
   };
 
   // Sample interests based on user data (in a real app, this would come from profile)
@@ -108,7 +132,7 @@ export function UserCard({ setSelectedUser, profile }) {
             </div>
 
             {/* Interests */}
-            <div className="flex items-center gap-1 mb-2 sm:mb-3 flex-wrap">
+            <div className="flex items-center gap-1 mb-2 sm:mb-3 flex-wrap" hidden>
               {interests.map((interest, index) => (
                 <div key={index} className="flex items-center gap-1 px-1.5 sm:px-2 py-0.5 sm:py-1 bg-muted/50 rounded-full">
                   <interest.icon className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-muted-foreground" />
@@ -122,7 +146,8 @@ export function UserCard({ setSelectedUser, profile }) {
         {/* Bio/Description */}
         <div className="mb-3 sm:mb-4">
           <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed line-clamp-2 sm:line-clamp-3">
-            {profile?.bio || `Hi! I'm ${profile?.firstname}, ${profile?.age} years old from ${profile?.city}. Looking to meet amazing people and create meaningful connections!`}
+            {profile?.bio || `Hi! I'm ${profile?.firstname}, ${profile?.age} years old from ${profile?.city}. Looking to meet amazing people
+             and create meaningful connections!`}
           </p>
         </div>
 
@@ -132,7 +157,7 @@ export function UserCard({ setSelectedUser, profile }) {
             <div className="flex items-center gap-1.5 sm:gap-2">
               <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-500 rounded-full"></div>
               <p className="text-xs text-muted-foreground">
-                Active {profile?.timeoflogin || 'recently'}
+                Active {formatLastLogin(profile?.timeoflogin)}
               </p>
             </div>
             <div className="text-xs text-primary font-medium group-hover:underline">
