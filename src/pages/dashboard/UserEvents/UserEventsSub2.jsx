@@ -1,16 +1,15 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { isObjEmpty, haversine } from "@/utils/util";
 import { useUserEvents2 } from "@/hooks/useEvents";
 import secureLocalStorage from "react-secure-storage";
 import { Separator } from '@/components/ui/separator';
+import { CalendarIcon, Search, Heart } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export function UserEventsSub2({ profiledata, userhandle, latitude, longitude }) {
-  const [loading, setLoading] = useState(false);
-  const [sortmsg, setSortmsg] = useState("Sort by date");
-  
-  const { isLoading, error, data, status, refetch } = useUserEvents2({
+  const { data } = useUserEvents2({
       userhandle: profiledata?.userhandle,
       lat: latitude,
       long: longitude
@@ -28,18 +27,7 @@ export function UserEventsSub2({ profiledata, userhandle, latitude, longitude })
     if (data?.length > 0) {
         secureLocalStorage.setItem("data" , JSON.stringify(data));
     }
-  }, [data]);
-
-  const sortClick = (e) => {
-      e.preventDefault();
-      if (sortmsg == "Sort by date") {
-        setSortmsg("Sort by distance")
-        data.sort((a, b) => new Date(a.eventdate) - new Date(b.eventdate));
-      } else if (sortmsg == "Sort by distance") {
-        data.sort((a, b) => a.distance - b.distance);
-        setSortmsg("Sort by date")
-      }
-  };
+  }, [data, latitude, longitude]);
 
   return (
     <Card className="bg-transparent border-accent border-none shadow-none hover:shadow-none">
@@ -51,10 +39,32 @@ export function UserEventsSub2({ profiledata, userhandle, latitude, longitude })
       <Separator />
       <CardContent className="space-y-2">
         {isObjEmpty(data) && (
-          <Card className="mt-3 w-full lg:w-[80%] bg-yellow-50 dark:bg-background">
-            <div className="py-4 px-4 text-xl">
-              Nothing here. Search and register to events in your area.
-            </div>
+          <Card className="mt-3 w-full bg-gradient-to-br from-primary/5 via-background to-muted/20 border-2 border-primary/10 shadow-lg backdrop-blur-sm">
+            <CardContent className="pt-8 pb-8 text-center">
+              <div className="w-16 h-16 rounded-full bg-primary/10 mx-auto mb-4 flex items-center justify-center">
+                <CalendarIcon className="w-8 h-8 text-primary" />
+              </div>
+              <h3 className="text-xl font-semibold text-foreground mb-2">
+                No Upcoming Events Yet
+              </h3>
+              <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+                Discover amazing events and meetups in your area. Start exploring and register for events that interest you!
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <Button asChild className="bg-primary hover:bg-primary/90">
+                  <Link to="/dashboard/events">
+                    <Search className="w-4 h-4 mr-2" />
+                    Find Events
+                  </Link>
+                </Button>
+                <Button variant="outline" asChild>
+                  <Link to="/dashboard/search">
+                    <Heart className="w-4 h-4 mr-2" />
+                    Find People
+                  </Link>
+                </Button>
+              </div>
+            </CardContent>
           </Card>
         )}
         {!isObjEmpty(data) && (

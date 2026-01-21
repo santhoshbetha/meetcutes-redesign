@@ -1,29 +1,15 @@
-import { useState, useContext } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { EventList } from "@/components/EventList";
 import { CreateEvent } from "@/components/CreateEvent";
-import EventDetailsDialog from "@/components/EventDetailsDialog";
 import { useUserEvents1 } from "@/hooks/useEvents";
 import { isObjEmpty } from "@/utils/util";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { SearchAndUserEventsDataContext } from '@/context/SearchAndUserEventsDataContext'
-import { UserCard } from "../../../components/UserCard";
 import { Dialog, DialogTrigger } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
+import { Plus, Sparkles } from "lucide-react";
 
-export function UserEventsSub1({profiledata, userhandle, latitude, longitude, userstate }) {
-  const { isLoading, error, data, status, refetch } = useUserEvents1({
+export function UserEventsSub1({profiledata, userhandle, latitude, longitude }) {
+  const { data } = useUserEvents1({
       userid: profiledata?.userid
   });
   
@@ -48,10 +34,27 @@ export function UserEventsSub1({profiledata, userhandle, latitude, longitude, us
         <Separator />
         <CardContent className="space-y-2">
           {isObjEmpty(data) && (
-            <Card className="mt-3 w-full lg:w-[80%] bg-yellow-50 dark:bg-background">
-              <div className="py-4 px-4 text-xl">
-                  Nothing here. Create new events to see them listed here.
-              </div>
+            <Card className="mt-3 w-full bg-gradient-to-br from-primary/5 via-background to-muted/20 border-2 border-primary/10 shadow-lg backdrop-blur-sm">
+              <CardContent className="pt-8 pb-8 text-center">
+                <div className="w-16 h-16 rounded-full bg-primary/10 mx-auto mb-4 flex items-center justify-center">
+                  <Plus className="w-8 h-8 text-primary" />
+                </div>
+                <h3 className="text-xl font-semibold text-foreground mb-2">
+                  No Events Created Yet
+                </h3>
+                <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+                  Start creating amazing events and connect with people in your community. Your events will appear here once created.
+                </p>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button className="bg-primary hover:bg-primary/90">
+                      <Sparkles className="w-4 h-4 mr-2" />
+                      Create Your First Event
+                    </Button>
+                  </DialogTrigger>
+                  <CreateEvent/>
+                </Dialog>
+              </CardContent>
             </Card>
           )}
         </CardContent>
