@@ -22,30 +22,11 @@ import { UserCard } from "../../../components/UserCard";
 import { Dialog, DialogTrigger } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
 
-const sampleEvents = [
-  {
-    id: 1,
-    name: "Abbie",
-    age: 23,
-    education: "Bachelor's level",
-    location: "Asan Nadia, Yishun",
-    status: "Middleclass",
-    language: "Marathi",
-    lastLogin: "Jan 11th, 11:14 pm",
-    handle: "abbie_handle",
-    phone: "3332344434",
-    email: "abbie@example.com",
-    facebook: "abbieFB",
-    instagram: "abbieIG",
-    linkedin: "AbbieLinkedIn",
-    bio: "Here we go",
-  },
-];
-
 export function UserEventsSub1({profiledata, userhandle, latitude, longitude, userstate }) {
   const { isLoading, error, data, status, refetch } = useUserEvents1({
       userid: profiledata?.userid
   });
+  
 
   return (
     <>
@@ -81,6 +62,7 @@ export function UserEventsSub1({profiledata, userhandle, latitude, longitude, us
           userhandle={userhandle}
           userlatitude={latitude}
           userlongitude={longitude}
+          profiledata={profiledata}
         />
       )}
     </>

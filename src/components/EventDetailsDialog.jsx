@@ -12,6 +12,8 @@ export default function EventDetailsDialog({ event, onClose, profiledata, loadin
   const [isRegistering, setIsRegistering] = useState(false);
   const [registrationMessage, setRegistrationMessage] = useState("");
 
+  console.log('EventDetailsDialog profiledata', profiledata);
+
   useEffect(() => {
     if (event) {
       setEventDetails(event);

@@ -21,8 +21,9 @@ export const AuthProvider = ({children}) => {
 
     const updateUserData = async (user) => {
       let res = await getProfileData(user?.id);
+      console.log("updateUserData res ", res)
       if (res.success == true){
-          setProfiledata({...res.data})
+        setProfiledata({...res.data});
       }
     }
 

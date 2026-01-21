@@ -35,6 +35,7 @@ export const getUserProfile = async (userid) => {
         "userid, userhandle, \
          firstname, age, gender, \
          city, state, \
+         ethnicity, \
          phonenumber, email, bio, images,\
          facebook, instagram, linkedin, \
          questionairevalues, \

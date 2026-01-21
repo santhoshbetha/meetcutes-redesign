@@ -610,7 +610,7 @@ export function Profile() {
               </Button>
 
               <Button
-                onClick={() => navigate('/dashboard?tab=search')}
+                onClick={() => navigate('/dashboard?tab=users')}
                 variant="ghost"
                 className="w-full justify-start h-12 hover:bg-primary/10 hover:text-primary transition-all duration-200 group"
               >

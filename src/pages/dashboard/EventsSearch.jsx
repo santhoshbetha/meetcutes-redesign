@@ -129,6 +129,7 @@ export function EventsSearch({
   const searchsuccess = useRef(false);
   const [sortmsg, setSortmsg] = useState(null);
   const [successMessage, setSuccessMessage] = useState("");
+  const [mobileError, setMobileError] = useState("");
 
   const [searchData, setSearchData] = useState();
 
@@ -255,6 +256,10 @@ export function EventsSearch({
     },
 
     onSubmit: async (values) => {
+      console.log("onSubmit call..")
+      // Close the mobile sheet when search is initiated
+      setOpen(false);
+
       let objectDate = new Date(searchDate);
       let day = objectDate.getDate();
       let month = objectDate.getMonth() + 1; //because getMonth() returns '0' based values
@@ -341,7 +346,7 @@ export function EventsSearch({
 
   return (
     <div className="min-h-screen bg-linear-to-br from-background via-background to-muted/20">
-      <div className="max-w-[1600px] mx-auto px-4 md:px-8 py-4 md:py-6">
+      <div className="max-w-400 mx-auto px-4 md:px-8 py-4 md:py-6">
         {/* Header Section */}
         <div className="mb-8">
           <div className="text-center mb-6">
@@ -429,9 +434,14 @@ export function EventsSearch({
                 <p className="text-sm text-muted-foreground">Discover events in your area</p>
               </div>
             </div>
-            <Sheet>
+            <Sheet open={open} onOpenChange={setOpen}>
               <SheetTrigger asChild>
-                <Button variant="outline" size="sm" className="md:hidden bg-white/50 dark:bg-gray-700/50">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="md:hidden bg-white/50 dark:bg-gray-700/50"
+                  onClick={() => setMobileError("")}
+                >
                   <SlidersHorizontal className="w-4 h-4 mr-2" />
                   Filters
                 </Button>
@@ -448,59 +458,82 @@ export function EventsSearch({
                 </SheetHeader>
                 <div className="mt-6 space-y-4">
                   <div className="space-y-4">
-                    <div>
-                      <Label className="text-sm font-medium">Date</Label>
-                      <Select
-                        value={formik.values.day}
-                        onValueChange={(value) => {
-                          formik.values.day = value;
-                          if (value == "today") {
-                            setSearchAll(false);
-                            setDisabledDate(true);
-                            setSearchDate(new Date(Date.now()));
-                          } else if (value == "tomorrow") {
-                            setSearchAll(false);
-                            setDisabledDate(true);
-                            setSearchDate(addOneDay());
-                          } else if (value == "saturday") {
-                            setSearchAll(false);
-                            setDisabledDate(true);
-                            setSearchDate(getSaturday());
-                          } else if (value == "sunday") {
-                            setSearchAll(false);
-                            setDisabledDate(true);
-                            setSearchDate(getSunday());
-                          } else if (value == "weekend") {
-                            setSearchAll(false);
-                            setDisabledDate(true);
-                            setSearchDate(getSaturday());
-                          } else if (value == "pickdate") {
-                            setSearchAll(false);
-                            setDisabledDate(false);
-                            setSearchDate(new Date(Date.now()));
-                          } else if (value == "all") {
-                            setSearchAll(true);
-                            setDisabledDate(true);
-                            setSearchDate(new Date(Date.now()));
-                          } else {
-                            setSearchAll(false);
-                            setDisabledDate(false);
-                          }
-                        }}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select date" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="today">Today</SelectItem>
-                          <SelectItem value="tomorrow">Tomorrow</SelectItem>
-                          <SelectItem value="saturday">This Saturday</SelectItem>
-                          <SelectItem value="sunday">This Sunday</SelectItem>
-                          <SelectItem value="weekend">This Weekend</SelectItem>
-                          <SelectItem value="pickdate">Pick Date</SelectItem>
-                          <SelectItem value="all">All (from today)</SelectItem>
-                        </SelectContent>
-                      </Select>
+                    {/* Mobile Date and Distance Grid */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <Label className="text-sm font-medium">Date</Label>
+                        <Select
+                          value={formik.values.day}
+                          onValueChange={(value) => {
+                            formik.values.day = value;
+                            if (value == "today") {
+                              setSearchAll(false);
+                              setDisabledDate(true);
+                              setSearchDate(new Date(Date.now()));
+                            } else if (value == "tomorrow") {
+                              setSearchAll(false);
+                              setDisabledDate(true);
+                              setSearchDate(addOneDay());
+                            } else if (value == "saturday") {
+                              setSearchAll(false);
+                              setDisabledDate(true);
+                              setSearchDate(getSaturday());
+                            } else if (value == "sunday") {
+                              setSearchAll(false);
+                              setDisabledDate(true);
+                              setSearchDate(getSunday());
+                            } else if (value == "weekend") {
+                              setSearchAll(false);
+                              setDisabledDate(true);
+                              setSearchDate(getSaturday());
+                            } else if (value == "pickdate") {
+                              setSearchAll(false);
+                              setDisabledDate(false);
+                              setSearchDate(new Date(Date.now()));
+                            } else if (value == "all") {
+                              setSearchAll(true);
+                              setDisabledDate(true);
+                              setSearchDate(new Date(Date.now()));
+                            } else {
+                              setSearchAll(false);
+                              setDisabledDate(false);
+                            }
+                          }}
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Select date" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="today">Today</SelectItem>
+                            <SelectItem value="tomorrow">Tomorrow</SelectItem>
+                            <SelectItem value="saturday">This Saturday</SelectItem>
+                            <SelectItem value="sunday">This Sunday</SelectItem>
+                            <SelectItem value="weekend">This Weekend</SelectItem>
+                            <SelectItem value="pickdate">Pick Date</SelectItem>
+                            <SelectItem value="all">All (from today)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div>
+                        <Label className="text-sm font-medium">Distance</Label>
+                        <Select
+                          value={formik.values.searchdistance}
+                          onValueChange={(value) => {
+                            formik.setFieldValue('searchdistance', value);
+                          }}
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Select distance" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="5">5 Miles</SelectItem>
+                            <SelectItem value="10">10 Miles</SelectItem>
+                            <SelectItem value="25">25 Miles</SelectItem>
+                            <SelectItem value="50">50 Miles</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
 
                     {!disabledDate && (
@@ -531,27 +564,7 @@ export function EventsSearch({
                       </div>
                     )}
 
-                    <div>
-                      <Label className="text-sm font-medium">Distance</Label>
-                      <Select
-                        value={formik.values.searchdistance}
-                        onValueChange={(value) => {
-                          formik.setFieldValue('searchdistance', value);
-                        }}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select distance" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="5">5 Miles</SelectItem>
-                          <SelectItem value="10">10 Miles</SelectItem>
-                          <SelectItem value="25">25 Miles</SelectItem>
-                          <SelectItem value="50">50 Miles</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <Button type="submit" className="w-full" disabled={isLoading}>
+                    <Button onClick={() => formik.handleSubmit()} className="w-full" disabled={isLoading}>
                       {isLoading ? (
                         <>
                           <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
@@ -713,7 +726,25 @@ export function EventsSearch({
 
             {/* Mobile Search Button */}
             <div className="md:hidden">
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              {mobileError && (
+                <Alert className="border-destructive/50 bg-destructive/5 mb-4">
+                  <AlertDescription className="text-destructive">
+                    {mobileError}
+                  </AlertDescription>
+                </Alert>
+              )}
+              <Button 
+                onClick={() => {
+                  if (!formik.values.day || !formik.values.searchdistance) {
+                    setMobileError("Please select both date and distance filters before searching.");
+                    return;
+                  }
+                  setMobileError("");
+                  formik.handleSubmit();
+                }} 
+                className="w-full" 
+                disabled={isLoading}
+              >
                 {isLoading ? (
                   <>
                     <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
@@ -739,7 +770,7 @@ export function EventsSearch({
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-lg bg-green-100 dark:bg-green-900/20 flex items-center justify-center">
-                    <Users className="w-5 h-5 text-green-600 dark:text-green-400" />
+                    <CalendarIcon className="w-5 h-5 text-green-600 dark:text-green-400" />
                   </div>
                   <div className="pb-4">
                     <h2 className="text-xl font-semibold text-foreground">Search Results</h2>

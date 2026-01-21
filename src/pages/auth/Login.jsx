@@ -18,7 +18,7 @@ import usePasswordToggle from "@/hooks/usePasswordToggle";
 import secureLocalStorage from "react-secure-storage";
 import supabase from "@/lib/supabase";
 
-export function Login({ setOpenLogin }) {
+export function Login({ setOpenLogin, setOpenSignup }) {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -30,7 +30,7 @@ export function Login({ setOpenLogin }) {
 
   const onSignupClick = () => {
     setOpenLogin(false);
-    //setOpenSignup(true)
+    setOpenSignup(true)
   };
 
   const doLogin = async (values) => {
@@ -78,7 +78,7 @@ export function Login({ setOpenLogin }) {
   });
 
   return (
-    <DialogContent className="w-[90%] sm:max-w-[425px] border-0 shadow-2xl bg-linear-to-br from-card via-card to-card/95 backdrop-blur-sm">
+    <DialogContent className="w-[90%] sm:max-w-106.25 border-0 shadow-2xl bg-linear-to-br from-card via-card to-card/95 backdrop-blur-sm">
       {loading && (
         <div className='absolute top-[50%] left-[50%] z-50 -translate-x-1/2 -translate-y-1/2'>
           <MeetCutesSpinner size="large" />

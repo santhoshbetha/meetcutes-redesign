@@ -18,15 +18,7 @@ import { SearchAndUserEventsDataContext } from '@/context/SearchAndUserEventsDat
 import { searchUsers } from "../../services/search.service";
 import { isObjEmpty } from "../../utils/util";
 import { Badge } from "@/components/ui/badge";
-import { Search, RefreshCw, Filter, Users, Heart, MapPin, SlidersHorizontal, ChevronsUpDown } from "lucide-react";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import { Search, RefreshCw, Filter, Users, Heart, MapPin, ChevronsUpDown } from "lucide-react";
 import {
   Popover,
   PopoverContent,
@@ -43,24 +35,21 @@ let distanceMap = new Map([
   ["200", 321869],
 ]);
 
-export function UsersSearch({ user, userhandle, gender, latitude, longitude, questionairevaluesset, userstate, onetimepaymentrequired}) {
+export function UsersSearch({ userhandle, gender, latitude, longitude, questionairevaluesset, userstate, onetimepaymentrequired}) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [searchError, setSearchError] = useState(null);
   const {searchUsersData, setSearchUsersData} = useContext(SearchAndUserEventsDataContext);
   const searchdone = useRef(false);
-
-  const getMin = () => {
-    return formik.values.agefrom;
-  };
 
   useEffect (() => {
     //if (!questionairevaluesset) { 
     //  setError("Finish questinaire to start searching")
     //} else 
     if (onetimepaymentrequired) {
-        //if (verified) {
-            setError("One time fees required, click on 'SERVICE FEES' button")
-        //}
+      //if (verified) {
+        setError("One time fees required, click on 'SERVICE FEES' button")
+      //}
     } else
     if (isObjEmpty(userhandle)) {
         setError("Set handle to start searching")
@@ -71,7 +60,7 @@ export function UsersSearch({ user, userhandle, gender, latitude, longitude, que
     } else {
         setError("")
     }
-  }, [userhandle, latitude, questionairevaluesset, userstate]);
+  }, [userhandle, latitude, questionairevaluesset, userstate, onetimepaymentrequired]);
 
   const formik = useFormik({
     initialValues: {
@@ -81,7 +70,17 @@ export function UsersSearch({ user, userhandle, gender, latitude, longitude, que
       ethnicity: [],
     },
     onSubmit: async (values) => {
-      //alert(JSON.stringify(values, null, 2));
+     console.log("onSubmit call..")
+     
+     // Validate required fields
+     if (!values.searchdistance || values.ethnicity.length === 0) {
+       setSearchError("Please select distance and ethnicity before searching.");
+       return;
+     }
+     
+     // Clear any previous search error
+     setSearchError(null);
+     
       let searchdata = {
           gender: gender,
           agefrom: values.agefrom < 21 ? 21 : values.agefrom,
@@ -105,6 +104,11 @@ export function UsersSearch({ user, userhandle, gender, latitude, longitude, que
       setIsLoading(false);
     },
   });
+
+  // Clear search error when form values change
+  useEffect(() => {
+    setSearchError(null);
+  }, [formik.values.searchdistance, formik.values.ethnicity]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 md:px-8 py-4 md:py-6">
@@ -145,6 +149,20 @@ export function UsersSearch({ user, userhandle, gender, latitude, longitude, que
             </CardContent>
           </Card>
         )}
+
+        {/* Search Error Banner */}
+        {searchError && (
+          <Card className="border-destructive/50 bg-destructive/5 mb-4">
+            <CardContent className="pt-4">
+              <div className="flex items-center gap-2 text-destructive">
+                <div className="w-5 h-5 rounded-full bg-destructive/10 flex items-center justify-center">
+                  <span className="text-xs">!</span>
+                </div>
+                <p className="text-sm font-medium">{searchError}</p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       {/* Search Form */}
@@ -160,164 +178,153 @@ export function UsersSearch({ user, userhandle, gender, latitude, longitude, que
                 <p className="text-sm text-muted-foreground">Find people in your area</p>
               </div>
             </div>
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="outline" size="sm" className="md:hidden">
-                  <SlidersHorizontal className="w-4 h-4 mr-2" />
-                  Filters
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="bottom" className="h-[80vh]">
-                <SheetHeader>
-                  <SheetTitle>Search Preferences</SheetTitle>
-                  <SheetDescription>
-                    Customize your search to find the perfect matches
-                  </SheetDescription>
-                </SheetHeader>
-                <div className="mt-6 space-y-4">
-                  <div className="space-y-4">
-                    <div>
-                      <Label className="text-sm font-medium">Distance</Label>
-                      <Select
-                        value={formik.values.searchdistance}
-                        onValueChange={(value) => {
-                          formik.setFieldValue('searchdistance', value);
-                        }}
-                      >
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select distance" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="5">5 Miles</SelectItem>
-                          <SelectItem value="10">10 Miles</SelectItem>
-                          <SelectItem value="25">25 Miles</SelectItem>
-                          <SelectItem value="50">50 Miles</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label className="text-sm font-medium">Age From</Label>
-                        <Input
-                          type="number"
-                          min="21"
-                          max="99"
-                          value={formik.values.agefrom}
-                          onChange={(e) => {
-                            formik.setFieldValue('agefrom', parseInt(e.target.value) || 21);
-                          }}
-                          placeholder="21"
-                        />
-                      </div>
-                      <div>
-                        <Label className="text-sm font-medium">Age To</Label>
-                        <Input
-                          type="number"
-                          min="21"
-                          max="99"
-                          value={formik.values.ageto}
-                          onChange={(e) => {
-                            formik.setFieldValue('ageto', parseInt(e.target.value) || 21);
-                          }}
-                          placeholder="99"
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <Label className="text-sm font-medium">Ethnicity</Label>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button variant="outline" className="w-full h-auto min-h-10 justify-between whitespace-normal">
-                            <span className="break-words text-left">
-                              {formik.values.ethnicity.length > 0
-                                ? formik.values.ethnicity.includes("all")
-                                  ? "All"
-                                  : formik.values.ethnicity.join(", ")
-                                : "Select ethnicities"}
-                            </span>
-                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-full p-0">
-                          <div className="p-2">
-                            <div className="space-y-2">
-                              <div className="flex items-center space-x-2">
-                                <input
-                                  type="checkbox"
-                                  id="all"
-                                  checked={formik.values.ethnicity.includes("all")}
-                                  onChange={(e) => {
-                                    if (e.target.checked) {
-                                      formik.setFieldValue('ethnicity', ["all"]);
-                                    } else {
-                                      formik.setFieldValue('ethnicity', []);
-                                    }
-                                  }}
-                                  className="h-4 w-4"
-                                />
-                                <Label htmlFor="all">All</Label>
-                              </div>
-                              {[
-                                "Asian",
-                                "Black / African American",
-                                "Hispanic / Latino",
-                                "Middle Eastern",
-                                "Native American",
-                                "Pacific Islander",
-                                "White / Caucasian",
-                                "East Indian",
-                              ].map((ethnicity) => (
-                                <div key={ethnicity} className="flex items-center space-x-2">
-                                  <input
-                                    type="checkbox"
-                                    id={ethnicity}
-                                    checked={formik.values.ethnicity.includes(ethnicity)}
-                                    onChange={(e) => {
-                                      let newEthnicity = [...formik.values.ethnicity];
-                                      if (e.target.checked) {
-                                        if (newEthnicity.includes("all")) {
-                                          newEthnicity = [ethnicity];
-                                        } else {
-                                          newEthnicity.push(ethnicity);
-                                        }
-                                      } else {
-                                        newEthnicity = newEthnicity.filter((e) => e !== ethnicity);
-                                      }
-                                      formik.setFieldValue('ethnicity', newEthnicity);
-                                    }}
-                                    className="h-4 w-4"
-                                  />
-                                  <Label htmlFor={ethnicity}>{ethnicity}</Label>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        </PopoverContent>
-                      </Popover>
-                    </div>
-
-                    <Button type="submit" className="w-full" disabled={isLoading}>
-                      {isLoading ? (
-                        <>
-                          <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                          Searching...
-                        </>
-                      ) : (
-                        <>
-                          <Search className="w-4 h-4 mr-2" />
-                          Find Matches
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                </div>
-              </SheetContent>
-            </Sheet>
           </div>
         </CardHeader>
         <CardContent>
+          {/* Mobile Search Form - Always Visible */}
+          <div className="md:hidden space-y-4 mb-6">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label className="text-sm font-medium">Distance</Label>
+                <Select
+                  required
+                  name="searchdistance"
+                  value={formik.values.searchdistance}
+                  onValueChange={(value) => {
+                    formik.setFieldValue('searchdistance', value);
+                  }}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select distance" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="5">5 Miles</SelectItem>
+                    <SelectItem value="10">10 Miles</SelectItem>
+                    <SelectItem value="25">25 Miles</SelectItem>
+                    <SelectItem value="50">50 Miles</SelectItem>
+                    <SelectItem value="75">75 Miles</SelectItem>
+                    <SelectItem value="100">100 Miles</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-sm font-medium">Ethnicity</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className="w-full h-auto min-h-10 justify-between whitespace-normal">
+                      <span className="break-words text-left">
+                        {formik.values.ethnicity.length > 0
+                          ? formik.values.ethnicity.includes("all")
+                            ? "All"
+                            : formik.values.ethnicity.join(", ")
+                          : "Select ethnicities"}
+                      </span>
+                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-full p-0">
+                    <div className="p-2">
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-2">
+                          <input
+                            type="checkbox"
+                            id="all-mobile"
+                            checked={formik.values.ethnicity.includes("all")}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                formik.setFieldValue('ethnicity', ["all"]);
+                              } else {
+                                formik.setFieldValue('ethnicity', []);
+                              }
+                            }}
+                            className="h-4 w-4"
+                          />
+                          <Label htmlFor="all-mobile">All</Label>
+                        </div>
+                        {[
+                          "Asian",
+                          "Black / African American",
+                          "Hispanic / Latino",
+                          "Middle Eastern",
+                          "Native American",
+                          "Pacific Islander",
+                          "White / Caucasian",
+                          "East Indian",
+                        ].map((ethnicity) => (
+                          <div key={ethnicity} className="flex items-center space-x-2">
+                            <input
+                              type="checkbox"
+                              id={`${ethnicity}-mobile`}
+                              checked={formik.values.ethnicity.includes(ethnicity)}
+                              onChange={(e) => {
+                                let newEthnicity = [...formik.values.ethnicity];
+                                if (e.target.checked) {
+                                  if (newEthnicity.includes("all")) {
+                                    newEthnicity = [ethnicity];
+                                  } else {
+                                    newEthnicity.push(ethnicity);
+                                  }
+                                } else {
+                                  newEthnicity = newEthnicity.filter((e) => e !== ethnicity);
+                                }
+                                formik.setFieldValue('ethnicity', newEthnicity);
+                              }}
+                              className="h-4 w-4"
+                            />
+                            <Label htmlFor={`${ethnicity}-mobile`}>{ethnicity}</Label>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label className="text-sm font-medium">Age From</Label>
+                <Input
+                  type="number"
+                  min="21"
+                  max="99"
+                  value={formik.values.agefrom}
+                  onChange={(e) => {
+                    formik.setFieldValue('agefrom', parseInt(e.target.value) || 21);
+                  }}
+                  placeholder="21"
+                />
+              </div>
+              <div>
+                <Label className="text-sm font-medium">Age To</Label>
+                <Input
+                  type="number"
+                  min="21"
+                  max="99"
+                  value={formik.values.ageto}
+                  onChange={(e) => {
+                    formik.setFieldValue('ageto', parseInt(e.target.value) || 21);
+                  }}
+                  placeholder="99"
+                />
+              </div>
+            </div>
+
+            <Button onClick={() => formik.handleSubmit()} className="w-full" disabled={isLoading}>
+              {isLoading ? (
+                <>
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                  Searching...
+                </>
+              ) : (
+                <>
+                  <Search className="w-4 h-4 mr-2" />
+                  Find Matches
+                </>
+              )}
+            </Button>
+          </div>
+
           <form onSubmit={formik.handleSubmit} className="space-y-6">
             {/* Desktop Filters */}
             <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -459,23 +466,6 @@ export function UsersSearch({ user, userhandle, gender, latitude, longitude, que
             {/* Search Button */}
             <div className="hidden md:block">
               <Button type="submit" className="w-full md:w-auto" disabled={isLoading}>
-                {isLoading ? (
-                  <>
-                    <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                    Searching...
-                  </>
-                ) : (
-                  <>
-                    <Search className="w-4 h-4 mr-2" />
-                    Find Matches
-                  </>
-                )}
-              </Button>
-            </div>
-
-            {/* Mobile Search Button */}
-            <div className="md:hidden">
-              <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? (
                   <>
                     <RefreshCw className="w-4 h-4 mr-2 animate-spin" />

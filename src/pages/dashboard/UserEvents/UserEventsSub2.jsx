@@ -63,6 +63,7 @@ export function UserEventsSub2({ profiledata, userhandle, latitude, longitude })
             userhandle={userhandle}
             userlatitude={latitude}
             userlongitude={longitude}
+            profiledata={profiledata}
           />
         )}
       </CardContent>

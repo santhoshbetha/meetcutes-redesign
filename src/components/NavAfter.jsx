@@ -98,12 +98,12 @@ const NavAfter = () => {
         {/* Right side actions */}
         <div className="flex items-center gap-3 md:gap-5">
           <ThemeToggle />
-          <div className="relative cursor-pointer group">
+          <Link to="/notifications" className="relative cursor-pointer group">
             <Bell className="w-6 h-6 text-muted-foreground group-hover:text-foreground transition-colors" />
             <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-[10px] font-semibold rounded-full w-4 h-4 flex items-center justify-center">
               10
             </span>
-          </div>
+          </Link>
           <Button
             className="hidden lg:flex bg-destructive hover:bg-destructive/90 text-destructive-foreground px-4 md:px-6 font-medium shadow-sm text-sm"
             onClick={onLogout}
@@ -152,7 +152,7 @@ const NavAfter = () => {
 
       {/* Mobile Navigation */}
       {isMenuOpen && (
-        <div className="md:hidden border-t border-border bg-background">
+        <div className="lg:hidden border-t border-border bg-background">
           <div className="px-2 pt-2 pb-3 space-y-1">
             <Link to="#about" className="block px-3 py-2 text-muted-foreground hover:text-foreground">
               About
@@ -171,10 +171,10 @@ const NavAfter = () => {
             </div>
             <div className="flex space-x-2 px-3 pt-2">
               <Button size="sm"
-                className="flex-1"
+                className="flex-1 text-lg"
                 onClick={onLogout}
               >
-                <LogOut className="w-4 h-4" />
+                 Log out
               </Button>
             </div>
           </div>

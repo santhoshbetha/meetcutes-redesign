@@ -26,7 +26,8 @@ import {
   Home,
   Settings as SettingsIcon,
   LogOut,
-  Camera
+  Camera,
+  CalendarSearch
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -58,7 +59,7 @@ export function Dashboard() {
     {
       id: "events",
       label: "My Events",
-      icon: Calendar,
+      icon: CalendarSearch,
       description: "Manage your created events"
     },
     {
@@ -374,7 +375,7 @@ export function Dashboard() {
           ) : activeTab === "settings" ? (
             <Settings />
           ) : (
-            <div className="max-w-[1600px] mx-auto px-4 md:px-8 py-8 md:py-12">
+            <div className="max-w-400 mx-auto px-4 md:px-8 py-8 md:py-12">
               <h1 className="text-2xl md:text-3xl font-bold mb-6">
                 {activeTab === "search" ? "Search Events" : "Search Users"}
               </h1>
@@ -402,7 +403,7 @@ export function Dashboard() {
                 }`}
               >
                 <Icon className="w-5 h-5 mb-1" />
-                <span className="text-xs font-medium truncate">{item.label}</span>
+                <span className="text-xs font-medium truncate hidden sm:block">{item.label}</span>
               </button>
             );
           })}

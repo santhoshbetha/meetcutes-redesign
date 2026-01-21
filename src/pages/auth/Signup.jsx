@@ -183,7 +183,7 @@ export function Signup({ setOpenSignup, setOpenLogin }) {
   });
 
   return (
-    <DialogContent className="flex max-h-[min(900px,90vh)] min-w-[350px] flex-col gap-0 p-0 max-w-md border-0 shadow-2xl bg-linear-to-br from-card via-card to-card/95 backdrop-blur-sm">
+    <DialogContent className="flex max-h-[min(900px,90vh)] min-w-87.5 flex-col gap-0 p-0 max-w-md border-0 shadow-2xl bg-linear-to-br from-card via-card to-card/95 backdrop-blur-sm">
       {loading && (
         <MeetCutesSpinner
           className="fixed top-[50%] left-[50%] z-50 cursor-pointer"
