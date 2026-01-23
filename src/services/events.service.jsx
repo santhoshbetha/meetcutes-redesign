@@ -4,12 +4,15 @@ import ShortUniqueId from "short-unique-id";
 import { isObjEmpty } from "@/utils/util";
 
 export const createEvent = async (dataIn) => {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 5000);
+
   let locationid = dataIn?.locationid;
   let latitude, longitude;
   try {
     const { data, error } = await supabase
       .from("locations")
-      .select("locationid, latitude, longitude")
+      .select("locationid, latitude, longitude", { signal: controller.signal })
       .eq("address1", dataIn?.address1)
       .eq("state", dataIn?.state)
       .eq("city", dataIn?.city)
@@ -30,7 +33,7 @@ export const createEvent = async (dataIn) => {
             city: dataIn?.city,
             latitude: dataIn?.eventlat,
             longitude: dataIn?.eventlng,
-          })
+          }, { signal: controller.signal })
           .select();
 
         if (data2) {
@@ -70,7 +73,7 @@ export const createEvent = async (dataIn) => {
     if (data?.length > 0) {
       const { data: data3, error: error3 } = await supabase
         .from("events")
-        .select("locationid")
+        .select("locationid", { signal: controller.signal })
         .eq("locationid", locationid)
         .eq("eventdate", dataIn?.eventdate)
         .gte("starttime", dataIn?.start_time)
@@ -90,7 +93,7 @@ export const createEvent = async (dataIn) => {
       if (data3?.length == 0) {
         const { data: data4, error: error4 } = await supabase
           .from("events")
-          .select("locationid")
+          .select("locationid", { signal: controller.signal })
           .eq("locationid", locationid)
           .eq("eventdate", dataIn?.eventdate)
           .gt("endtime", dataIn?.start_time)
@@ -110,7 +113,7 @@ export const createEvent = async (dataIn) => {
         if (data4?.length == 0) {
           const { data: data5, error: error5 } = await supabase
             .from("events")
-            .select("locationid")
+            .select("locationid", { signal: controller.signal })
             .eq("locationid", locationid)
             .eq("eventdate", dataIn?.eventdate)
             .lte("starttime", dataIn?.start_time)
@@ -152,7 +155,7 @@ export const createEvent = async (dataIn) => {
           longitude: longitude,
           endtime: dataIn?.end_time,
           description: dataIn?.description,
-        })
+        }, { signal: controller.signal })
         .select();
 
       if (data6 && !error6) {
@@ -169,7 +172,7 @@ export const createEvent = async (dataIn) => {
             longitude: longitude,
             endtime: dataIn?.end_time,
             description: dataIn?.description,
-          })
+          }, { signal: controller.signal })
           .select();
       }
 
@@ -185,25 +188,31 @@ export const createEvent = async (dataIn) => {
       success: true,
     };
   } catch (error) {
+    clearTimeout(timeoutId);
     return {
       success: false,
       msg: error.message,
     };
+  } finally {
+    clearTimeout(timeoutId);
   }
 };
 
 export const getEventDetails = async (eventid) => {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 5000);
+
   let eventdata = {};
   try {
     const { data, error } = await supabase
       .from("events")
-      .select()
+      .select("*", { signal: controller.signal })
       .eq("eventid", eventid);
 
     if (data?.length > 0 && !error) {
       const { data: data2, error: error2 } = await supabase
         .from("locations")
-        .select("locationid, locationname, address1, state, city, zipcode")
+        .select("locationid, locationname, address1, state, city, zipcode", { signal: controller.signal })
         .eq("locationid", data[0].locationid);
 
       if (data2?.length > 0 && !error2) {
@@ -231,10 +240,15 @@ export const getEventDetails = async (eventid) => {
       success: false,
       msg: error.message,
     };
+  } finally {
+    clearTimeout(timeoutId);
   }
 };
 
 export const getEventsData = async (dataIn) => {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 5000);
+
   let eventsdata = new Array();
   try {
     const distance = 241401; // 150 miles
@@ -248,6 +262,7 @@ export const getEventsData = async (dataIn) => {
           distance: dataIn?.searchdistance ? dataIn?.searchdistance : distance,
           startdate: dataIn?.startdate,
         },
+        { signal: controller.signal }
       );
       data1 = data;
       error1 = error;
@@ -261,6 +276,7 @@ export const getEventsData = async (dataIn) => {
           startdate: dataIn?.startdate,
           enddate: dataIn?.enddate,
         },
+        { signal: controller.signal }
       );
       data1 = data;
       error1 = error;
@@ -274,7 +290,7 @@ export const getEventsData = async (dataIn) => {
     if (data1?.length > 0 && !error1) {
       const { data: data2, error: error2 } = await supabase
         .from("locations")
-        .select("locationid, locationname, address1, state, city, zipcode")
+        .select("locationid, locationname, address1, state, city, zipcode", { signal: controller.signal })
         .filter("locationid", "in", `(${locationidlist})`); // `(${data})`
 
       if (data2?.length > 0 && !error2) {
@@ -309,12 +325,18 @@ export const getEventsData = async (dataIn) => {
       success: false,
       msg: error.message,
     };
+  } finally {
+    clearTimeout(timeoutId);
   }
 };
 
 export const getUserEvents1 = async (dataIn) => {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 5000);
+
   let eventsdata = new Array();
-  const dateminus7 = new Date();
+  try {
+    const dateminus7 = new Date();
   dateminus7.setDate(dateminus7.getDate() - 7);
   let year = dateminus7.getFullYear();
   let month = dateminus7.getMonth() + 1; //because getMonth() returns '0' based values
@@ -323,12 +345,12 @@ export const getUserEvents1 = async (dataIn) => {
 
   const { data, error } = await supabase
     .from("events")
-    .delete()
+    .delete({ signal: controller.signal })
     .lte("eventdate", dateformatted);
 
   const { data: data2, error: error2 } = await supabase
     .from("events")
-    .select()
+    .select("*", { signal: controller.signal })
     .eq("creatorid", dataIn?.userid);
 
   let locationidlist = new Array();
@@ -339,7 +361,7 @@ export const getUserEvents1 = async (dataIn) => {
   if (data2?.length > 0 && !error2) {
     const { data: data3, error: error3 } = await supabase
       .from("locations")
-      .select("locationid, locationname, address1, state, city, zipcode")
+      .select("locationid, locationname, address1, state, city, zipcode", { signal: controller.signal })
       .filter("locationid", "in", `(${locationidlist})`); // `(${data})`;
 
     if (data3?.length > 0 && !error2) {
@@ -370,35 +392,48 @@ export const getUserEvents1 = async (dataIn) => {
     success: true,
     data: data2,
   };
+  } catch (error) {
+    return {
+      success: false,
+      msg: error.message,
+    };
+  } finally {
+    clearTimeout(timeoutId);
+  }
 };
 
 export const getUserEvents2 = async (dataIn) => {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 5000);
+
   let userEvents = [];
   let eventsdata = new Array();
-  const dateminus7 = new Date();
-  dateminus7.setDate(dateminus7.getDate() - 7);
-  let year = dateminus7.getFullYear();
-  let month = dateminus7.getMonth() + 1; //because getMonth() returns '0' based values
-  let day = dateminus7.getDate();
-  let dateformatted = `${year}-${month}-${day}`;
+  try {
+    const dateminus7 = new Date();
+    dateminus7.setDate(dateminus7.getDate() - 7);
+    let year = dateminus7.getFullYear();
+    let month = dateminus7.getMonth() + 1; //because getMonth() returns '0' based values
+    let day = dateminus7.getDate();
+    let dateformatted = `${year}-${month}-${day}`;
 
-  //
-  // delete old events
-  //
-  const { data, error } = await supabase
-    .from("events")
-    .delete()
-    .lte("eventdate", dateformatted);
+    //
+    // delete old events
+    //
+    const { data, error } = await supabase
+      .from("events")
+      .delete({ signal: controller.signal })
+      .lte("eventdate", dateformatted);
 
-  const distance = 241401; // 150 miles
-  const { data: data2, error: error2 } = await supabase.rpc(
-    "get_events_by_distance",
-    {
-      lat: dataIn?.lat,
-      long: dataIn?.long,
-      distance: distance, //150 miles
-    },
-  );
+    const distance = 241401; // 150 miles
+    const { data: data2, error: error2 } = await supabase.rpc(
+      "get_events_by_distance",
+      {
+        lat: dataIn?.lat,
+        long: dataIn?.long,
+        distance: distance, //150 miles
+      },
+      { signal: controller.signal }
+    );
 
   if (data2 && !error2) {
     if (data2?.length != 0) {
@@ -424,7 +459,7 @@ export const getUserEvents2 = async (dataIn) => {
   if (userEvents?.length > 0 && !error2) {
     const { data: data3, error: error3 } = await supabase
       .from("locations")
-      .select("locationid, locationname, address1, state, city, zipcode")
+      .select("locationid, locationname, address1, state, city, zipcode", { signal: controller.signal })
       .filter("locationid", "in", `(${locationidlist})`); // `(${data})`
 
     if (data3?.length > 0 && !error2) {
@@ -457,14 +492,26 @@ export const getUserEvents2 = async (dataIn) => {
       msg: error2?.message,
     };
   }
+  } catch (error) {
+    return {
+      success: false,
+      msg: error.message,
+    };
+  } finally {
+    clearTimeout(timeoutId);
+  }
 };
 
 export const registerToAnEvent = async (dataIn) => {
-  const { data, error } = await supabase
-    .from("events")
-    .select("attendeeslist")
-    .eq("eventid", dataIn?.eventid)
-    .single();
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+  try {
+    const { data, error } = await supabase
+      .from("events")
+      .select("attendeeslist", { signal: controller.signal })
+      .eq("eventid", dataIn?.eventid)
+      .single();
 
   if (data && !error) {
     let data2out = {
@@ -482,14 +529,14 @@ export const registerToAnEvent = async (dataIn) => {
         //  console.log("first add")
         data2out = await supabase
           .from("events")
-          .update({ attendeeslist: [`${dataIn?.userhandle.toLowerCase()}`] })
+          .update({ attendeeslist: [`${dataIn?.userhandle.toLowerCase()}`] }, { signal: controller.signal })
           .eq("eventid", dataIn?.eventid);
       } else {
         //   console.log("append to array")
         data2out = await supabase.rpc("append_to_attendeeslist", {
           userhandle: dataIn?.userhandle.toLowerCase(),
           eventid: dataIn?.eventid,
-        });
+        }, { signal: controller.signal });
       }
 
       //console.log("data2out data::", data2out.data);
@@ -509,6 +556,7 @@ export const registerToAnEvent = async (dataIn) => {
             attendeesdata: JSON.stringify(dataIn?.attendeesdata),
             eventid: dataIn?.eventid,
           },
+          { signal: controller.signal }
         );
 
         const { data: data4, error: error4 } = await supabase.rpc(
@@ -518,6 +566,7 @@ export const registerToAnEvent = async (dataIn) => {
             attendeesdata: JSON.stringify(dataIn?.attendeesdata),
             eventid: dataIn?.eventid,
           },
+          { signal: controller.signal }
         );
       }
     }
@@ -533,7 +582,7 @@ export const registerToAnEvent = async (dataIn) => {
 
     const { data: data5, error: error5 } = await supabase
       .from("users")
-      .select("previouseventsattendeeslist, userhandle")
+      .select("previouseventsattendeeslist, userhandle", { signal: controller.signal })
       //  .filter('userhandle', 'in', `(${listnew})`);  //test works!!
       .filter("userhandle", "in", `(${colValues})`);
 
@@ -550,7 +599,7 @@ export const registerToAnEvent = async (dataIn) => {
 
           const { data: data6, error: error6 } = await supabase
             .from("users")
-            .update({ previouseventsattendeeslist: n })
+            .update({ previouseventsattendeeslist: n }, { signal: controller.signal })
             .eq("userhandle", e.userhandle);
         });
       }
@@ -579,14 +628,26 @@ export const registerToAnEvent = async (dataIn) => {
       attendeesdata: dataIn?.attendeesdata,
     },
   };
+  } catch (error) {
+    return {
+      success: false,
+      msg: error.message,
+    };
+  } finally {
+    clearTimeout(timeoutId);
+  }
 };
 
 export const unregisterToAnEvent = async (dataIn) => {
-  const { data, error } = await supabase
-    .from("events")
-    .select("attendeeslist")
-    .eq("eventid", dataIn?.eventid)
-    .single();
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+  try {
+    const { data, error } = await supabase
+      .from("events")
+      .select("attendeeslist", { signal: controller.signal })
+      .eq("eventid", dataIn?.eventid)
+      .single();
 
   if (data && !error) {
     if (
@@ -599,6 +660,7 @@ export const unregisterToAnEvent = async (dataIn) => {
           userhandle: dataIn?.userhandle.toLowerCase(),
           eventid: dataIn?.eventid,
         },
+        { signal: controller.signal }
       );
 
       if (!error2) {
@@ -608,6 +670,7 @@ export const unregisterToAnEvent = async (dataIn) => {
             attendeesdata: JSON.stringify(dataIn?.attendeesdata),
             eventid: dataIn?.eventid,
           },
+          { signal: controller.signal }
         );
 
         const { data: data4, error: error4 } = await supabase.rpc(
@@ -617,6 +680,7 @@ export const unregisterToAnEvent = async (dataIn) => {
             attendeesdata: JSON.stringify(dataIn?.attendeesdata),
             eventid: dataIn?.eventid,
           },
+          { signal: controller.signal }
         );
       }
     }
@@ -637,42 +701,74 @@ export const unregisterToAnEvent = async (dataIn) => {
       attendeesdata: dataIn?.attendeesdata,
     },
   };
+  } catch (error) {
+    return {
+      success: false,
+      msg: error.message,
+    };
+  } finally {
+    clearTimeout(timeoutId);
+  }
 };
 
 export const postEventComment = async (dataIn) => {
-  const { data, error } = await supabase
-    .from("events")
-    .update({ comments: JSON.stringify(dataIn?.commentsdata) })
-    .eq("eventid", dataIn?.eventid);
-  const { data: data2, error: error2 } = await supabase
-    .from("events_backup")
-    .update({ comments: JSON.stringify(dataIn?.commentsdata) })
-    .eq("eventid", dataIn?.eventid);
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 5000);
 
-  if (error) {
+  try {
+    const { data, error } = await supabase
+      .from("events")
+      .update({ comments: JSON.stringify(dataIn?.commentsdata) }, { signal: controller.signal })
+      .eq("eventid", dataIn?.eventid);
+    const { data: data2, error: error2 } = await supabase
+      .from("events_backup")
+      .update({ comments: JSON.stringify(dataIn?.commentsdata) }, { signal: controller.signal })
+      .eq("eventid", dataIn?.eventid);
+
+    if (error) {
+      return {
+        success: false,
+        msg: error?.message,
+      };
+    }
+    return {
+      success: true,
+    };
+  } catch (error) {
     return {
       success: false,
-      msg: error?.message,
+      msg: error.message,
     };
+  } finally {
+    clearTimeout(timeoutId);
   }
-  return {
-    success: true,
-  };
 };
 
 export const postUserComment = async (dataIn) => {
-  const { data, error } = await supabase
-    .from("users")
-    .update({ comments: JSON.stringify(dataIn?.commentsdata) })
-    .eq("eventid", dataIn?.eventid);
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 5000);
 
-  if (error) {
+  try {
+    const { data, error } = await supabase
+      .from("users")
+      .update({ comments: JSON.stringify(dataIn?.commentsdata) }, { signal: controller.signal })
+      .eq("eventid", dataIn?.eventid);
+
+    if (error) {
+      return {
+        success: false,
+        msg: error?.message,
+      };
+    }
+    return {
+      success: true,
+    };
+  } catch (error) {
     return {
       success: false,
-      msg: error?.message,
+      msg: error.message,
     };
+  } finally {
+    clearTimeout(timeoutId);
   }
-  return {
-    success: true,
-  };
 };

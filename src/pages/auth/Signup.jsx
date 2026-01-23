@@ -26,7 +26,7 @@ import * as Yup from "yup";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import usePasswordToggle from "@/hooks/usePasswordToggle";
 import { checkIfUserExists } from "../../services/register.service";
-import { successAlert, errorAlert } from "@/services/alert.service";
+import toast from "react-hot-toast";
 import { coords } from "@/lib/defaultcoords";
 import { cities } from "@/lib/cities"
 import supabase from "@/lib/supabase";
@@ -70,19 +70,23 @@ export function Signup({ setOpenSignup, setOpenLogin }) {
   }
 
   const doRegister = async (values, actions) => {
-    const res = await checkIfUserExists({
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+    try {
+      const res = await checkIfUserExists({
         email: formik.values.email.trim().toLowerCase(),
         phonenumber: formik.values.phonenumber.trim()
-    })
-    let userExists = false;
-    if (res.success) {
-        if (res.userExists) {
+      })
+      let userExists = false;
+      if (res.success) {
+          if (res.userExists) {
             userExists = true;
-            errorAlert('Signup Error', "User with given email or phone number exists!.");
-        }
-    }
+            toast.error("User with given email or phone number exists!.");
+          }
+      }
 
-    if (!userExists) {
+      if (!userExists) {
         const dateofbirth = dobDate == '' ? (new Date('2002-01-01')).toISOString()
                                           : (new Date(`${dobDate}`)).toISOString();
         const dateofcreation = (new Date()).toISOString();                                 
@@ -104,41 +108,46 @@ export function Signup({ setOpenSignup, setOpenLogin }) {
             dateofcoordinates: dateofcreation,
             visibilityPreference: formik.values.visibilityPreference
         }
-        try {
-            setLoading(true);
-            const {data, error} = await supabase.auth.signUp({
-                email: formik.values.email.trim(),
-                password: formik.values.password.trim(),
-                options: {
-                    data: dataIn,
-                    emailRedirectTo: `${import.meta.env.VITE_SITE_URL}/login`
-                }
-            });
-
-            if (error) {
-                alert("Signup Error")
-                errorAlert('Signup Error:', `${String(error).substring(14)}`);
+        
+        setLoading(true);
+        const {data, error} = await supabase.auth.signUp({
+            email: formik.values.email.trim(),
+            password: formik.values.password.trim(),
+            options: {
+                data: dataIn,
+                emailRedirectTo: `${import.meta.env.VITE_SITE_URL}/login`
             }
+        });
 
-            if (!error) {
-                if (data?.user?.id) {
-                    navigate('/')
-                    const { error: _signOutError } = await supabase.auth.signOut();
-                    successAlert('', `Signup Successful!`);
-                    successAlert('', `Verify email to confirm signup.`);
-                } 
-            }
-
-            setOpenSignup(false);  //this closes "register" popup window
-            setLoading(false)
-        } catch (_error) {
-            errorAlert('Error registering', "Please try again. If the error persists, contact support.");
-            setLoading(false)
-            throw _error;
-        } finally {
-            actions.setSubmitting(false)
-            setLoading(false)
+        if (error) {
+            alert("Signup Error")
+            toast.error(`${String(error).substring(14)}`);
         }
+
+        if (!error) {
+            if (data?.user?.id) {
+                navigate('/registration-success', { state: { email: data?.email } });
+                const { error: _signOutError } = await supabase.auth.signOut();
+                toast.success(`Signup Successful!`);
+                toast.success(`Verify email to confirm signup.`);
+            } 
+        }
+
+        setOpenSignup(false);  //this closes "register" popup window
+        setLoading(false)
+    }
+    } catch (error) {
+      if (error.name === 'AbortError') {
+        toast.error('Request timed out. Please try again.');
+      } else {
+        toast.error("Please try again. If the error persists, contact support.");
+      }
+      setLoading(false);
+      throw error;
+    } finally {
+      clearTimeout(timeoutId);
+      actions.setSubmitting(false);
+      setLoading(false);
     }
   }
 

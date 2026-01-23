@@ -47,6 +47,17 @@ export function Login({ setOpenLogin, setOpenSignup }) {
         }
   
         if (error) {
+            // Check if the error is related to email not being verified
+            if (error.message?.includes('Email not confirmed') ||
+                error.message?.includes('email_not_confirmed') ||
+                error.message?.includes('not confirmed') ||
+                error.message?.includes('verify your email')) {
+              // Redirect to email not verified page with the email
+              navigate('/email-not-verified', {
+                state: { email: values.email.trim() }
+              });
+              return;
+            }
             // Provide user-friendly error messages
             let errorMessage = "An error occurred during login. Please try again.";
             

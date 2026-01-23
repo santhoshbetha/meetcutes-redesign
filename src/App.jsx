@@ -18,7 +18,12 @@ const Terms = lazy(() => import("@/pages/Terms").then(module => ({ default: modu
 const Privacy = lazy(() => import("@/pages/Privacy").then(module => ({ default: module.Privacy })));
 const TermsPopup = lazy(() => import("@/pages/TermsPopup").then(module => ({ default: module.TermsPopup })));
 const LoginPage = lazy(() => import("@/pages/auth/LoginPage").then(module => ({ default: module.LoginPage })));
+const RegistrationSuccess = lazy(() => import("@/pages/auth/RegistrationSuccess").then(module => ({ default: module.RegistrationSuccess })));
+const EmailVerification = lazy(() => import("@/pages/auth/EmailVerification").then(module => ({ default: module.EmailVerification })));
+const EmailNotVerified = lazy(() => import("@/pages/auth/EmailNotVerified").then(module => ({ default: module.EmailNotVerified })));
+const AuthConfirm = lazy(() => import("@/pages/auth/AuthConfirm").then(module => ({ default: module.AuthConfirm })));
 const Notifications = lazy(() => import("@/pages/dashboard/Notifications").then(module => ({ default: module.Notifications })));
+const Maintenance = lazy(() => import("@/pages/Maintenance").then(module => ({ default: module.Maintenance })));
 import NavBefore from "@/components/NavBefore";
 import NavAfter from "@/components/Navafter";
 import { useAuth } from "./context/AuthContext";
@@ -36,6 +41,24 @@ function App() {
   const [showInitialLoading, setShowInitialLoading] = useState(false);
 
   const [theme, _setTheme] = useState("dark");
+
+  // Check if maintenance mode is enabled
+  const isMaintenanceMode = import.meta.env.VITE_MAINTENANCE_MODE === 'true' ||
+                           import.meta.env.VITE_MAINTENANCE_MODE === '1' ||
+                           import.meta.env.VITE_MAINTENANCE_MODE === 'yes';
+
+  // If maintenance mode is enabled, show only the maintenance page
+  if (isMaintenanceMode) {
+    return (
+      <Suspense fallback={
+        <div className="fixed inset-0 z-9999 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        </div>
+      }>
+        <Maintenance />
+      </Suspense>
+    );
+  }
 
   useEffect(() => {
     const root = window.document.documentElement;
@@ -175,6 +198,11 @@ function App() {
               <Route path="/changepassword" element={<ChangePassword />} />
               <Route path="/forgotpassword" element={<ForgotPassword />} />
               <Route path="/login" element={<LoginPage />} />
+
+              <Route path="/registration-success" element={<RegistrationSuccess />} />
+              <Route path="/email-verification" element={<EmailVerification />} />
+              <Route path="/email-not-verified" element={<EmailNotVerified />} />
+              <Route path="/auth-confirm" element={<AuthConfirm />} />
 
               <Route path="/settings" element={<Settings />} />
               <Route path="/terms" element={<Terms />} />

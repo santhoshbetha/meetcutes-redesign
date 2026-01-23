@@ -454,7 +454,7 @@ export default function EventDetails() {
                 className={`w-full font-semibold py-4 rounded-md transition-all hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] ${
                   isRegistered
                     ? 'bg-red-500 hover:bg-red-600 text-white'
-                    : 'bg-primary hover:bg-primary/90 text-primary-foreground'
+                    : 'bg-green-500 hover:bg-green-600 text-white'
                 }`}
               >
                 {isRegistering ? (
@@ -490,7 +490,7 @@ export default function EventDetails() {
                   <AlertDialogCancel>Cancel</AlertDialogCancel>
                   <AlertDialogAction
                     onClick={confirmRegistration}
-                    className={isRegistered ? 'bg-red-500 hover:bg-red-600' : 'bg-primary hover:bg-primary/90'}
+                    className={isRegistered ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'}
                   >
                     {isRegistered ? 'Unregister' : 'Register'}
                   </AlertDialogAction>

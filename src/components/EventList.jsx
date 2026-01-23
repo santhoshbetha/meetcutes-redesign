@@ -154,6 +154,7 @@ export function EventList({ events, userlatitude, userlongitude, setIsLoading, p
                 event={event}
                 userlatitude={userlatitude}
                 userlongitude={userlongitude}
+                profiledata={profiledata}
               />
             ))}
           </div>

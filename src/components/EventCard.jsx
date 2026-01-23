@@ -3,16 +3,16 @@ import { Clock, Calendar, MapPin, Users, Heart, Coffee, Music, Camera } from "lu
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from '@/components/ui/separator';
-import { haversine } from "../utils/util";
+import { haversine, isObjEmpty } from "../utils/util";
 import dayjs from "dayjs";
 
 const getEventIcon = (locationName) => {
   const name = locationName?.toLowerCase() || '';
-  if (name.includes('target') || name.includes('store') || name.includes('shop')) return <Coffee className="w-5 h-5" />;
-  if (name.includes('ross') || name.includes('clothing')) return <Heart className="w-5 h-5" />;
-  if (name.includes('music') || name.includes('concert')) return <Music className="w-5 h-5" />;
-  if (name.includes('photo') || name.includes('camera')) return <Camera className="w-5 h-5" />;
-  return <Heart className="w-5 h-5" />;
+  if (name.includes('target') || name.includes('store') || name.includes('shop')) return '🛍️';
+  if (name.includes('ross') || name.includes('clothing')) return '👕';
+  if (name.includes('music') || name.includes('concert')) return '🎵';
+  if (name.includes('photo') || name.includes('camera')) return '📷';
+  return '❤️';
 };
 
 const getSampleInterests = () => {
@@ -25,14 +25,34 @@ const getSampleInterests = () => {
   return interests.slice(0, Math.floor(Math.random() * 3) + 1);
 };
 
-export function EventCard({ setSelectedEvent, event, userlatitude, userlongitude }) {
+export function EventCard({ setSelectedEvent, event, userlatitude, userlongitude, profiledata }) {
   const [distance, setDistance] = useState(0);
+  const [isRegistered, setIsRegistered] = useState(false);
   const interests = getSampleInterests();
 
   useEffect(() => {
     const distance = haversine(userlatitude, userlongitude, event?.latitude, event?.longitude);
     setDistance(distance);
   }, [event?.latitude, event?.longitude, userlatitude, userlongitude]);
+
+  useEffect(() => {
+    if (isObjEmpty(event?.attendeeslist)) {
+        setIsRegistered(false)
+    } else {
+        let attendeeslistObj3
+        if (Array.isArray(event?.attendeeslist) == false) {  // if string (from postgres)
+            attendeeslistObj3 = event?.attendeeslist?.replace(/\{|\}/gm, "").split(",")
+        } else {
+            attendeeslistObj3 = event?.attendeeslist
+        }
+
+        if (attendeeslistObj3?.map(attendee => attendee?.toLowerCase()).includes(profiledata?.userhandle?.toLowerCase())) {
+            setIsRegistered(true)
+        } else {
+            setIsRegistered(false)
+        }
+    }
+  }, [event, profiledata]);
 
   return (
     <Card
@@ -42,6 +62,15 @@ export function EventCard({ setSelectedEvent, event, userlatitude, userlongitude
     >
       {/* Gradient overlay on hover */}
       <div className="absolute inset-0 bg-linear-to-br from-primary/5 via-transparent to-primary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+      {/* Registered indicator */}
+      {isRegistered && (
+        <div className="absolute top-3 right-3 z-10">
+          <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center shadow-lg">
+            <span className="text-white text-xs font-bold">R</span>
+          </div>
+        </div>
+      )}
 
       <div className="relative p-6">
         {/* Header with icon and title */}

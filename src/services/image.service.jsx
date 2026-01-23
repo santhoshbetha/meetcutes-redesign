@@ -7,6 +7,9 @@ const CDNURL = "https://yrxymkmmfrkrfccmutvr.supabase.co/storage/v1/object/publi
 //https://github.com/supabase/storage/issues/266
 
 export const getImagesList = async (userid) => {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 5000);
+
   try {
     const { data, error } = await supabase.storage
       .from("meetfirst")
@@ -14,6 +17,7 @@ export const getImagesList = async (userid) => {
         limit: 4,
         offset: 0,
         sortBy: { column: "name", order: "asc" },
+        signal: controller.signal,
       });
 
     if (error) {
@@ -28,10 +32,18 @@ export const getImagesList = async (userid) => {
       };
     }
   } catch (error) {
+    if (error.name === 'AbortError') {
+      return {
+        success: false,
+        msg: 'Request timed out'
+      };
+    }
     return {
       success: false,
       msg: error.message,
     };
+  } finally {
+    clearTimeout(timeoutId);
   }
 };
 
@@ -45,10 +57,13 @@ export const getSupabaseFileUrl = (filePath) => {
 };
 
 export const getImage = async (userid, imagename) => {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 5000);
+
   try {
     const { data, error } = await supabase.storage
       .from("meetfirst")
-      .list(`images/${userid}/${imagename}`);
+      .list(`images/${userid}/${imagename}`, { signal: controller.signal });
 
     if (error) {
       return {
@@ -62,14 +77,25 @@ export const getImage = async (userid, imagename) => {
       };
     }
   } catch (error) {
+    if (error.name === 'AbortError') {
+      return {
+        success: false,
+        msg: 'Request timed out'
+      };
+    }
     return {
       success: false,
       msg: error.message,
     };
+  } finally {
+    clearTimeout(timeoutId);
   }
 };
 
 export const uploadImage = async (userid, file, imageid) => {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 5000);
+
   let imagename;
   switch (imageid) {
     case 0:
@@ -115,6 +141,7 @@ export const uploadImage = async (userid, file, imageid) => {
       .upload(`images/${userid}/${imagename}` + "/", file, {
         cacheControl: "3600",
         upsert: true,
+        signal: controller.signal,
       });
     if (error) {
       return {
@@ -128,18 +155,29 @@ export const uploadImage = async (userid, file, imageid) => {
       };
     }
   } catch (error) {
+    if (error.name === 'AbortError') {
+      return {
+        success: false,
+        msg: 'Request timed out'
+      };
+    }
     return {
       success: false,
       msg: error.message,
     };
+  } finally {
+    clearTimeout(timeoutId);
   }
 };
 
 export const uploadFaceImage = async (userid, file) => {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 5000);
+
   try {
     const { data, error } = await supabase.storage
       .from("meetfirst")
-      .upload(`images/${userid}/face` + "/", file);
+      .upload(`images/${userid}/face` + "/", file, { signal: controller.signal });
     if (error) {
       return {
         success: false,
@@ -152,14 +190,25 @@ export const uploadFaceImage = async (userid, file) => {
       };
     }
   } catch (error) {
+    if (error.name === 'AbortError') {
+      return {
+        success: false,
+        msg: 'Request timed out'
+      };
+    }
     return {
       success: false,
       msg: error.message,
     };
+  } finally {
+    clearTimeout(timeoutId);
   }
 };
 
 export const deleteImage = async (userid, imageid) => {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 5000);
+
   let imagename;
   switch (imageid) {
     case 0:
@@ -203,7 +252,7 @@ export const deleteImage = async (userid, imageid) => {
   try {
     const { data, error } = await supabase.storage
       .from("meetfirst")
-      .remove([`images/${userid}/${imagename}`]);
+      .remove([`images/${userid}/${imagename}`], { signal: controller.signal });
 
     if (error) {
       return {
@@ -216,9 +265,17 @@ export const deleteImage = async (userid, imageid) => {
       };
     }
   } catch (error) {
+    if (error.name === 'AbortError') {
+      return {
+        success: false,
+        msg: 'Request timed out'
+      };
+    }
     return {
       success: false,
       msg: error.message,
     };
+  } finally {
+    clearTimeout(timeoutId);
   }
 };

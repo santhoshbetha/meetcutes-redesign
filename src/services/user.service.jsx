@@ -2,10 +2,13 @@
 import supabase from "@/lib/supabase";
 
 export const getProfileData = async userid => {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 5000);
+
   try {
     const { data, error } = await supabase
       .from("users")
-      .select()
+      .select("*", { signal: controller.signal })
       .eq("userid", userid)
       .single();
     if (error) {
@@ -24,10 +27,15 @@ export const getProfileData = async userid => {
       success: false,
       msg: error.message
     };
+  } finally {
+    clearTimeout(timeoutId);
   }
 };
 
 export const getUserProfile = async (userid) => {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 5000);
+
   try {
     const { data, error } = await supabase
       .from("users")
@@ -44,7 +52,7 @@ export const getUserProfile = async (userid) => {
          userstate, \
          idverified, \
          termsaccepted"
-       )
+       , { signal: controller.signal })
       .eq("userid", userid)
       .single();
 
@@ -63,14 +71,19 @@ export const getUserProfile = async (userid) => {
       success: false,
       msg: error.message
     };
+  } finally {
+    clearTimeout(timeoutId);
   }
 };
 
 export const updateUserInfo = async (userid, data) => {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 5000);
+
   try {
     const { error } = await supabase
       .from("users")
-      .update(data)
+      .update(data, { signal: controller.signal })
       .eq("userid", userid);
 
     if (error) {
@@ -87,14 +100,19 @@ export const updateUserInfo = async (userid, data) => {
       success: false,
       msg: error.message
     };
+  } finally {
+    clearTimeout(timeoutId);
   }
 };
 
 export const checkIfHandleTaken = async (handle) => {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 5000);
+
   try {
     const { data, error } = await supabase.rpc("check_if_handle_taken", {
       handle: handle,
-    });
+    }, { signal: controller.signal });
 
     if (error) {
       return {
@@ -112,6 +130,8 @@ export const checkIfHandleTaken = async (handle) => {
       success: false,
       msg: error.message
     };
+  } finally {
+    clearTimeout(timeoutId);
   }
 };
 
@@ -138,11 +158,14 @@ export const logoutUser = async () => {
 }
 
 export const deleteUser = async (userId) => {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 5000);
+
   try {
     // First delete from users table
     const { error: userError } = await supabase
       .from("users")
-      .delete()
+      .delete({ signal: controller.signal })
       .eq("userid", userId);
 
     if (userError) {
@@ -165,5 +188,7 @@ export const deleteUser = async (userId) => {
       success: false,
       msg: error.message
     };
+  } finally {
+    clearTimeout(timeoutId);
   }
 };

@@ -8,61 +8,82 @@ const digits = (num, count = 0) => {
 };
 
 export const searchUsers = async (searchinput) => {
-  const gender = searchinput.gender;
-  let lat = searchinput.latitude;
-  let lng = searchinput.longitude;
-  let ageto = searchinput.ageto;
-  let agefrom = searchinput.agefrom;
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 5000);
 
-  var cols = {
-    gender: gender == "Male" ? "Female" : "Male",
-    agefrom: agefrom,
-    ageto: ageto,
-    lat: lat,
-    long: lng,
-    searchdistance: searchinput?.searchdistance,
-    ethnicity: searchinput?.ethnicity,
-  };
+  try {
+    const gender = searchinput.gender;
+    let lat = searchinput.latitude;
+    let lng = searchinput.longitude;
+    let ageto = searchinput.ageto;
+    let agefrom = searchinput.agefrom;
 
-  const { data, error } = await supabase.rpc("search_by_distance", {
-    gender: cols.gender,
-    agefrom: cols.agefrom,
-    ageto: cols.ageto,
-    lat: cols.lat,
-    long: cols.long,
-    searchdistance: cols.searchdistance,
-  });
+    var cols = {
+      gender: gender == "Male" ? "Female" : "Male",
+      agefrom: agefrom,
+      ageto: ageto,
+      lat: lat,
+      long: lng,
+      searchdistance: searchinput?.searchdistance,
+      ethnicity: searchinput?.ethnicity,
+    };
 
-  if (error) {
+    const { data, error } = await supabase.rpc("search_by_distance", {
+      gender: cols.gender,
+      agefrom: cols.agefrom,
+      ageto: cols.ageto,
+      lat: cols.lat,
+      long: cols.long,
+      searchdistance: cols.searchdistance,
+    }, { signal: controller.signal });
+
+    if (error) {
+      return {
+        success: false,
+        msg: error?.message,
+      };
+    }
+
+    // Filter out users who have set visibility to 'events-only'
+    let filteredData = data?.filter(user => user.visibilityPreference !== 'events-only') || [];
+
+    // Filter by ethnicity if provided
+    if (cols.ethnicity && cols.ethnicity.length > 0 && !cols.ethnicity.includes("all")) {
+      filteredData = filteredData.filter(user => cols.ethnicity.includes(user.ethnicity));
+    }
+
+    return {
+      success: true,
+      data: filteredData,
+    };
+  } catch (error) {
+    if (error.name === 'AbortError') {
+      return {
+        success: false,
+        msg: 'Request timed out',
+      };
+    }
     return {
       success: false,
-      msg: error?.message,
+      msg: error?.message || 'An error occurred',
     };
+  } finally {
+    clearTimeout(timeoutId);
   }
-
-  // Filter out users who have set visibility to 'events-only'
-  let filteredData = data?.filter(user => user.visibilityPreference !== 'events-only') || [];
-
-  // Filter by ethnicity if provided
-  if (cols.ethnicity && cols.ethnicity.length > 0 && !cols.ethnicity.includes("all")) {
-    filteredData = filteredData.filter(user => cols.ethnicity.includes(user.ethnicity));
-  }
-
-  return {
-    success: true,
-    data: filteredData,
-  };
 };
 
 export const searchUser = async (searchtext) => {
-  console.log("Searching for user:", searchtext);
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 5000);
+
   try {
+    console.log("Searching for user:", searchtext);
     let dataout = {
       data: null,
       error: null
     };
 
-  var emailregex = /^[\w.-]+@([\w-]+\.)+[\w-]{2,4}$/;
+    var emailregex = /^[\w.-]+@([\w-]+\.)+[\w-]{2,4}$/;
 
     if (digits(Number(searchtext.trim())) == 10) {
       console.log("Searching by phone number:", searchtext);
@@ -71,11 +92,11 @@ export const searchUser = async (searchtext) => {
         .select(
           "userid, userhandle, firstname, age, gender, userstate, \
           latitude, longitude, onlyhundredmileevisiblity, \
-          defaultcoordsset, usercoordsset, exactcoordsset, timeoflogin, visibilitypreference"
+          defaultcoordsset, usercoordsset, exactcoordsset, timeoflogin, visibilitypreference",
+          { signal: controller.signal }
         )
         .textSearch("phonenumber", Number(searchtext))
         .eq("phonenumbersearch", true)
-        // .eq('phonenumber', Number(searchtext))
         .single();
     } else if (searchtext.match(emailregex)) {
       console.log("Searching by email:", searchtext);
@@ -84,7 +105,8 @@ export const searchUser = async (searchtext) => {
         .select(
           "userid, userhandle, firstname, age, gender, userstate, \
           latitude, longitude, onlyhundredmileevisiblity, \
-          defaultcoordsset, usercoordsset, exactcoordsset, timeoflogin, visibilitypreference"
+          defaultcoordsset, usercoordsset, exactcoordsset, timeoflogin, visibilitypreference",
+          { signal: controller.signal }
         )
         //   .textSearch('userid', searchtext.toLowerCase())
         .eq("emailsearch", true)
@@ -97,7 +119,8 @@ export const searchUser = async (searchtext) => {
         .select(
           "userid, userhandle, firstname, age, gender, userstate, \
            latitude, longitude, onlyhundredmileevisiblity, \
-           defaultcoordsset, usercoordsset, exactcoordsset, timeoflogin, visibilitypreference"
+           defaultcoordsset, usercoordsset, exactcoordsset, timeoflogin, visibilitypreference",
+          { signal: controller.signal }
         )
         //   .textSearch('userhandle', searchtext)
         .eq("userhandlesearch", true)
@@ -127,9 +150,17 @@ export const searchUser = async (searchtext) => {
       data: dataout.data
     };
   } catch (error) {
+    if (error.name === 'AbortError') {
+      return {
+        success: false,
+        msg: 'Request timed out'
+      };
+    }
     return {
       success: false,
-      msg: error
+      msg: error?.message || error
     };
+  } finally {
+    clearTimeout(timeoutId);
   }
 };

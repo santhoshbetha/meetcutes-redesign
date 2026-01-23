@@ -229,7 +229,7 @@ export default function EventDetailsDialog({ event, onClose, profiledata, loadin
             className={`w-full font-semibold py-4 rounded-md transition-all hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] ${
               isRegistered
                 ? 'bg-red-500 hover:bg-red-600 text-white'
-                : 'bg-primary hover:bg-primary/90 text-primary-foreground'
+                : 'bg-green-500 hover:bg-green-600 text-white'
             }`}
           >
             {isRegistering ? (

@@ -6,7 +6,7 @@ import { Edit2, Mail, Phone, Settings, Calendar, Eye, Users, ChevronLeft, Chevro
 import { FaFacebook, FaInstagram, FaLinkedin } from "react-icons/fa";
 import { LocationDialog } from "@/components/LocationDialog";
 import { ChangeLocation } from "@/components/ChangeLocation";
-import { Dialog, DialogTrigger, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogTrigger, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Spinner } from '@/components/ui/Spinner';
 import { Editable } from "@/components/Editable";
 import { HandleCard } from "@/components/HandleCard";
@@ -509,9 +509,9 @@ export function Profile() {
             {/* Save Changes Dialog */}
             <Dialog open={change} onOpenChange={setChange}>
               <DialogContent className="sm:max-w-md">
+                <DialogTitle>Unsaved Changes</DialogTitle>
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="font-semibold text-foreground">Unsaved Changes</h3>
                     <p className="text-sm text-muted-foreground">You have unsaved changes to your profile</p>
                   </div>
                 </div>

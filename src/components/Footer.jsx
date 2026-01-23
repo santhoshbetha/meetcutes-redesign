@@ -33,7 +33,7 @@ export default function Footer() {
               <div className="flex items-center gap-4 pt-2">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Mail className="w-4 h-4" />
-                  <span>hello@meetcutes.com</span>
+                  <span>hello@meetcutes.us</span>
                 </div>
               </div>
             </div>
