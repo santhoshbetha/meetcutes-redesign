@@ -55,6 +55,7 @@ export const searchUsers = async (searchinput) => {
 };
 
 export const searchUser = async (searchtext) => {
+  console.log("Searching for user:", searchtext);
   try {
     let dataout = {
       data: null,
@@ -64,42 +65,47 @@ export const searchUser = async (searchtext) => {
   var emailregex = /^[\w.-]+@([\w-]+\.)+[\w-]{2,4}$/;
 
     if (digits(Number(searchtext.trim())) == 10) {
+      console.log("Searching by phone number:", searchtext);
       dataout = await supabase
         .from("users")
         .select(
-          "userid, userhandle, firstname, age, gender, userstate,\
-                                            latitude, longitude, onlyhundredmileevisiblity, \
-                                            defaultcoordsset, usercoordsset, exactcoordsset, timeoflogin, visibilityPreference",
+          "userid, userhandle, firstname, age, gender, userstate, \
+          latitude, longitude, onlyhundredmileevisiblity, \
+          defaultcoordsset, usercoordsset, exactcoordsset, timeoflogin, visibilitypreference"
         )
         .textSearch("phonenumber", Number(searchtext))
         .eq("phonenumbersearch", true)
         // .eq('phonenumber', Number(searchtext))
         .single();
     } else if (searchtext.match(emailregex)) {
+      console.log("Searching by email:", searchtext);
       dataout = await supabase
         .from("users")
         .select(
-          "userid, userhandle, firstname, age, gender, userstate,\
-                                        latitude, longitude, onlyhundredmileevisiblity, \
-                                        defaultcoordsset, usercoordsset, exactcoordsset, timeoflogin, visibilityPreference",
+          "userid, userhandle, firstname, age, gender, userstate, \
+          latitude, longitude, onlyhundredmileevisiblity, \
+          defaultcoordsset, usercoordsset, exactcoordsset, timeoflogin, visibilitypreference"
         )
         //   .textSearch('userid', searchtext.toLowerCase())
         .eq("emailsearch", true)
         .eq("email", searchtext.toLowerCase())
         .single();
     } else {
+      console.log("Searching by user handle:", searchtext);
       dataout = await supabase
         .from("users")
         .select(
-          "userid, userhandle, firstname, age, gender, userstate,\
-                                        latitude, longitude, onlyhundredmileevisiblity, \
-                                        defaultcoordsset, usercoordsset, exactcoordsset, timeoflogin, visibilityPreference",
+          "userid, userhandle, firstname, age, gender, userstate, \
+           latitude, longitude, onlyhundredmileevisiblity, \
+           defaultcoordsset, usercoordsset, exactcoordsset, timeoflogin, visibilitypreference"
         )
         //   .textSearch('userhandle', searchtext)
         .eq("userhandlesearch", true)
         .eq("userhandle", searchtext)
         .single();
     }
+
+    console.log("Search result:", dataout);
 
     if (dataout.error) {
       return {

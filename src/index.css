@@ -47,6 +47,7 @@
   --color-input: hsl(217.2 32.6% 17.5%);
   --color-ring: hsl(30 100% 70%);
 }
+
 :root {
   --background: oklch(0.9798 0.0045 78.2983);
   --foreground: oklch(0.251 0.0105 260.6945);
@@ -191,9 +192,6 @@
   --primary-gradient: linear-gradient(135deg, var(--primary) 0%, var(--primary-gradient-accent) 100%);
 }
 
-
-
-
 @theme inline {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
@@ -234,8 +232,6 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 }
-
-
 
 .pacifico-regular {
   font-family: "Pacifico", cursive;

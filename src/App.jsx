@@ -27,6 +27,7 @@ import { AutoCompleteDataContextProvider } from './context/AutoCompleteDataConte
 import { GlobalLoadingProvider } from './context/GlobalLoadingContext';
 import { Toaster } from "react-hot-toast";
 import GlobalLoadingSpinner from './components/GlobalLoadingSpinner';
+import { InternetStatusBanner } from './components/InternetStatusBanner';
 
 function App() {
   const { user, profiledata } = useAuth();
@@ -73,7 +74,57 @@ function App() {
       <GlobalLoadingProvider>
         <div className="App">
           <AutoCompleteDataContextProvider>
-          <Toaster />
+          <Toaster
+            position="top-center"
+            toastOptions={{
+              duration: 4000,
+              closeButton: true,
+              style: {
+                background: 'hsl(var(--color-card) / 0.95)',
+                color: 'hsl(var(--color-card-foreground))',
+                border: '2px solid hsl(var(--color-primary))',
+                borderRadius: '0.75rem',
+                boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.3), 0 10px 10px -5px rgb(0 0 0 / 0.2)',
+                fontSize: '14px',
+                fontWeight: '600',
+                backdropFilter: 'blur(8px)',
+                padding: '12px 16px',
+              },
+              success: {
+                style: {
+                  background: '#dcfce7',
+                  color: '#166534',
+                  border: '2px solid #16a34a',
+                  boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.3), 0 10px 10px -5px rgb(0 0 0 / 0.2)',
+                },
+                iconTheme: {
+                  primary: '#16a34a',
+                  secondary: '#dcfce7',
+                },
+              },
+              error: {
+                style: {
+                  background: '#fef2f2',
+                  color: '#991b1b',
+                  border: '2px solid #dc2626',
+                  boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.3), 0 10px 10px -5px rgb(0 0 0 / 0.2)',
+                },
+                iconTheme: {
+                  primary: '#dc2626',
+                  secondary: '#fef2f2',
+                },
+              },
+              loading: {
+                style: {
+                  background: 'hsl(var(--color-muted) / 0.95)',
+                  color: 'hsl(var(--color-muted-foreground))',
+                  border: '2px solid hsl(var(--color-border))',
+                  boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.3), 0 10px 10px -5px rgb(0 0 0 / 0.2)',
+                },
+              },
+            }}
+          />
+          <InternetStatusBanner />
           <GlobalLoadingSpinner />
           <SearchAndUserEventsDataContextProvider>
           {showInitialLoading ? (

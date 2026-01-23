@@ -18,6 +18,7 @@ import { isObjEmpty } from "@/utils/util";
 import { updateUserInfo } from "@/services/user.service";
 import { uploadImage } from "@/services/image.service";
 import { useOnlineStatus } from '@/hooks/useOnlineStatus';
+import toast from "react-hot-toast";
 
 export function Profile() {
   const { user, userSession, profiledata, setProfiledata } = useAuth();
@@ -84,23 +85,24 @@ export function Profile() {
                       instagram: instagram,
                       linkedin: linkedin
                   });
+                  toast.success('Profile updated successfully!')
               } else {
-                  alert('Something wrong. Try later')
+                  toast.error('Something wrong. Try later')
               }
               setEditing(false)
           } else {
             setEditing(false)
-            alert ("Error, logout and login again")
+            toast.error("Error, logout and login again")
           }
       } else {
           setEditing(false)
-          alert('You are offline. check your internet connection.')
+          toast.error('You are offline. check your internet connection.')
       }
 
       setEditing(false)
     } else {
       setEditing(false)
-      alert("invalid phonenumber! try again");
+      toast.error("invalid phonenumber! try again");
     }
     return;
   };
@@ -112,17 +114,18 @@ export function Profile() {
               const res = await updateUserInfo(user?.id, {bio: editdata.bio});
               if (res.success) {
                   setProfiledata({...profiledata, bio: editdata.bio});
+                  toast.success('Bio updated successfully!')
               } else {
-                  alert ('Edit Biodata Error.. try again later')
+                  toast.error ('Edit Biodata Error.. try again later')
               }
               setEditing(false)
           } else {
               setEditing(false)
-              alert ("Error, logout and login again")
+              toast.error ("Error, logout and login again")
           }
       } else {
           setEditing(false)
-          alert('You are offline. check your internet connection.')
+          toast.error('You are offline. check your internet connection.')
       }
   }
 
@@ -138,17 +141,17 @@ export function Profile() {
               setEditing(false)
           }
         } else {
-          alert ("Error, logout and login again")
+          toast.error ("Error, logout and login again")
         }
       } else {
-        alert('You are offline. check your internet connection.')
+        toast.error('You are offline. check your internet connection.')
         return;
       }
   };
 
   const handleProfileImageCropped = async (blob) => {
     if (!isOnline) {
-      alert('You are offline. Check your internet connection');
+      toast.error('You are offline. Check your internet connection');
       return;
     }
 
@@ -180,16 +183,17 @@ export function Profile() {
             images: imagesObj,
           });
           setEditingProfileImage(false);
+          toast.success('Profile image updated successfully!');
         } else {
-          alert(res2.msg || 'Failed to update profile');
+          toast.error(res2.msg || 'Failed to update profile');
           setEditingProfileImage(false);
         }
       } else {
-        alert(res.msg || 'Failed to upload image');
+        toast.error(res.msg || 'Failed to upload image');
         setEditingProfileImage(false);
       }
     } catch (error) {
-      alert('An error occurred while uploading the image');
+      toast.error('An error occurred while uploading the image');
       setEditingProfileImage(false);
     }
   };
@@ -366,8 +370,15 @@ export function Profile() {
                         placeholder="Enter your phone number"
                         value={phone}
                         onChange={(e) => {
-                          setChange(true)
                           setPhone(e.target.value);
+                        }}
+                        onBlur={() => {
+                          const phoneregex = /^\d{10}$/;
+                          if (phone && !phone.match(phoneregex)) {
+                            toast.error("Invalid phone number! Please enter a 10-digit number");
+                            return;
+                          }
+                          setChange(true);
                         }}
                         className="w-full p-4 border border-border/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 bg-background transition-all hover:bg-muted/20 cursor-text"
                       />
@@ -410,9 +421,9 @@ export function Profile() {
                         placeholder="https://facebook.com/yourprofile"
                         value={facebook}
                         onChange={(e) => {
-                          setChange(true)
                           setFacebook(e.target.value);
                         }}
+                        onBlur={() => setChange(true)}
                         className="w-full p-4 border border-border/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 bg-background transition-all hover:bg-muted/20 cursor-text"
                       />
                     </Editable>
@@ -436,9 +447,9 @@ export function Profile() {
                         placeholder="@yourusername or full URL"
                         value={instagram}
                         onChange={(e) => {
-                          setChange(true)
                           setInstagram(e.target.value);
                         }}
+                        onBlur={() => setChange(true)}
                         className="w-full p-4 border border-border/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 bg-background transition-all hover:bg-muted/20 cursor-text"
                       />
                     </Editable>
@@ -462,9 +473,9 @@ export function Profile() {
                         placeholder="https://linkedin.com/in/yourprofile"
                         value={linkedin}
                         onChange={(e) => {
-                          setChange(true)
                           setLinkedIn(e.target.value);
                         }}
+                        onBlur={() => setChange(true)}
                         className="w-full p-4 border border-border/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 bg-background transition-all hover:bg-muted/20 cursor-text"
                       />
                     </Editable>
@@ -495,49 +506,47 @@ export function Profile() {
               </CardContent>
             </Card>
 
-            {/* Save Changes Button */}
-            {change && (
-              <Card className="shadow-xl border-2 border-primary/30 bg-primary/5">
-                <CardContent className="pt-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="font-semibold text-foreground">Unsaved Changes</h3>
-                      <p className="text-sm text-muted-foreground">You have unsaved changes to your profile</p>
-                    </div>
-                    <div className="flex gap-3">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => {
-                          setChange(false);
-                          setPhone(isObjEmpty(profiledata?.phonenumber) ? "" : profiledata?.phonenumber);
-                          setFacebook(isObjEmpty(profiledata?.facebook) ? "" : profiledata?.facebook);
-                          setInstagram(isObjEmpty(profiledata?.instagram) ? "" : profiledata?.instagram);
-                          setLinkedIn(isObjEmpty(profiledata?.linkedin) ? "" : profiledata?.linkedin);
-                        }}
-                      >
-                        Cancel
-                      </Button>
-                      <Button
-                        type="submit"
-                        form="social-form"
-                        className="bg-primary hover:bg-primary/90 shadow-lg"
-                        disabled={editing}
-                      >
-                        {editing ? (
-                          <>
-                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
-                            Saving...
-                          </>
-                        ) : (
-                          'Save Changes'
-                        )}
-                      </Button>
-                    </div>
+            {/* Save Changes Dialog */}
+            <Dialog open={change} onOpenChange={setChange}>
+              <DialogContent className="sm:max-w-md">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="font-semibold text-foreground">Unsaved Changes</h3>
+                    <p className="text-sm text-muted-foreground">You have unsaved changes to your profile</p>
                   </div>
-                </CardContent>
-              </Card>
-            )}
+                </div>
+                <div className="flex gap-3 justify-end mt-4">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      setChange(false);
+                      setPhone(isObjEmpty(profiledata?.phonenumber) ? "" : profiledata?.phonenumber);
+                      setFacebook(isObjEmpty(profiledata?.facebook) ? "" : profiledata?.facebook);
+                      setInstagram(isObjEmpty(profiledata?.instagram) ? "" : profiledata?.instagram);
+                      setLinkedIn(isObjEmpty(profiledata?.linkedin) ? "" : profiledata?.linkedin);
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    form="social-form"
+                    className="bg-primary hover:bg-primary/90 shadow-lg"
+                    disabled={editing}
+                  >
+                    {editing ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
+                        Saving...
+                      </>
+                    ) : (
+                      'Save Changes'
+                    )}
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
 

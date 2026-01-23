@@ -10,6 +10,7 @@ import { searchUser } from "../services/search.service";
 import { Spinner } from "../components/ui/Spinner";
 import { UserCard } from "../components/UserCard";
 import { Search as SearchIcon, Users, AlertCircle, CheckCircle } from "lucide-react";
+import toast from "react-hot-toast";
 
 export function Search() {
   const navigate = useNavigate();
@@ -20,12 +21,23 @@ export function Search() {
   const [loading, setLoading] = useState(false);
 
   const searchdone = useRef(false);
+  const resultsRef = useRef(null);
 
   useEffect(() => {
     if (!isObjEmpty(userdata)) {
       setUsercoordsset(userdata?.defaultcoordsset || userdata?.usercoordsset || userdata?.exactcoordsset)
     }
   }, [userdata]);
+
+  useEffect(() => {
+    if (searchdone.current && resultsRef.current) {
+      // Scroll to results section with smooth behavior
+      resultsRef.current.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'start' 
+      });
+    }
+  }, [searchdone.current, userdata]);
 
     const handleSearchSubmit = async (e) => {
         e.preventDefault()
@@ -50,7 +62,7 @@ export function Search() {
             setUserdata({})
           }
         } else {
-          alert("invalid email or phonenumber or handle");
+          toast.error("Invalid email, phone number, or user handle. Please check your input and try again.");
         }
         setSearchtext("");
         searchdone.current = true;
@@ -145,7 +157,7 @@ export function Search() {
         </div>
 
         {/* Search Results */}
-        <div className="max-w-2xl mx-auto space-y-6">
+        <div ref={resultsRef} className="max-w-2xl mx-auto space-y-6">
           {/* No Results */}
           {isObjEmpty(userdata) && searchdone.current && (
             <Card className="border-amber-200 bg-amber-50/50 dark:bg-amber-950/20 dark:border-amber-800/30">
@@ -159,7 +171,7 @@ export function Search() {
                       No User Found
                     </h3>
                     <p className="text-amber-900/80 dark:text-amber-100/80">
-                      We couldn't find a user matching your search criteria. Please check your input and try again.
+                      We couldn't find a user matching your search input. Please check your input and try again.
                     </p>
                   </div>
                   <Button
@@ -199,27 +211,6 @@ export function Search() {
             </Card>
           )}
 
-          {/* User Found */}
-          {!Array.isArray(userdata) && !isObjEmpty(userdata) && (
-            <Card className="border-green-200 bg-green-50/50 dark:bg-green-950/20 dark:border-green-800/30">
-              <CardContent className="pt-6">
-                <div className="text-center space-y-4">
-                  <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-2xl flex items-center justify-center mx-auto">
-                    <CheckCircle className="w-8 h-8 text-green-600 dark:text-green-400" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-green-900 dark:text-green-100 mb-2">
-                      User Found!
-                    </h3>
-                    <p className="text-green-900/80 dark:text-green-100/80">
-                      Click below to view their profile and connect.
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
           {/* User Card */}
           {!isObjEmpty(userdata) && (
             <div className="flex justify-center">
@@ -231,11 +222,8 @@ export function Search() {
                 className="transform transition-transform hover:scale-105"
               >
                 <UserCard
+                  setSelectedUser={null}
                   profile={userdata}
-                  userid={userdata?.userid}
-                  firstname={userdata?.firstname}
-                  age={userdata?.age}
-                  setUserdata={setUserdata}
                 />
               </Link>
             </div>

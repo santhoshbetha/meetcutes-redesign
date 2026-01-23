@@ -12,9 +12,9 @@ import {
   QueryObserver,
   queryOptions,
 } from "@tanstack/react-query";
-import { current, produce } from "immer";
 import { useState, useEffect } from "react";
 import { isObjEmpty } from "@/utils/util";
+import { getAutoCompleteData } from "../services/location.service";
 
 //export function getMeals(client) {
 //  return client.from("meals").select().limit(50);

@@ -7,7 +7,7 @@ export const SearchAndUserEventsDataContext = createContext();
 
 export function SearchAndUserEventsDataContextProvider(props) {
   const [searchUsersData, setSearchUsersData] = useState(null);
-  const [imagesList, setImagesList] = useState(null);
+  //const [imagesList, setImagesList] = useState(null);
   const [defaultTab1, setDefaultTab1] = useState("searchevents");
   const [defaultTab2, setDefaultTab2] = useState("createdevents");
 
@@ -18,8 +18,8 @@ export function SearchAndUserEventsDataContextProvider(props) {
       value={{
         searchUsersData,
         setSearchUsersData,
-        imagesList,
-        setImagesList,
+        //imagesList,
+        //setImagesList,
         defaultTab1,
         setDefaultTab1,
         defaultTab2,

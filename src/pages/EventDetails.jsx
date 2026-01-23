@@ -9,19 +9,36 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useAuth } from "../context/AuthContext";
 import { isObjEmpty } from "../utils/util";
+import { useRegisterToAnEvent, useUnregisterToAnEvent, eventDetailsQueryOptions } from '@/hooks/useEvents'
+import { useSuspenseQuery } from '@tanstack/react-query'
 import toast from "react-hot-toast";
+
+const delay = ms => new Promise(res => setTimeout(res, ms));
+
+let attendeesdata;
+let registeredattendees = [];
 
 export default function EventDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { profiledata } = useAuth();
+  const { userSession, profiledata } = useAuth();
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isRegistered, setIsRegistered] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
   const [registrationMessage, setRegistrationMessage] = useState("");
+  const [showRegistrationConfirm, setShowRegistrationConfirm] = useState(false);
+  const { data: eventdata } = useSuspenseQuery(eventDetailsQueryOptions(id));
+
+  const [attendeeslistObj, setAttendeeslistObj] = useState({}); // eslint-disable-line no-unused-vars
+  const [attendeesdataObj, setAttendeesdataObj] = useState({}); // eslint-disable-line no-unused-vars
+
+  const registerToAnEvent = useRegisterToAnEvent();
+  const unregisterToAnEvent = useUnregisterToAnEvent();
+
   const [comments, setComments] = useState([
     {
       id: 1,
@@ -44,31 +61,16 @@ export default function EventDetails() {
   useEffect(() => {
     // In a real app, you would fetch the event data from an API
     // For now, we'll simulate loading
-    const fetchEvent = async () => {
+    const setEventData = async () => {
       try {
         setLoading(true);
         // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        //await new Promise(resolve => setTimeout(resolve, 1000));
 
         // This would be replaced with actual API call
-        // For demo purposes, we'll create a mock event
-        const mockEvent = {
-          id: id,
-          name: "Sample Event",
-          locationdata: {
-            locationname: "Sample Location",
-            address1: "123 Sample Street"
-          },
-          starttime: "14:00",
-          endtime: "16:00",
-          eventdate: new Date().toISOString(),
-          details: "Join us for a wonderful meetup experience! This is a great opportunity to meet new people, share interests, and create lasting connections. We'll have plenty of activities planned to ensure everyone has a great time.",
-          males: 5,
-          females: 3,
-          attendeeslist: ["user1", "user2", "user3"]
-        };
-
-        setEvent(mockEvent);
+        // For demo purposes, we'll use the eventdata from the query
+        console.log("Event data fetched:", eventdata);
+        setEvent(eventdata);
       } catch (error) {
         console.error("Error fetching event:", error);
       } finally {
@@ -76,8 +78,8 @@ export default function EventDetails() {
       }
     };
 
-    fetchEvent();
-  }, [id]);
+    setEventData();
+  }, [id, eventdata]);
 
   useEffect(() => {
     if (event && profiledata) {
@@ -100,27 +102,147 @@ export default function EventDetails() {
     }
   }, [event, profiledata]);
 
-  const handleRegistration = async () => {
+  useEffect(() => {
+    if (!isObjEmpty(event?.attendeeslist)) {
+        if (Array.isArray(event?.attendeeslist) == false) {  // if string (from postgres)
+            setAttendeeslistObj(event?.attendeeslist?.replace(/\{|\}/gm, "").split(","))
+        } else {
+            setAttendeeslistObj(event?.attendeeslist)
+        }
+    } else {
+        setAttendeeslistObj(null)
+    }
+
+    if (!isObjEmpty(event?.attendeesdata)) {
+        if (Array.isArray(event?.attendeesdata) == false) { 
+            setAttendeesdataObj(JSON.parse(event?.attendeesdata));
+        } else {
+            setAttendeesdataObj(event?.attendeesdata);
+        }
+    } else {
+        setAttendeesdataObj(null);
+    }
+  }, [event]);
+
+  const handleRegistration = () => {
     if (!profiledata?.userhandle) {
       setRegistrationMessage("Please log in to register for events.");
       return;
     }
 
+    let newattendee = {
+      attendeehandle:  profiledata?.userhandle.toLowerCase(),
+      attendeegender: profiledata?.gender
+    }
+
+    let attendeesdataObj1;
+    if (isObjEmpty(event?.attendeesdata)) {
+        attendeesdata = [newattendee] 
+    } else {
+        if (Array.isArray(event?.attendeesdata) == false) { //string from supabase
+            attendeesdataObj1 = JSON.parse(event?.attendeesdata);
+        } else {
+            attendeesdataObj1 = event?.attendeesdata;
+        }
+        let temparray =  [...attendeesdataObj1, newattendee];
+        attendeesdata = temparray.filter((obj, index) => {
+                            return index === temparray.findIndex(o => obj.attendeehandle == o.attendeehandle);
+                        });
+    }
+
+    if (!isObjEmpty(event?.attendeesdata)) {
+      attendeesdataObj1?.forEach((eachattendee) => {
+          if (eachattendee?.attendeegender != profiledata?.gender) {
+              registeredattendees.push(eachattendee?.attendeehandle)
+          }
+      });
+    }
+
+    if (isObjEmpty(profiledata?.previouseventsattendeeslist)) {
+      //
+      // Insert "previouseventsattendeesstartdate"
+      //
+      setShowRegistrationConfirm(false);
+      confirmRegistration();
+    }
+
+    let countofattendessfromprev = 0  
+    if (!isObjEmpty(profiledata?.previouseventsattendeeslist)) {
+      //
+      // Get attendees of previous events
+      // 
+      registeredattendees.forEach((eachattendee) => {
+        if (profiledata?.previouseventsattendeeslist.includes(eachattendee)) {
+          countofattendessfromprev = countofattendessfromprev + 1; 
+        }
+      })
+      
+      //
+      // Compare and alert
+      //
+      if (countofattendessfromprev > registeredattendees.length/2 && registeredattendees.length > 5) {
+        setShowRegistrationConfirm(true);
+        ////console.log("More than half of this event attendees are from your previous events")
+      } else {
+        setShowRegistrationConfirm(false);
+        confirmRegistration();
+      }
+    }
+  };
+
+  const confirmRegistration = async () => {
+    console.log("Confirming registration for event:", id);
+    setShowRegistrationConfirm(false);
     setIsRegistering(true);
     setRegistrationMessage("");
 
     try {
-      // Simulate API call - replace with actual registration logic
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      if (!isRegistered) {
+        // Use the actual register hook
+        await registerToAnEvent.mutateAsync({ 
+          eventId: id, 
+          userHandle: profiledata?.userhandle.toLowerCase(),
+          attendeesdata: attendeesdata,
+          registeredattendees: registeredattendees
+        });
 
-      if (isRegistered) {
-        setRegistrationMessage("You've been unregistered from this event.");
-        setIsRegistered(false);
-      } else {
+        if (!registerToAnEvent.isError) {
+          //
+          // update event details to reflect current page
+          //
+          let newEvent = structuredClone(event);
+          let attendeeslistObj4;
+
+          if (!isObjEmpty(newEvent?.attendeeslist)) {
+            if (Array.isArray(newEvent?.attendeeslist) == false) {  // if string (from postgres)
+                attendeeslistObj4 = newEvent?.attendeeslist?.replace(/\{|\}/gm, "").split(",");
+                console.log("here if")
+                console.log("attendeeslistObj4 if::", attendeeslistObj4);
+            } else {
+                attendeeslistObj4 = newEvent?.attendeeslist
+                console.log("here else")
+                console.log("attendeeslistObj4 else::", attendeeslistObj4);
+            }
+          }
+          setEvent({
+              ...event, 
+              attendeesdata: JSON.stringify(attendeesdata),
+              attendeeslist: isObjEmpty(newEvent?.attendeeslist) ? 
+                  [profiledata?.userhandle.toLowerCase()]
+                  : 
+                  [...new Set([...attendeeslistObj4, profiledata?.userhandle.toLowerCase()])]
+          });
+        }
         setRegistrationMessage("Successfully registered for this event!");
         setIsRegistered(true);
+      } else {
+        // Use the actual unregister hook
+        await unregisterToAnEvent.mutateAsync({ eventId: id, userHandle: profiledata?.userhandle });
+        setRegistrationMessage("You've been unregistered from this event.");
+        setIsRegistered(false);
       }
-    } catch {
+    } catch (error) {
+      console.error('Registration error:', error);
       setRegistrationMessage("Registration failed. Please try again.");
     } finally {
       setIsRegistering(false);
@@ -155,6 +277,7 @@ export default function EventDetails() {
       setNewComment("");
       toast.success("Comment posted successfully!");
     } catch (error) {
+      console.error("Failed to post comment:", error);
       toast.error("Failed to post comment. Please try again.");
     } finally {
       setIsPostingComment(false);
@@ -347,6 +470,33 @@ export default function EventDetails() {
                 )}
               </Button>
             </Card>
+
+            {/* Registration Confirmation Dialog */}
+            <AlertDialog open={showRegistrationConfirm} onOpenChange={setShowRegistrationConfirm}>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle className="flex items-center gap-2">
+                    <Heart className="w-5 h-5 text-primary" />
+                    {isRegistered ? 'Unregister from Event' : 'Register for Event'}
+                  </AlertDialogTitle>
+                  <AlertDialogDescription>
+                    {isRegistered
+                      ? 'Are you sure you want to unregister from this event? You will no longer be listed as an attendee.'
+                      : 'More than half of this event attendees are from your previous events. Press \'Register\' to continue to register for this event.'
+                    }
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={confirmRegistration}
+                    className={isRegistered ? 'bg-red-500 hover:bg-red-600' : 'bg-primary hover:bg-primary/90'}
+                  >
+                    {isRegistered ? 'Unregister' : 'Register'}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </div>
 
@@ -382,7 +532,7 @@ export default function EventDetails() {
                       placeholder="Share your thoughts about this event..."
                       value={newComment}
                       onChange={(e) => setNewComment(e.target.value)}
-                      className="min-h-[100px] resize-none"
+                      className="min-h-25 resize-none"
                       disabled={isPostingComment}
                     />
                     <div className="flex justify-end">

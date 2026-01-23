@@ -77,7 +77,7 @@ export function UserCard({ setSelectedUser, profile }) {
   return (
     <Card
       key={profile?.id}
-      onClick={() => setSelectedUser(profile)}
+      onClick={() => setSelectedUser && setSelectedUser(profile)}
       className={`group overflow-hidden shadow-xl hover:shadow-2xl hover:shadow-primary/20 transition-all duration-300 hover:scale-[1.02] border
         border-border/60 hover:border-primary/40 cursor-pointer bg-linear-to-br from-card to-card/90 dark:border-blue-900/60 p-4 sm:p-6`}
     >

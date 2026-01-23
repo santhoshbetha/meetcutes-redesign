@@ -7,22 +7,63 @@ import { FaFacebook, FaInstagram, FaLinkedin } from "react-icons/fa";
 import { Spinner } from '@/components/ui/Spinner';
 import { getUserProfile } from "@/services/user.service";
 import { isObjEmpty } from "@/utils/util";
+import { useAuth } from "@/context/AuthContext";
 
 const CDNURL = 'https://yrxymkmmfrkrfccmutvr.supabase.co/storage/v1/object/public/meetfirst/images';
 
 export function UserProfile() {
   const { userid } = useParams();
   const navigate = useNavigate();
+  const { profiledata, userSession } = useAuth();
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [imageUseCover, setImageUseCover] = useState({});
   const carouselRef = useRef(null);
+  
+  // Generate a more detailed dummy avatar based on user data
+  const generateDummyAvatar = () => {
+    const colors = [
+      'from-blue-400 to-blue-600',
+      'from-purple-400 to-purple-600',
+      'from-green-400 to-green-600',
+      'from-pink-400 to-pink-600',
+      'from-orange-400 to-orange-600',
+      'from-teal-400 to-teal-600',
+      'from-indigo-400 to-indigo-600',
+      'from-red-400 to-red-600'
+    ];
 
+    const patterns = [
+      'bg-gradient-to-br',
+      'bg-gradient-to-tr',
+      'bg-gradient-to-bl',
+      'bg-gradient-to-tl'
+    ];
+
+    // Use user data to create consistent colors
+    const colorIndex = (userData?.firstname?.charCodeAt(0) || 0) % colors.length;
+    const patternIndex = (userData?.age || 0) % patterns.length;
+
+    return `${patterns[patternIndex]} ${colors[colorIndex]}`;
+  };
+  
   // Filter out null/empty images and ensure we have valid images
   const validImages = userData?.images?.filter(img => img && typeof img === 'string' && img.trim() !== '') || [];
   const hasImages = validImages.length > 0;
+
+  console.log('UserProfile load::');
+
+  // Check authentication - redirect to home if not logged in
+  useEffect(() => {
+    // Only redirect after authentication state has been determined
+    // userSession being null means auth check is complete and user is not logged in
+    if (userSession === null) {
+      navigate('/');
+      return;
+    }
+  }, [userSession, navigate]);
 
   const nextImage = () => {
     if (!validImages.length) return;
@@ -203,18 +244,31 @@ export function UserProfile() {
                 <div className="flex flex-col items-center space-y-4">
                   {/* Profile Image Carousel */}
                   <div className="relative w-28 h-28 rounded-full overflow-hidden ring-4 ring-primary/20 shadow-2xl">
-                    <img
+                    {validImages[0] ? (
+                      <img
                         src={
-                        validImages[0]
-                          ? (validImages[0].startsWith('http')
-                              ? validImages[0]
-                              : `https://yrxymkmmfrkrfccmutvr.supabase.co/storage/v1/object/public/meetfirst/images/${userData?.shortid || userData?.userid || ''}/${validImages[0]}`)
-                          : '/professional-headshot-of-a-young-man-with-brown-ha.jpg'
-                      }
-                      alt={`${userData?.firstname} - Profile`}
-                      className="w-full h-full object-cover"
-                      onError={(e) => { e.target.src = '/professional-headshot-of-a-young-man-with-brown-ha.jpg'; }}
-                    />
+                          validImages[0].startsWith('http')
+                            ? validImages[0]
+                            : `https://yrxymkmmfrkrfccmutvr.supabase.co/storage/v1/object/public/meetfirst/images/${userData?.shortid || userData?.userid || ''}/${validImages[0]}`
+                        }
+                        alt={`${userData?.firstname} - Profile`}
+                        className="w-full h-full object-cover"
+                        onError={(e) => { e.target.src = '/professional-headshot-of-a-young-man-with-brown-ha.jpg'; }}
+                      />
+                    ) : (
+                      <div className={`w-full h-full flex items-center justify-center relative ${generateDummyAvatar()}`}>
+                        {/* Enhanced dummy avatar with more detail */}
+                        <div className="text-white text-lg sm:text-2xl font-bold">
+                          {userData?.firstname?.charAt(0)?.toUpperCase() || '?'}
+                        </div>
+                        {/* Decorative elements */}
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <div className="w-6 h-6 sm:w-8 sm:h-8 border-2 border-white/30 rounded-full"></div>
+                        </div>
+                        <div className="absolute top-1 right-1 w-2 h-2 sm:w-3 sm:h-3 bg-white/40 rounded-full"></div>
+                        <div className="absolute bottom-1 left-1 w-1.5 h-1.5 sm:w-2 sm:h-2 bg-white/60 rounded-full"></div>
+                      </div>
+                    )}
                   </div>
 
                   {/* Name and Location */}
@@ -411,7 +465,7 @@ export function UserProfile() {
             )}
 
             {/* Action Buttons */}
-            <Card className="shadow-xl border-2 border-primary/30 bg-primary/5">
+            <Card className="shadow-xl border-2 border-primary/30 bg-primary/5" hidden>
               <CardContent className="pt-6">
                 <div className="flex justify-center">
                   <Button

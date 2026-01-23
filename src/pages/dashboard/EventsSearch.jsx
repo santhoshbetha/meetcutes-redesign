@@ -39,6 +39,16 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 let distanceMap = new Map([
   ["5", 8046],
@@ -127,11 +137,14 @@ export function EventsSearch({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const searchsuccess = useRef(false);
+  const isRestoredSearch = useRef(false);
   const [sortmsg, setSortmsg] = useState(null);
   const [successMessage, setSuccessMessage] = useState("");
-  const [mobileError, setMobileError] = useState("");
+  const [formError, setFormError] = useState("");
 
   const [searchData, setSearchData] = useState();
+  const resultsRef = useRef(null);
+  const [showNoEventsDialog, setShowNoEventsDialog] = useState(false);
 
   // Utility functions for localStorage persistence
   const saveToStorage = (key, value) => {
@@ -168,6 +181,7 @@ export function EventsSearch({
 
     if (storedSearchSuccess) {
       searchsuccess.current = true;
+      isRestoredSearch.current = true;
       if (storedSearchResults) {
         setSearchData(storedSearchResults);
       }
@@ -228,6 +242,19 @@ export function EventsSearch({
     }
   }, [searchData]);
 
+  useEffect(() => {
+    if (searchsuccess.current && !isObjEmpty(searchData) && resultsRef.current) {
+      // Scroll to results section with smooth behavior
+      resultsRef.current.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'start' 
+      });
+    } else if (searchsuccess.current && isObjEmpty(searchData) && !isRestoredSearch.current) {
+      // Show no events found dialog only for fresh searches, not restored ones
+      setShowNoEventsDialog(true);
+    }
+  }, [searchData]);
+
   useEffect (() => {
     //if (!questionairevaluesset) {
     //  setError("Finish questinaire to start searching")
@@ -257,6 +284,8 @@ export function EventsSearch({
 
     onSubmit: async (values) => {
       console.log("onSubmit call..")
+      // Reset restored search flag for fresh searches
+      isRestoredSearch.current = false;
       // Close the mobile sheet when search is initiated
       setOpen(false);
 
@@ -326,7 +355,8 @@ export function EventsSearch({
               setSearchData([]);
               setSuccessMessage("Search completed! No events found in your area.");
           } else {
-              setSuccessMessage(`Search completed! Found ${res.data.length} event${res.data.length === 1 ? '' : 's'} in your area.`);
+              // Don't show success message when events are found to avoid flicker
+              // searchData will be set by the querydata useEffect
           }
       } else {
           setSearchData([]);
@@ -346,7 +376,7 @@ export function EventsSearch({
 
   return (
     <div className="min-h-screen bg-linear-to-br from-background via-background to-muted/20">
-      <div className="max-w-400 mx-auto px-4 md:px-8 py-4 md:py-6">
+      <div className="max-w-4xl mx-auto px-4 md:px-8 py-4 md:py-6">
         {/* Header Section */}
         <div className="mb-8">
           <div className="text-center mb-6">
@@ -421,294 +451,346 @@ export function EventsSearch({
           )}
         </div>
 
-      {/* Search Form */}
-      <Card className="mb-8 shadow-lg bg-card/50 dark:bg-card/40 backdrop-blur-sm border-2 border-border">
-        <CardHeader className="pb-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                <Search className="w-6 h-6 text-primary" />
+        {/* Search Form */}
+        <Card className="mb-8 shadow-lg bg-card/50 dark:bg-card/40 backdrop-blur-sm border-2 border-border">
+          <CardHeader className="pb-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <Search className="w-6 h-6 text-primary" />
+                </div>
+                <div>
+                  <CardTitle className="text-xl">Find Your Perfect Event</CardTitle>
+                  <p className="text-sm text-muted-foreground">Discover events in your area</p>
+                </div>
               </div>
-              <div>
-                <CardTitle className="text-xl">Find Your Perfect Event</CardTitle>
-                <p className="text-sm text-muted-foreground">Discover events in your area</p>
-              </div>
-            </div>
-            <Sheet open={open} onOpenChange={setOpen}>
-              <SheetTrigger asChild>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="md:hidden bg-white/50 dark:bg-gray-700/50"
-                  onClick={() => setMobileError("")}
-                >
-                  <SlidersHorizontal className="w-4 h-4 mr-2" />
-                  Filters
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="bottom" className="h-[80vh] bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm">
-                <SheetHeader>
-                  <SheetTitle className="flex items-center gap-2">
-                    <Filter className="w-5 h-5" />
-                    Search Filters
-                  </SheetTitle>
-                  <SheetDescription>
-                    Customize your event search preferences to find the perfect matches
-                  </SheetDescription>
-                </SheetHeader>
-                <div className="mt-6 space-y-4">
-                  <div className="space-y-4">
-                    {/* Mobile Date and Distance Grid */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <Label className="text-sm font-medium">Date</Label>
-                        <Select
-                          value={formik.values.day}
-                          onValueChange={(value) => {
-                            formik.values.day = value;
-                            if (value == "today") {
-                              setSearchAll(false);
-                              setDisabledDate(true);
-                              setSearchDate(new Date(Date.now()));
-                            } else if (value == "tomorrow") {
-                              setSearchAll(false);
-                              setDisabledDate(true);
-                              setSearchDate(addOneDay());
-                            } else if (value == "saturday") {
-                              setSearchAll(false);
-                              setDisabledDate(true);
-                              setSearchDate(getSaturday());
-                            } else if (value == "sunday") {
-                              setSearchAll(false);
-                              setDisabledDate(true);
-                              setSearchDate(getSunday());
-                            } else if (value == "weekend") {
-                              setSearchAll(false);
-                              setDisabledDate(true);
-                              setSearchDate(getSaturday());
-                            } else if (value == "pickdate") {
-                              setSearchAll(false);
-                              setDisabledDate(false);
-                              setSearchDate(new Date(Date.now()));
-                            } else if (value == "all") {
-                              setSearchAll(true);
-                              setDisabledDate(true);
-                              setSearchDate(new Date(Date.now()));
-                            } else {
-                              setSearchAll(false);
-                              setDisabledDate(false);
-                            }
-                          }}
-                        >
-                          <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Select date" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="today">Today</SelectItem>
-                            <SelectItem value="tomorrow">Tomorrow</SelectItem>
-                            <SelectItem value="saturday">This Saturday</SelectItem>
-                            <SelectItem value="sunday">This Sunday</SelectItem>
-                            <SelectItem value="weekend">This Weekend</SelectItem>
-                            <SelectItem value="pickdate">Pick Date</SelectItem>
-                            <SelectItem value="all">All (from today)</SelectItem>
-                          </SelectContent>
-                        </Select>
+              <Sheet open={open} onOpenChange={setOpen}>
+                <SheetTrigger asChild>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="md:hidden bg-white/50 dark:bg-gray-700/50"
+                  onClick={() => setFormError("")}
+                  >
+                    <SlidersHorizontal className="w-4 h-4 mr-2" />
+                    Filters
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="bottom" className="h-[80vh] bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm">
+                  <SheetHeader>
+                    <SheetTitle className="flex items-center gap-2">
+                      <Filter className="w-5 h-5" />
+                      Search Filters
+                    </SheetTitle>
+                    <SheetDescription>
+                      Customize your event search preferences to find the perfect matches
+                    </SheetDescription>
+                  </SheetHeader>
+                  <div className="mt-6 space-y-4">
+                    <div className="space-y-4">
+                      {/* Mobile Date and Distance Grid */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <Label className="text-sm font-medium">Date</Label>
+                          <Select
+                            value={formik.values.day}
+                            onValueChange={(value) => {
+                              formik.values.day = value;
+                              if (value == "today") {
+                                setSearchAll(false);
+                                setDisabledDate(true);
+                                setSearchDate(new Date(Date.now()));
+                              } else if (value == "tomorrow") {
+                                setSearchAll(false);
+                                setDisabledDate(true);
+                                setSearchDate(addOneDay());
+                              } else if (value == "saturday") {
+                                setSearchAll(false);
+                                setDisabledDate(true);
+                                setSearchDate(getSaturday());
+                              } else if (value == "sunday") {
+                                setSearchAll(false);
+                                setDisabledDate(true);
+                                setSearchDate(getSunday());
+                              } else if (value == "weekend") {
+                                setSearchAll(false);
+                                setDisabledDate(true);
+                                setSearchDate(getSaturday());
+                              } else if (value == "pickdate") {
+                                setSearchAll(false);
+                                setDisabledDate(false);
+                                setSearchDate(new Date(Date.now()));
+                              } else if (value == "all") {
+                                setSearchAll(true);
+                                setDisabledDate(true);
+                                setSearchDate(new Date(Date.now()));
+                              } else {
+                                setSearchAll(false);
+                                setDisabledDate(false);
+                              }
+                            }}
+                          >
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Select date" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="today">Today</SelectItem>
+                              <SelectItem value="tomorrow">Tomorrow</SelectItem>
+                              <SelectItem value="saturday">This Saturday</SelectItem>
+                              <SelectItem value="sunday">This Sunday</SelectItem>
+                              <SelectItem value="weekend">This Weekend</SelectItem>
+                              <SelectItem value="pickdate">Pick Date</SelectItem>
+                              <SelectItem value="all">All (from today)</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div>
+                          <Label className="text-sm font-medium">Distance</Label>
+                          <Select
+                            value={formik.values.searchdistance}
+                            onValueChange={(value) => {
+                              formik.setFieldValue('searchdistance', value);
+                            }}
+                          >
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Select distance" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="5">5 Miles</SelectItem>
+                              <SelectItem value="10">10 Miles</SelectItem>
+                              <SelectItem value="25">25 Miles</SelectItem>
+                              <SelectItem value="50">50 Miles</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
                       </div>
 
-                      <div>
-                        <Label className="text-sm font-medium">Distance</Label>
-                        <Select
-                          value={formik.values.searchdistance}
-                          onValueChange={(value) => {
-                            formik.setFieldValue('searchdistance', value);
-                          }}
-                        >
-                          <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Select distance" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="5">5 Miles</SelectItem>
-                            <SelectItem value="10">10 Miles</SelectItem>
-                            <SelectItem value="25">25 Miles</SelectItem>
-                            <SelectItem value="50">50 Miles</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-
-                    {!disabledDate && (
-                      <div>
-                        <Label className="text-sm font-medium">Pick Date</Label>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <Button
-                              variant="outline"
-                              className={cn(
-                                "w-full justify-start text-left font-normal",
-                                !searchDate && "text-muted-foreground"
-                              )}
-                            >
-                              <CalendarIcon className="mr-2 h-4 w-4" />
-                              {searchDate ? format(searchDate, "PPP") : <span>Pick a date</span>}
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0 z-50" side="bottom" align="start" sideOffset={8}>
-                            <Calendar
-                              mode="single"
-                              selected={searchDate}
-                              onSelect={setSearchDate}
-                              initialFocus
-                            />
-                          </PopoverContent>
-                        </Popover>
-                      </div>
-                    )}
-
-                    <Button onClick={() => formik.handleSubmit()} className="w-full" disabled={isLoading}>
-                      {isLoading ? (
-                        <>
-                          <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                          Searching...
-                        </>
-                      ) : (
-                        <>
-                          <Search className="w-4 h-4 mr-2" />
-                          Find Events
-                        </>
+                      {!disabledDate && (
+                        <div>
+                          <Label className="text-sm font-medium">Pick Date</Label>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Button
+                                variant="outline"
+                                className={cn(
+                                  "w-full justify-start text-left font-normal",
+                                  !searchDate && "text-muted-foreground"
+                                )}
+                              >
+                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                {searchDate ? format(searchDate, "PPP") : <span>Pick a date</span>}
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0 z-50" side="bottom" align="start" sideOffset={8}>
+                              <Calendar
+                                mode="single"
+                                selected={searchDate}
+                                onSelect={setSearchDate}
+                                initialFocus
+                              />
+                            </PopoverContent>
+                          </Popover>
+                        </div>
                       )}
-                    </Button>
-                  </div>
-                </div>
-              </SheetContent>
-            </Sheet>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={formik.handleSubmit} className="space-y-6">
-            {/* Desktop Filters */}
-            <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {/* Date Filter */}
-              <div className="space-y-2">
-                <Label className="text-sm font-medium flex items-center gap-2">
-                  <CalendarIcon className="w-4 h-4" />
-                  Date
-                </Label>
-                <Select
-                  required
-                  name="day"
-                  value={formik.values.day}
-                  onValueChange={(value) => {
-                    formik.values.day = value;
-                    if (value == "today") {
-                      setSearchAll(false);
-                      setDisabledDate(true);
-                      setSearchDate(new Date(Date.now()));
-                    } else if (value == "tomorrow") {
-                      setSearchAll(false);
-                      setDisabledDate(true);
-                      setSearchDate(addOneDay());
-                    } else if (value == "saturday") {
-                      setSearchAll(false);
-                      setDisabledDate(true);
-                      setSearchDate(getSaturday());
-                    } else if (value == "sunday") {
-                      setSearchAll(false);
-                      setDisabledDate(true);
-                      setSearchDate(getSunday());
-                    } else if (value == "weekend") {
-                      setSearchAll(false);
-                      setDisabledDate(true);
-                      setSearchDate(getSaturday());
-                    } else if (value == "pickdate") {
-                      setSearchAll(false);
-                      setDisabledDate(false);
-                      setSearchDate(new Date(Date.now()));
-                    } else if (value == "all") {
-                      setSearchAll(true);
-                      setDisabledDate(true);
-                      setSearchDate(new Date(Date.now()));
-                    } else {
-                      setSearchAll(false);
-                      setDisabledDate(false);
-                    }
-                  }}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select date" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="today">Today</SelectItem>
-                    <SelectItem value="tomorrow">Tomorrow</SelectItem>
-                    <SelectItem value="saturday">This Saturday</SelectItem>
-                    <SelectItem value="sunday">This Sunday</SelectItem>
-                    <SelectItem value="weekend">This Weekend</SelectItem>
-                    <SelectItem value="pickdate">Pick a Date</SelectItem>
-                    <SelectItem value="all">All (from today)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
 
-              {/* Date Picker */}
-              {!disabledDate && (
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">Pick a Date</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "w-full justify-start text-left font-normal h-10",
-                          !searchDate && "text-muted-foreground"
+                      <Button onClick={() => formik.handleSubmit()} className="w-full" disabled={isLoading}>
+                        {isLoading ? (
+                          <>
+                            <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                            Searching...
+                          </>
+                        ) : (
+                          <>
+                            <Search className="w-4 h-4 mr-2" />
+                            Find Events
+                          </>
                         )}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {searchDate ? format(searchDate, "PPP") : <span>Pick a date</span>}
                       </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0 z-50" side="bottom" align="start" sideOffset={8}>
-                      <Calendar
-                        mode="single"
-                        selected={searchDate}
-                        onSelect={setSearchDate}
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </div>
+                    </div>
+                  </div>
+                </SheetContent>
+              </Sheet>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              if (!formik.values.day || !formik.values.searchdistance) {
+                setFormError("Please select both date and distance filters before searching.");
+                return;
+              }
+              setFormError("");
+              formik.handleSubmit(e);
+            }} className="space-y-6">
+              {/* Form Error Display */}
+              {formError && (
+                <Alert className="border-destructive/50 bg-destructive/5">
+                  <AlertDescription className="text-destructive">
+                    {formError}
+                  </AlertDescription>
+                </Alert>
               )}
+              {/* Desktop Filters */}
+              <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {/* Date Filter */}
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium flex items-center gap-2">
+                    <CalendarIcon className="w-4 h-4" />
+                    Date
+                  </Label>
+                  <Select
+                    required
+                    name="day"
+                    value={formik.values.day}
+                    onValueChange={(value) => {
+                      formik.values.day = value;
+                      if (value == "today") {
+                        setSearchAll(false);
+                        setDisabledDate(true);
+                        setSearchDate(new Date(Date.now()));
+                      } else if (value == "tomorrow") {
+                        setSearchAll(false);
+                        setDisabledDate(true);
+                        setSearchDate(addOneDay());
+                      } else if (value == "saturday") {
+                        setSearchAll(false);
+                        setDisabledDate(true);
+                        setSearchDate(getSaturday());
+                      } else if (value == "sunday") {
+                        setSearchAll(false);
+                        setDisabledDate(true);
+                        setSearchDate(getSunday());
+                      } else if (value == "weekend") {
+                        setSearchAll(false);
+                        setDisabledDate(true);
+                        setSearchDate(getSaturday());
+                      } else if (value == "pickdate") {
+                        setSearchAll(false);
+                        setDisabledDate(false);
+                        setSearchDate(new Date(Date.now()));
+                      } else if (value == "all") {
+                        setSearchAll(true);
+                        setDisabledDate(true);
+                        setSearchDate(new Date(Date.now()));
+                      } else {
+                        setSearchAll(false);
+                        setDisabledDate(false);
+                      }
+                    }}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select date" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="today">Today</SelectItem>
+                      <SelectItem value="tomorrow">Tomorrow</SelectItem>
+                      <SelectItem value="saturday">This Saturday</SelectItem>
+                      <SelectItem value="sunday">This Sunday</SelectItem>
+                      <SelectItem value="weekend">This Weekend</SelectItem>
+                      <SelectItem value="pickdate">Pick a Date</SelectItem>
+                      <SelectItem value="all">All (from today)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
 
-              {/* Distance Filter */}
-              <div className="space-y-2">
-                <Label className="text-sm font-medium flex items-center gap-2">
-                  <MapPin className="w-4 h-4" />
-                  Distance
-                </Label>
-                <Select
-                  required
-                  name="searchdistance"
-                  value={formik.values.searchdistance}
-                  onValueChange={(value) => {
-                    formik.setFieldValue('searchdistance', value);
-                  }}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select distance" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="5">5 Miles</SelectItem>
-                    <SelectItem value="10">10 Miles</SelectItem>
-                    <SelectItem value="25">25 Miles</SelectItem>
-                    <SelectItem value="50">50 Miles</SelectItem>
-                    <SelectItem value="75">75 Miles</SelectItem>
-                    <SelectItem value="100">100 Miles</SelectItem>
-                  </SelectContent>
-                </Select>
+                {/* Date Picker */}
+                {!disabledDate && (
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Pick a Date</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full justify-start text-left font-normal h-10",
+                            !searchDate && "text-muted-foreground"
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {searchDate ? format(searchDate, "PPP") : <span>Pick a date</span>}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0 z-50" side="bottom" align="start" sideOffset={8}>
+                        <Calendar
+                          mode="single"
+                          selected={searchDate}
+                          onSelect={setSearchDate}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                )}
+
+                {/* Distance Filter */}
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium flex items-center gap-2">
+                    <MapPin className="w-4 h-4" />
+                    Distance
+                  </Label>
+                  <Select
+                    required
+                    name="searchdistance"
+                    value={formik.values.searchdistance}
+                    onValueChange={(value) => {
+                      formik.setFieldValue('searchdistance', value);
+                    }}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select distance" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="5">5 Miles</SelectItem>
+                      <SelectItem value="10">10 Miles</SelectItem>
+                      <SelectItem value="25">25 Miles</SelectItem>
+                      <SelectItem value="50">50 Miles</SelectItem>
+                      <SelectItem value="75">75 Miles</SelectItem>
+                      <SelectItem value="100">100 Miles</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Search Button */}
+                <div className="space-y-2 md:col-span-2 lg:col-span-1">
+                  <Label className="text-sm font-medium opacity-0">Search</Label>
+                  <Button type="submit" className="w-full h-10" disabled={isLoading}>
+                    {isLoading ? (
+                      <>
+                        <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                        Searching...
+                      </>
+                    ) : (
+                      <>
+                        <Search className="w-4 h-4 mr-2" />
+                        Find Events
+                      </>
+                    )}
+                  </Button>
+                </div>
               </div>
 
-              {/* Search Button */}
-              <div className="space-y-2 md:col-span-2 lg:col-span-1">
-                <Label className="text-sm font-medium opacity-0">Search</Label>
-                <Button type="submit" className="w-full h-10" disabled={isLoading}>
+              {/* Mobile Search Button */}
+              <div className="md:hidden">
+                {formError && (
+                  <Alert className="border-destructive/50 bg-destructive/5 mb-4">
+                    <AlertDescription className="text-destructive">
+                      {formError}
+                    </AlertDescription>
+                  </Alert>
+                )}
+                <Button 
+                  onClick={() => {
+                    if (!formik.values.day || !formik.values.searchdistance) {
+                      setFormError("Please select both date and distance filters before searching.");
+                      return;
+                    }
+                    setFormError("");
+                    formik.handleSubmit();
+                  }} 
+                  className="w-full" 
+                  disabled={isLoading}
+                >
                   {isLoading ? (
                     <>
                       <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
@@ -722,112 +804,104 @@ export function EventsSearch({
                   )}
                 </Button>
               </div>
-            </div>
+            </form>
+          </CardContent>
+        </Card>
 
-            {/* Mobile Search Button */}
-            <div className="md:hidden">
-              {mobileError && (
-                <Alert className="border-destructive/50 bg-destructive/5 mb-4">
-                  <AlertDescription className="text-destructive">
-                    {mobileError}
-                  </AlertDescription>
-                </Alert>
-              )}
-              <Button 
-                onClick={() => {
-                  if (!formik.values.day || !formik.values.searchdistance) {
-                    setMobileError("Please select both date and distance filters before searching.");
-                    return;
-                  }
-                  setMobileError("");
-                  formik.handleSubmit();
-                }} 
-                className="w-full" 
-                disabled={isLoading}
+        {/* Results Section */}
+        <div ref={resultsRef} className="space-y-6">
+          {searchsuccess.current && (
+            <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
+              <CardContent className="pt-6 pb-6">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-green-100 dark:bg-green-900/20 flex items-center justify-center">
+                      <CalendarIcon className="w-5 h-5 text-green-600 dark:text-green-400" />
+                    </div>
+                    <div className="pb-4">
+                      <h2 className="text-xl font-semibold text-foreground">Search Results</h2>
+                      <p className="text-sm text-muted-foreground">Events found in your area</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    {searchData && (
+                      <Badge variant="secondary" className="px-3 py-1 text-sm bg-primary/10 text-primary border-primary/20">
+                        {Array.isArray(searchData) ? searchData.length : 0} events found
+                      </Badge>
+                    )}
+                    {searchData && Array.isArray(searchData) && searchData.length > 0 && (
+                      <Button variant="outline" size="sm" className="bg-white/50 dark:bg-gray-700/50">
+                        <Filter className="w-4 h-4 mr-2" />
+                        Sort
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Event List */}
+          {!isObjEmpty(searchData) && (
+            <div className="min-h-100">
+              <EventList
+                events={searchData}
+                userhandle={userhandle}
+                userlatitude={latitude}
+                userlongitude={longitude}
+                setIsLoading={setIsLoading}
+                profiledata={profiledata}
+              />
+            </div>
+          )}
+         
+          {/* Empty State - Hidden when using dialog */}
+          {searchsuccess.current && isObjEmpty(searchData) && (
+            <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
+              <CardContent className="pt-12 pb-12 text-center">
+                <div className="w-16 h-16 rounded-full bg-muted mx-auto mb-4 flex items-center justify-center">
+                  <CalendarIcon className="w-8 h-8 text-muted-foreground" />
+                </div>
+                <h3 className="text-lg font-semibold text-foreground mb-2">No Events Found</h3>
+                <p className="text-muted-foreground mb-4">
+                  Try adjusting your search criteria or expanding your search radius.
+                </p>
+                <Button variant="outline" onClick={() => window.location.reload()}>
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Try Again
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+
+        {/* No Events Found Dialog */}
+        <AlertDialog open={showNoEventsDialog} onOpenChange={setShowNoEventsDialog}>
+          <AlertDialogContent className="sm:max-w-md">
+            <AlertDialogHeader>
+              <div className="flex items-center justify-center mb-4">
+                <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center">
+                  <CalendarIcon className="w-8 h-8 text-muted-foreground" />
+                </div>
+              </div>
+              <AlertDialogTitle className="text-center text-xl">No Events Found</AlertDialogTitle>
+              <AlertDialogDescription className="text-center">
+                We couldn't find any events matching your search criteria. Try adjusting your search parameters or expanding your search radius.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+              <AlertDialogCancel className="w-full sm:w-auto">
+                Close
+              </AlertDialogCancel>
+              <AlertDialogAction 
+                onClick={() => setShowNoEventsDialog(false)}
+                className="w-full sm:w-auto"
               >
-                {isLoading ? (
-                  <>
-                    <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                    Searching...
-                  </>
-                ) : (
-                  <>
-                    <Search className="w-4 h-4 mr-2" />
-                    Find Events
-                  </>
-                )}
-              </Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
-
-      {/* Results Section */}
-      <div className="space-y-6">
-        {searchsuccess.current && (
-          <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
-            <CardContent className="pt-6 pb-6">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-green-100 dark:bg-green-900/20 flex items-center justify-center">
-                    <CalendarIcon className="w-5 h-5 text-green-600 dark:text-green-400" />
-                  </div>
-                  <div className="pb-4">
-                    <h2 className="text-xl font-semibold text-foreground">Search Results</h2>
-                    <p className="text-sm text-muted-foreground">Events found in your area</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  {searchData && (
-                    <Badge variant="secondary" className="px-3 py-1 text-sm bg-primary/10 text-primary border-primary/20">
-                      {Array.isArray(searchData) ? searchData.length : 0} events found
-                    </Badge>
-                  )}
-                  {searchData && Array.isArray(searchData) && searchData.length > 0 && (
-                    <Button variant="outline" size="sm" className="bg-white/50 dark:bg-gray-700/50">
-                      <Filter className="w-4 h-4 mr-2" />
-                      Sort
-                    </Button>
-                  )}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Event List */}
-        {!isObjEmpty(searchData) && (
-          <div className="min-h-100">
-            <EventList
-              events={searchData}
-              userhandle={userhandle}
-              userlatitude={latitude}
-              userlongitude={longitude}
-              setIsLoading={setIsLoading}
-              profiledata={profiledata}
-            />
-          </div>
-        )}
-       
-        {/* Empty State */}
-        {searchsuccess.current && isObjEmpty(searchData) && (
-          <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
-            <CardContent className="pt-12 pb-12 text-center">
-              <div className="w-16 h-16 rounded-full bg-muted mx-auto mb-4 flex items-center justify-center">
-                <CalendarIcon className="w-8 h-8 text-muted-foreground" />
-              </div>
-              <h3 className="text-lg font-semibold text-foreground mb-2">No Events Found</h3>
-              <p className="text-muted-foreground mb-4">
-                Try adjusting your search criteria or expanding your search radius.
-              </p>
-              <Button variant="outline" onClick={() => window.location.reload()}>
-                <RefreshCw className="w-4 h-4 mr-2" />
-                Try Again
-              </Button>
-            </CardContent>
-          </Card>
-        )}
-      </div>
+                Try Different Search
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   );

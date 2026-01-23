@@ -21,7 +21,7 @@ export const AuthProvider = ({children}) => {
 
     const updateUserData = async (user) => {
       let res = await getProfileData(user?.id);
-      console.log("updateUserData res ", res)
+      //console.log("updateUserData res ", res)
       if (res.success == true){
         setProfiledata({...res.data});
       }
@@ -34,26 +34,25 @@ export const AuthProvider = ({children}) => {
       });
   
       const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
-          //console.log(`Supabase auth event: ${event}`);
-
-          if (session) {
-              //console.log("session?.user::", session?.user)
-              setAuth(session?.user);
-              //setUser(session?.user ?? null);
-              setUserSession(session);
-              updateUserData(session?.user)
-              
-              // Set dark mode as default for logged-in users if no theme preference exists
-              const savedTheme = localStorage.getItem("theme");
-              if (!savedTheme) {
-                  localStorage.setItem("theme", "dark");
-                  document.documentElement.classList.add("dark");
-              }
-          } else {
-              setAuth(null);
-              //setUser(null);
-              setUserSession(null);
-          }
+        //console.log(`Supabase auth event: ${event}`);
+        if (session) {
+            //console.log("session?.user::", session?.user)
+            setAuth(session?.user);
+            //setUser(session?.user ?? null);
+            setUserSession(session);
+            updateUserData(session?.user)
+            
+            // Set dark mode as default for logged-in users if no theme preference exists
+            const savedTheme = localStorage.getItem("theme");
+            if (!savedTheme) {
+                localStorage.setItem("theme", "dark");
+                document.documentElement.classList.add("dark");
+            }
+        } else {
+            setAuth(null);
+            //setUser(null);
+            setUserSession(null);
+        }
       });
   
       return () => {
