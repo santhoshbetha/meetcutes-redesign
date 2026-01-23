@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -7,32 +7,59 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Link, useNavigate } from "react-router-dom";
-import { Mail, AlertTriangle, RefreshCw, LogOut } from "lucide-react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Mail, AlertTriangle, RefreshCw, LogOut, CheckCircle } from "lucide-react";
 import supabase from "@/lib/supabase";
 import toast from "react-hot-toast";
 
 export function EmailNotVerified() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const [email] = useState(location.state?.email || '');
   const [resending, setResending] = useState(false);
+  const [countdown, setCountdown] = useState(0);
+
+  useEffect(() => {
+    // If no email provided, redirect to login
+    if (!email) {
+      navigate('/login');
+    }
+  }, [email, navigate]);
+
+  // Countdown timer effect
+  useEffect(() => {
+    let timer;
+    if (countdown > 0) {
+      timer = setTimeout(() => {
+        setCountdown(countdown - 1);
+      }, 1000);
+    } else if (countdown === 0 && countdown !== null) {
+      // Countdown finished, redirect to login for security
+      navigate('/login');
+    }
+    return () => clearTimeout(timer);
+  }, [countdown, navigate]);
+
 
   const handleResendVerification = async () => {
+    if (!email) {
+      toast.error('Email address not found. Please try logging in again.');
+      navigate('/login');
+      return;
+    }
     setResending(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user && !user.email_confirmed_at) {
-        const { error } = await supabase.auth.resend({
-          type: 'signup',
-          email: user.email,
-        });
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: email,
+      });
 
-        if (error) {
-          toast.error('Failed to resend verification email.');
-        } else {
-          toast.success('Verification email sent! Please check your inbox.');
-        }
+      if (error) {
+        toast.error('Failed to resend verification email.');
       } else {
-        toast.error('Unable to find user information.');
+        // Start countdown timer for security
+        setCountdown(10);
+        toast.success('Verification email sent! This page will close in 10 seconds for security.');
       }
     } catch (err) {
       toast.error('Unable to resend verification email.');
@@ -120,6 +147,21 @@ export function EmailNotVerified() {
               </Button>
             </div>
           </div>
+
+          {countdown !== null && countdown > 0 && (
+            <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4 text-center">
+              <div className="flex items-center justify-center space-x-2 text-green-700 dark:text-green-300 mb-2">
+                <CheckCircle className="w-5 h-5" />
+                <span className="font-semibold">Verification Email Sent!</span>
+              </div>
+              <p className="text-sm text-green-600 dark:text-green-400 mb-2">
+                Please check your inbox and click the verification link.
+              </p>
+              <p className="text-xs text-green-500 dark:text-green-500">
+                This page will automatically close in <span className="font-bold text-lg">{countdown}</span> seconds for security.
+              </p>
+            </div>
+          )}
 
           <div className="text-center">
             <p className="text-xs text-muted-foreground">

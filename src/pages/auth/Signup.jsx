@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { useState, useMemo, useEffect } from "react";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { useFormik } from "formik";
 import { DialogContent, DialogTitle } from "@/components/ui/dialog";
 import {
@@ -22,6 +22,9 @@ import { MeetCutesSpinner } from "@/components/ui/MeetCutesSpinner"
 import { useNavigate, Link } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Combobox } from "@/components/ui/combobox";
 import * as Yup from "yup";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import usePasswordToggle from "@/hooks/usePasswordToggle";
@@ -30,7 +33,8 @@ import toast from "react-hot-toast";
 import { coords } from "@/lib/defaultcoords";
 import { cities } from "@/lib/cities"
 import supabase from "@/lib/supabase";
-import { Eye, Users, Calendar } from "lucide-react";
+import { Eye, Users, Calendar as CalendarIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 function isEmpty(val) {
   return val === undefined || val == null || val.length <= 0 ? true : false;
@@ -41,24 +45,153 @@ function calcAge(dateString) {
   return ~~((Date.now() - birthday) / 31557600000);
 }
 
-const getCity = (stateIn) => {
-  if (!isEmpty(stateIn)) {
-    return cities[stateIn]?.map((city, idx) => {
-      return (
-        <SelectItem key={idx} value={city}>
-          {city}
-        </SelectItem>
-      );
-    });
-  }
-};
-
 export function Signup({ setOpenSignup, setOpenLogin }) {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [state, setState] = useState("");
   const [PasswordInputType, ToggleIcon] = usePasswordToggle();
-  const [dobDate, setDobDate] = useState(new Date("2002-01-01"));
+  // Default to 20 years back from today
+  const [dobDate, setDobDate] = useState(() => {
+    const today = new Date();
+    const twentyYearsBack = new Date(today);
+    twentyYearsBack.setFullYear(today.getFullYear() - 20);
+    return twentyYearsBack;
+  });
+  const [calendarOpen, setCalendarOpen] = useState(false);
+  const [selectedCity, setSelectedCity] = useState("");
+
+  // Memoize city options to prevent re-rendering on every state change
+  const cityOptions = useMemo(() => {
+    if (!isEmpty(state)) {
+      return cities[state]?.map((city, idx) => (
+        <SelectItem key={`${state}-${city}-${idx}`} value={city}>
+          {city}
+        </SelectItem>
+      )) || [];
+    }
+    return [];
+  }, [state]);
+
+  // Memoize state options for better performance
+  const stateOptions = useMemo(() => [
+    <SelectItem key="alabama" value="Alabama">Alabama</SelectItem>,
+    <SelectItem key="alaska" value="Alaska">Alaska</SelectItem>,
+    <SelectItem key="arizona" value="Arizona">Arizona</SelectItem>,
+    <SelectItem key="arkansas" value="Arkansas">Arkansas</SelectItem>,
+    <SelectItem key="california" value="California">California</SelectItem>,
+    <SelectItem key="colorado" value="Colorado">Colorado</SelectItem>,
+    <SelectItem key="connecticut" value="Connecticut">Connecticut</SelectItem>,
+    <SelectItem key="delaware" value="Delaware">Delaware</SelectItem>,
+    <SelectItem key="florida" value="Florida">Florida</SelectItem>,
+    <SelectItem key="georgia" value="Georgia">Georgia</SelectItem>,
+    <SelectItem key="hawaii" value="Hawaii">Hawaii</SelectItem>,
+    <SelectItem key="idaho" value="Idaho">Idaho</SelectItem>,
+    <SelectItem key="illinois" value="Illinois">Illinois</SelectItem>,
+    <SelectItem key="indiana" value="Indiana">Indiana</SelectItem>,
+    <SelectItem key="iowa" value="Iowa">Iowa</SelectItem>,
+    <SelectItem key="kansas" value="Kansas">Kansas</SelectItem>,
+    <SelectItem key="kentucky" value="Kentucky">Kentucky</SelectItem>,
+    <SelectItem key="louisiana" value="Louisiana">Louisiana</SelectItem>,
+    <SelectItem key="maine" value="Maine">Maine</SelectItem>,
+    <SelectItem key="maryland" value="Maryland">Maryland</SelectItem>,
+    <SelectItem key="massachusetts" value="Massachusetts">Massachusetts</SelectItem>,
+    <SelectItem key="michigan" value="Michigan">Michigan</SelectItem>,
+    <SelectItem key="minnesota" value="Minnesota">Minnesota</SelectItem>,
+    <SelectItem key="mississippi" value="Mississippi">Mississippi</SelectItem>,
+    <SelectItem key="missouri" value="Missouri">Missouri</SelectItem>,
+    <SelectItem key="montana" value="Montana">Montana</SelectItem>,
+    <SelectItem key="nebraska" value="Nebraska">Nebraska</SelectItem>,
+    <SelectItem key="nevada" value="Nevada">Nevada</SelectItem>,
+    <SelectItem key="new-hampshire" value="New Hampshire">New Hampshire</SelectItem>,
+    <SelectItem key="new-jersey" value="New Jersey">New Jersey</SelectItem>,
+    <SelectItem key="new-mexico" value="New Mexico">New Mexico</SelectItem>,
+    <SelectItem key="new-york" value="New York">New York</SelectItem>,
+    <SelectItem key="north-carolina" value="North Carolina">North Carolina</SelectItem>,
+    <SelectItem key="north-dakota" value="North Dakota">North Dakota</SelectItem>,
+    <SelectItem key="ohio" value="Ohio">Ohio</SelectItem>,
+    <SelectItem key="oklahoma" value="Oklahoma">Oklahoma</SelectItem>,
+    <SelectItem key="oregon" value="Oregon">Oregon</SelectItem>,
+    <SelectItem key="pennsylvania" value="Pennsylvania">Pennsylvania</SelectItem>,
+    <SelectItem key="rhode-island" value="Rhode Island">Rhode Island</SelectItem>,
+    <SelectItem key="south-carolina" value="South Carolina">South Carolina</SelectItem>,
+    <SelectItem key="south-dakota" value="South Dakota">South Dakota</SelectItem>,
+    <SelectItem key="tennessee" value="Tennessee">Tennessee</SelectItem>,
+    <SelectItem key="texas" value="Texas">Texas</SelectItem>,
+    <SelectItem key="utah" value="Utah">Utah</SelectItem>,
+    <SelectItem key="vermont" value="Vermont">Vermont</SelectItem>,
+    <SelectItem key="virginia" value="Virginia">Virginia</SelectItem>,
+    <SelectItem key="washington" value="Washington">Washington</SelectItem>,
+    <SelectItem key="west-virginia" value="West Virginia">West Virginia</SelectItem>,
+    <SelectItem key="wisconsin" value="Wisconsin">Wisconsin</SelectItem>,
+    <SelectItem key="wyoming" value="Wyoming">Wyoming</SelectItem>,
+    <SelectItem key="washington-dc" value="Washington DC">Washington DC</SelectItem>,
+  ], []);
+
+  // Create combobox options for states
+  const stateComboboxOptions = useMemo(() => [
+    { value: "Alabama", label: "Alabama" },
+    { value: "Alaska", label: "Alaska" },
+    { value: "Arizona", label: "Arizona" },
+    { value: "Arkansas", label: "Arkansas" },
+    { value: "California", label: "California" },
+    { value: "Colorado", label: "Colorado" },
+    { value: "Connecticut", label: "Connecticut" },
+    { value: "Delaware", label: "Delaware" },
+    { value: "Florida", label: "Florida" },
+    { value: "Georgia", label: "Georgia" },
+    { value: "Hawaii", label: "Hawaii" },
+    { value: "Idaho", label: "Idaho" },
+    { value: "Illinois", label: "Illinois" },
+    { value: "Indiana", label: "Indiana" },
+    { value: "Iowa", label: "Iowa" },
+    { value: "Kansas", label: "Kansas" },
+    { value: "Kentucky", label: "Kentucky" },
+    { value: "Louisiana", label: "Louisiana" },
+    { value: "Maine", label: "Maine" },
+    { value: "Maryland", label: "Maryland" },
+    { value: "Massachusetts", label: "Massachusetts" },
+    { value: "Michigan", label: "Michigan" },
+    { value: "Minnesota", label: "Minnesota" },
+    { value: "Mississippi", label: "Mississippi" },
+    { value: "Missouri", label: "Missouri" },
+    { value: "Montana", label: "Montana" },
+    { value: "Nebraska", label: "Nebraska" },
+    { value: "Nevada", label: "Nevada" },
+    { value: "New Hampshire", label: "New Hampshire" },
+    { value: "New Jersey", label: "New Jersey" },
+    { value: "New Mexico", label: "New Mexico" },
+    { value: "New York", label: "New York" },
+    { value: "North Carolina", label: "North Carolina" },
+    { value: "North Dakota", label: "North Dakota" },
+    { value: "Ohio", label: "Ohio" },
+    { value: "Oklahoma", label: "Oklahoma" },
+    { value: "Oregon", label: "Oregon" },
+    { value: "Pennsylvania", label: "Pennsylvania" },
+    { value: "Rhode Island", label: "Rhode Island" },
+    { value: "South Carolina", label: "South Carolina" },
+    { value: "South Dakota", label: "South Dakota" },
+    { value: "Tennessee", label: "Tennessee" },
+    { value: "Texas", label: "Texas" },
+    { value: "Utah", label: "Utah" },
+    { value: "Vermont", label: "Vermont" },
+    { value: "Virginia", label: "Virginia" },
+    { value: "Washington", label: "Washington" },
+    { value: "West Virginia", label: "West Virginia" },
+    { value: "Wisconsin", label: "Wisconsin" },
+    { value: "Wyoming", label: "Wyoming" },
+    { value: "Washington DC", label: "Washington DC" },
+  ], []);
+
+  // Create combobox options for cities based on selected state
+  const cityComboboxOptions = useMemo(() => {
+    if (!isEmpty(state) && cities[state]) {
+      return cities[state].map((city) => ({
+        value: city,
+        label: city,
+      }));
+    }
+    return [];
+  }, [state]);
 
   const forgotPassword = () => {
     setOpenSignup(false);
@@ -179,17 +312,33 @@ export function Signup({ setOpenSignup, setOpenLogin }) {
         .max(40, "Too Long! (max 40 characters)")
         .required("Required"),
       phonenumber: Yup.string()
-        .matches(/^[0-9]+$/, "Must be only digits")
-        .length(10)
+        .matches(/^\d{0,10}$/, "Must be only digits (10 digits required)")
+        .test('len', 'Must be exactly 10 digits', val => val && val.length === 10)
         .required("required"),
       email: Yup.string().email().required("Required"),
       password: Yup.string()
         .min(8, "Too Short! (min 8 characters)")
         .required("Required"),
+      state: Yup.string().required("Required"),
+      city: Yup.string().required("Required"),
     }),
 
     onSubmit,
   });
+
+  // Reset form when component mounts (every time signup dialog opens)
+  useEffect(() => {
+    formik.resetForm();
+    setState("");
+    setSelectedCity("");
+    setDobDate(() => {
+      const today = new Date();
+      const twentyYearsBack = new Date(today);
+      twentyYearsBack.setFullYear(today.getFullYear() - 20);
+      return twentyYearsBack;
+    });
+    setCalendarOpen(false);
+  }, []);
 
   return (
     <DialogContent className="flex max-h-[min(900px,90vh)] min-w-87.5 flex-col gap-0 p-0 max-w-md border-0 shadow-2xl bg-linear-to-br from-card via-card to-card/95 backdrop-blur-sm">
@@ -284,128 +433,133 @@ export function Signup({ setOpenSignup, setOpenLogin }) {
                 </div>
                 <div className="grid gap-2 w-full">
                   <Label htmlFor="dob">Date of Birth</Label>
-                  <Input
-                    type="date"
-                    id="dob"
-                    name="dob"
-                    max="2004-01-01"
-                    min="1973-01-01"
-                    onChange={(e) => {
-                      setDobDate(e.target.value);
-                    }}
-                  />
+                  <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left font-normal bg-background border-input hover:bg-accent hover:text-accent-foreground",
+                          !dobDate && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4 text-primary" />
+                        {dobDate ? (
+                          dobDate.toLocaleDateString("en-US", {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          })
+                        ) : (
+                          <span>Pick a date</span>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0 bg-card border-2 border-primary/20 shadow-2xl" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={dobDate}
+                        onSelect={(date) => {
+                          const today = new Date();
+                          const twentyYearsBack = new Date(today);
+                          twentyYearsBack.setFullYear(today.getFullYear() - 20);
+                          setDobDate(date || twentyYearsBack);
+                          setCalendarOpen(false);
+                        }}
+                        disabled={(date) => {
+                          const today = new Date();
+                          const twentyYearsBack = new Date(today);
+                          twentyYearsBack.setFullYear(today.getFullYear() - 20);
+                          return date > twentyYearsBack || date < new Date("1973-01-01");
+                        }}
+                        defaultMonth={(() => {
+                          const today = new Date();
+                          const twentyYearsBack = new Date(today);
+                          twentyYearsBack.setFullYear(today.getFullYear() - 20);
+                          return twentyYearsBack;
+                        })()}
+                        initialFocus
+                        className="rounded-md border-0 bg-gradient-to-br from-card via-card to-card/95"
+                        classNames={{
+                          months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
+                          month: "space-y-4",
+                          caption: "flex justify-center pt-1 relative items-center",
+                          caption_label: "text-sm font-medium text-primary",
+                          nav: "space-x-1 flex items-center",
+                          nav_button: cn(
+                            buttonVariants({ variant: "outline" }),
+                            "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 border-primary/30 hover:border-primary hover:bg-primary/10"
+                          ),
+                          nav_button_previous: "absolute left-1",
+                          nav_button_next: "absolute right-1",
+                          table: "w-full border-collapse space-y-1",
+                          head_row: "flex",
+                          head_cell: "text-muted-foreground rounded-md w-9 font-normal text-[0.8rem] flex-1 justify-center",
+                          row: "flex w-full mt-2",
+                          cell: "text-center text-sm p-0 relative flex-1 justify-center [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
+                          day: cn(
+                            buttonVariants({ variant: "ghost" }),
+                            "h-9 w-9 p-0 font-normal aria-selected:opacity-100 hover:bg-primary/20 hover:text-primary-foreground aria-selected:bg-primary aria-selected:text-primary-foreground"
+                          ),
+                          day_selected: "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
+                          day_today: "bg-accent text-accent-foreground",
+                          day_outside: "text-muted-foreground opacity-50",
+                          day_disabled: "text-muted-foreground opacity-50",
+                          day_range_middle: "aria-selected:bg-accent aria-selected:text-accent-foreground",
+                          day_hidden: "invisible",
+                        }}
+                      />
+                    </PopoverContent>
+                  </Popover>
                 </div>
               </div>
 
               <div className="flex flex-col md:flex-row md:items-center gap-6">
                 <div className="grid gap-2 w-full">
                   <Label htmlFor="state">State</Label>
-                  <Select
-                    required
-                    name="state"
+                  <Combobox
+                    options={stateComboboxOptions}
+                    value={state}
                     onValueChange={(value) => {
-                      //formik.handleChange(value)
                       formik.values.state = value;
+                      formik.setFieldTouched('state', true);
+                      formik.values.city = ""; // Clear city when state changes
+                      setSelectedCity(""); // Clear local city state
                       setState(value);
                     }}
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select your state" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        <SelectItem value="Alabama">Alabama</SelectItem>
-                        <SelectItem value="Alaska">Alaska</SelectItem>
-                        <SelectItem value="Arizona">Arizona</SelectItem>
-                        <SelectItem value="Arkansas">Arkansas</SelectItem>
-                        <SelectItem value="California">California</SelectItem>
-                        <SelectItem value="Colorado">Colorado</SelectItem>
-                        <SelectItem value="Connecticut">Connecticut</SelectItem>
-                        <SelectItem value="Delaware">Delaware</SelectItem>
-                        <SelectItem value="Florida">Florida</SelectItem>
-                        <SelectItem value="Georgia">Georgia</SelectItem>
-                        <SelectItem value="Hawaii">Hawaii</SelectItem>
-                        <SelectItem value="Idaho">Idaho</SelectItem>
-                        <SelectItem value="Illinois">Illinois</SelectItem>
-                        <SelectItem value="Indiana">Indiana</SelectItem>
-                        <SelectItem value="Iowa">Iowa</SelectItem>
-                        <SelectItem value="Kansas">Kansas</SelectItem>
-                        <SelectItem value="Kentucky">Kentucky</SelectItem>
-                        <SelectItem value="Louisiana5">Louisiana</SelectItem>
-                        <SelectItem value="Maine">Maine</SelectItem>
-                        <SelectItem value="Maryland">Maryland</SelectItem>
-                        <SelectItem value="Massachusetts">
-                          Massachusetts
-                        </SelectItem>
-                        <SelectItem value="Michigan">Michigan</SelectItem>
-                        <SelectItem value="Minnesota">Minnesota</SelectItem>
-                        <SelectItem value="Mississipi">Mississippi</SelectItem>
-                        <SelectItem value="Missouri">Missouri</SelectItem>
-                        <SelectItem value="Montana">Montana</SelectItem>
-                        <SelectItem value="Nebraska">Nebraska</SelectItem>
-                        <SelectItem value="Nevada">Nevada</SelectItem>
-                        <SelectItem value="new Hampshire">
-                          New Hampshire
-                        </SelectItem>
-                        <SelectItem value="New Jersey">New Jersey</SelectItem>
-                        <SelectItem value="New Mexico">New Mexico</SelectItem>
-                        <SelectItem value="New york">New York</SelectItem>
-                        <SelectItem value="North Carolina">
-                          North Carolina
-                        </SelectItem>
-                        <SelectItem value="North Dakota">
-                          North Dakota
-                        </SelectItem>
-                        <SelectItem value="Ohio">Ohio</SelectItem>
-                        <SelectItem value="Oklahoma">Oklahoma</SelectItem>
-                        <SelectItem value="Oregon">Oregon</SelectItem>
-                        <SelectItem value="Pennsylvania">
-                          Pennsylvania
-                        </SelectItem>
-                        <SelectItem value="Rhode Island">
-                          Rhode Island
-                        </SelectItem>
-                        <SelectItem value="South Carolina">
-                          South Carolina
-                        </SelectItem>
-                        <SelectItem value="South Dakota">
-                          South Dakota
-                        </SelectItem>
-                        <SelectItem value="Tennessee">Tennessee</SelectItem>
-                        <SelectItem value="Texas">Texas</SelectItem>
-                        <SelectItem value="Utah">Utah</SelectItem>
-                        <SelectItem value="Vermont">Vermont</SelectItem>
-                        <SelectItem value="Virginia">Virginia</SelectItem>
-                        <SelectItem value="Washington">Washington</SelectItem>
-                        <SelectItem value="West Virginia">
-                          West Virginia
-                        </SelectItem>
-                        <SelectItem value="Wisconsin">Wisconsin</SelectItem>
-                        <SelectItem value="Wyoming">Wyoming</SelectItem>
-                        <SelectItem value="Washington DC">
-                          Washington DC
-                        </SelectItem>
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
+                    onOpenChange={(open) => {
+                      if (open) formik.setFieldTouched('state', true);
+                    }}
+                    placeholder="Select your state"
+                    searchPlaceholder="Search states..."
+                    emptyMessage="No states found."
+                    className="w-full"
+                  />
+                  {formik.touched.state && formik.errors.state ? (
+                    <p className="text-red-700">{formik.errors.state}</p>
+                  ) : null}
                 </div>
                 <div className="grid gap-2 w-full">
                   <Label htmlFor="city">City</Label>
-                  <Select
-                    required
-                    name="city"
+                  <Combobox
+                    options={cityComboboxOptions}
+                    value={selectedCity}
                     onValueChange={(value) => {
-                      //formik.handleChange(value)
+                      setSelectedCity(value);
                       formik.values.city = value;
+                      formik.setFieldTouched('city', true);
                     }}
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select your city" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>{getCity(state)}</SelectGroup>
-                    </SelectContent>
-                  </Select>
+                    onOpenChange={(open) => {
+                      if (open) formik.setFieldTouched('city', true);
+                    }}
+                    placeholder="Select your city"
+                    searchPlaceholder="Search cities..."
+                    emptyMessage="Select a state first"
+                    className="w-full"
+                    disabled={!state}
+                  />
+                  {formik.touched.city && formik.errors.city ? (
+                    <p className="text-red-700">{formik.errors.city}</p>
+                  ) : null}
                 </div>
               </div>
 

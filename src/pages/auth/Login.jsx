@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { DialogContent, DialogTitle } from "@/components/ui/dialog";
 import {
   CardContent,
@@ -23,6 +23,13 @@ export function Login({ setOpenLogin, setOpenSignup }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [PasswordInputType, ToggleIcon] = usePasswordToggle();
+  const [formKey, setFormKey] = useState(0);
+
+  // Reset form when component mounts (every time login dialog opens)
+  useEffect(() => {
+    setFormKey(prev => prev + 1);
+    setError("");
+  }, []);
 
   const forgotPassword = () => {
     setOpenLogin(false);
@@ -113,6 +120,7 @@ export function Login({ setOpenLogin, setOpenSignup }) {
       </CardHeader>
       <CardContent className="px-8 pb-8">
         <Formik
+          key={formKey}
           initialValues={{
             email: "",
             password: "",
