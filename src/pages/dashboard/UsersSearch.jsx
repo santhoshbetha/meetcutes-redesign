@@ -155,7 +155,7 @@ export function UsersSearch({ userhandle, gender, latitude, longitude, questiona
               className="hidden md:flex"
             >
               <RefreshCw className="w-4 h-4 mr-2" />
-              Refresh
+              Refresh22
             </Button>
           </div>
         </div>
@@ -266,7 +266,7 @@ export function UsersSearch({ userhandle, gender, latitude, longitude, questiona
               </div>
             </div>
 
-            <Button onClick={() => formik.handleSubmit()} className="w-full" disabled={isLoading}>
+            <Button onClick={() => formik.handleSubmit()} className="w-full" disabled={isLoading || !!error}>
               {isLoading ? (
                 <>
                   <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
@@ -353,7 +353,7 @@ export function UsersSearch({ userhandle, gender, latitude, longitude, questiona
 
             {/* Search Button */}
             <div className="hidden md:block">
-              <Button type="submit" className="w-full md:w-auto" disabled={isLoading}>
+              <Button type="submit" className="w-full md:w-auto" disabled={isLoading || !!error}>
                 {isLoading ? (
                   <>
                     <RefreshCw className="w-4 h-4 mr-2 animate-spin" />

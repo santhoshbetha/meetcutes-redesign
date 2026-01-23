@@ -620,7 +620,7 @@ export function EventsSearch({
                         </div>
                       )}
 
-                      <Button onClick={() => formik.handleSubmit()} className="w-full" disabled={isLoading}>
+                      <Button onClick={() => formik.handleSubmit()} className="w-full" disabled={isLoading || !!error}>
                         {isLoading ? (
                           <>
                             <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
@@ -780,7 +780,7 @@ export function EventsSearch({
                 {/* Search Button */}
                 <div className="space-y-2 md:col-span-2 lg:col-span-1">
                   <Label className="text-sm font-medium opacity-0">Search</Label>
-                  <Button type="submit" className="w-full h-10" disabled={isLoading}>
+                  <Button type="submit" className="w-full h-10" disabled={isLoading || !!error}>
                     {isLoading ? (
                       <>
                         <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
@@ -815,7 +815,7 @@ export function EventsSearch({
                     formik.handleSubmit();
                   }} 
                   className="w-full" 
-                  disabled={isLoading}
+                  disabled={isLoading || !!error}
                 >
                   {isLoading ? (
                     <>

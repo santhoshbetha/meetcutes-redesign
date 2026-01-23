@@ -367,7 +367,9 @@ export function Dashboard() {
               userhandle={profiledata?.userhandle}
               latitude={profiledata?.latitude}
               longitude={profiledata?.longitude}
+              questionairevaluesset={profiledata?.questionairevaluesset}
               userstate={profiledata?.userstate}
+              onetimepaymentrequired={profiledata?.onetimefeesrequired && !profiledata?.onetimefeespaid}
             />
           ) : activeTab === "users" ? (
             <UsersSearch

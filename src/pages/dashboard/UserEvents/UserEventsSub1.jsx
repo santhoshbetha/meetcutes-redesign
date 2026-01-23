@@ -12,7 +12,7 @@ import { Plus, Sparkles } from "lucide-react";
 
 const delay = ms => new Promise(res => setTimeout(res, ms));
 
-export function UserEventsSub1({profiledata, userhandle, latitude, longitude }) {
+export function UserEventsSub1({profiledata, userhandle, latitude, longitude, error }) {
   const [reload, setReload] = useState(true);
   const { isLoading, error, data, status, refetch } = useUserEvents1({
       userid: profiledata?.userid
@@ -55,7 +55,7 @@ export function UserEventsSub1({profiledata, userhandle, latitude, longitude }) 
           </CardTitle>
           <Dialog>
             <DialogTrigger asChild>
-              <button className="text-sm md:text-base font-medium text-primary hover:text-primary/80 transition-colors">
+              <button disabled={!!error} className="text-sm md:text-base font-medium text-primary hover:text-primary/80 transition-colors">
                   Create Event
               </button>
             </DialogTrigger>
@@ -90,7 +90,7 @@ export function UserEventsSub1({profiledata, userhandle, latitude, longitude }) 
                 </p>
                 <Dialog>
                   <DialogTrigger asChild>
-                    <Button className="bg-primary hover:bg-primary/90">
+                    <Button className="bg-primary hover:bg-primary/90" disabled={!!error}>
                       <Sparkles className="w-4 h-4 mr-2" />
                       Create Your First Event
                     </Button>
