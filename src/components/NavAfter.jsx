@@ -27,6 +27,13 @@ const NavAfter = () => {
   const {setSearchUsersData} = useContext(SearchAndUserEventsDataContext);
   const { user, profiledata } = useAuth();
 
+  const getInitials = () => {
+    if (profiledata?.firstname && profiledata?.lastname) {
+      return `${profiledata.firstname[0]}${profiledata.lastname[0]}`.toUpperCase();
+    }
+    return 'U';
+  };
+
   async function onLogout() {
     const res = await logoutUser();
       if (res.success) {
@@ -104,17 +111,19 @@ const NavAfter = () => {
               10
             </span>
           </Link>
+
           <Button
             className="hidden lg:flex bg-destructive hover:bg-destructive/90 text-destructive-foreground px-4 md:px-6 font-medium shadow-sm text-sm"
             onClick={onLogout}
           >
             <LogOut className="w-4 h-4" />
           </Button>
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Avatar className="h-9 w-9" style={{ cursor: "pointer" }}>
                 <AvatarImage src="/placeholder-user.jpg" alt="@shadcn" />
-                <AvatarFallback>AS</AvatarFallback>
+                <AvatarFallback>{getInitials()}</AvatarFallback>
                 <span className="sr-only">Toggle user menu</span>
               </Avatar>
             </DropdownMenuTrigger>
