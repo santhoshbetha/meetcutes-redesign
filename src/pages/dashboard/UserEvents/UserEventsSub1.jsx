@@ -14,7 +14,7 @@ const delay = ms => new Promise(res => setTimeout(res, ms));
 
 export function UserEventsSub1({profiledata, userhandle, latitude, longitude, error }) {
   const [reload, setReload] = useState(true);
-  const { isLoading, error, data, status, refetch } = useUserEvents1({
+  const { isLoading, error: error1, data, status, refetch } = useUserEvents1({
       userid: profiledata?.userid
   });
 
@@ -48,7 +48,7 @@ export function UserEventsSub1({profiledata, userhandle, latitude, longitude, er
       {/* User Profile Dialog */}
       <Card className="bg-transparent border-accent border-none shadow-none hover:shadow-none">
         {isLoading && <p>Loading...</p>}
-        {error && <p>Error: {error.message}</p>}
+        {error1 && <p>Error: {error1.message}</p>}
         <div className="flex flex-row items-center justify-between md:mx-2 lg:mx-4">
           <CardTitle>
             <span className="md:text-lg">Events you have created</span>
