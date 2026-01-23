@@ -25,7 +25,7 @@ const AuthConfirm = lazy(() => import("@/pages/auth/AuthConfirm").then(module =>
 const Notifications = lazy(() => import("@/pages/dashboard/Notifications").then(module => ({ default: module.Notifications })));
 const Maintenance = lazy(() => import("@/pages/Maintenance").then(module => ({ default: module.Maintenance })));
 import NavBefore from "@/components/NavBefore";
-import NavAfter from "@/components/Navafter";
+import NavAfter from "@/components/NavAfter";
 import { useAuth } from "./context/AuthContext";
 import { SearchAndUserEventsDataContextProvider } from './context/SearchAndUserEventsDataContext';
 import { AutoCompleteDataContextProvider } from './context/AutoCompleteDataContext';
