@@ -47,19 +47,6 @@ function App() {
                            import.meta.env.VITE_MAINTENANCE_MODE === '1' ||
                            import.meta.env.VITE_MAINTENANCE_MODE === 'yes';
 
-  // If maintenance mode is enabled, show only the maintenance page
-  if (isMaintenanceMode) {
-    return (
-      <Suspense fallback={
-        <div className="fixed inset-0 z-9999 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-        </div>
-      }>
-        <Maintenance />
-      </Suspense>
-    );
-  }
-
   useEffect(() => {
     const root = window.document.documentElement;
 
@@ -91,6 +78,19 @@ function App() {
       setShowInitialLoading(false);
     }
   }, [user, profiledata]);
+
+  // If maintenance mode is enabled, show only the maintenance page
+  if (isMaintenanceMode) {
+    return (
+      <Suspense fallback={
+        <div className="fixed inset-0 z-9999 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        </div>
+      }>
+        <Maintenance />
+      </Suspense>
+    );
+  }
 
   return (
     <>
@@ -202,7 +202,7 @@ function App() {
               <Route path="/registration-success" element={<RegistrationSuccess />} />
               <Route path="/email-verification" element={<EmailVerification />} />
               <Route path="/email-not-verified" element={<EmailNotVerified />} />
-              <Route path="/auth-confirm" element={<AuthConfirm />} />
+              <Route path="/auth/confirm" element={<AuthConfirm />} />
 
               <Route path="/settings" element={<Settings />} />
               <Route path="/terms" element={<Terms />} />
@@ -214,7 +214,7 @@ function App() {
             </Suspense>
             
             {/* Terms Popup - shows after login if terms not accepted */}
-            {user && profiledata && profiledata.termsaccepted === false && (
+            {user && profiledata && profiledata.termsaccepted == false && (
               <TermsPopup />
             )}
           </>
