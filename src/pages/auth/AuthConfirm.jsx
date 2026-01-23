@@ -31,18 +31,25 @@ export function AuthConfirm() {
 
       if (errorParam) {
         setError(errorDescription || 'An authentication error occurred.');
+        console.error("AuthConfirm: Authentication error received from query parameters", { errorParam, errorDescription });
         return;
       }
 
       if (!token || !type) {
         setError('Invalid or missing authentication parameters.');
+        console.error("AuthConfirm: Invalid or missing authentication parameters", { token, type });
         return;
       }
+
+      console.log("AuthConfirm: Starting authentication process", { token, type });
 
       setProcessing(true);
       setActionType(type);
 
+      console.log("AuthConfirm: Beginning OTP verification", { token, type });
+
       try {
+        console.log("AuthConfirm: Confirming OTP", { token, type });
         let result;
 
         switch (type) {
