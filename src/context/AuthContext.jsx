@@ -10,6 +10,7 @@ export const AuthProvider = ({children}) => {
     const [user, setUser] = useState(null);
     const [profiledata, setProfiledata] = useState(null);
     const [userSession, setUserSession] = useState(null);
+    const [profileLoading, setProfileLoading] = useState(false);
 
     const setAuth = (authUser) => {
         setUser(authUser)
@@ -20,11 +21,13 @@ export const AuthProvider = ({children}) => {
     //}
 
     const updateUserData = async (user) => {
+      setProfileLoading(true);
       let res = await getProfileData(user?.id);
       //console.log("updateUserData res ", res)
       if (res.success == true){
         setProfiledata({...res.data});
       }
+      setProfileLoading(false);
     }
 
     useEffect(() => {
@@ -65,6 +68,7 @@ export const AuthProvider = ({children}) => {
             user,
             userSession,
             profiledata,
+            profileLoading,
             setProfiledata,
             setAuth
         }}>

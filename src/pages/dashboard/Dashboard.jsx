@@ -31,9 +31,10 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import { MeetCutesSpinner } from '@/components/ui/MeetCutesSpinner';
 
 export function Dashboard() {
-  const {user, profiledata, setProfiledata} = useAuth();
+  const {user, profiledata, profileLoading, setProfiledata} = useAuth();
   const [searchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState(searchParams.get('tab') || "profile");
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -219,6 +220,17 @@ export function Dashboard() {
 
   return (
     <div className="min-h-screen bg-background flex">
+      {/* Loading Spinner for Profile Data */}
+      {(profileLoading || (user && !profiledata)) && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
+          <div className="text-center">
+            <MeetCutesSpinner size="large" />
+            <p className="mt-4 text-lg font-medium text-foreground">Loading your profile...</p>
+            <p className="text-sm text-muted-foreground">Please wait while we set up your dashboard</p>
+          </div>
+        </div>
+      )}
+
       {/* Sidebar */}
       <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-card border-r border-border transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 ${
         sidebarOpen ? 'translate-x-0' : '-translate-x-full'
