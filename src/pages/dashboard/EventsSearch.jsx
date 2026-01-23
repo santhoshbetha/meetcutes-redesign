@@ -144,6 +144,7 @@ export function EventsSearch({
 
   const [searchData, setSearchData] = useState();
   const resultsRef = useRef(null);
+  const [hasScrolledForSearch, setHasScrolledForSearch] = useState(false);
   const [showNoEventsDialog, setShowNoEventsDialog] = useState(false);
 
   // Utility functions for localStorage persistence
@@ -243,17 +244,18 @@ export function EventsSearch({
   }, [searchData]);
 
   useEffect(() => {
-    if (searchsuccess.current && !isObjEmpty(searchData) && resultsRef.current) {
+    if (searchsuccess.current && !isObjEmpty(searchData) && resultsRef.current && !hasScrolledForSearch) {
       // Scroll to results section with smooth behavior
       resultsRef.current.scrollIntoView({ 
         behavior: 'smooth', 
         block: 'start' 
       });
+      setHasScrolledForSearch(true);
     } else if (searchsuccess.current && isObjEmpty(searchData) && !isRestoredSearch.current) {
       // Show no events found dialog only for fresh searches, not restored ones
       setShowNoEventsDialog(true);
     }
-  }, [searchData]);
+  }, [searchData, hasScrolledForSearch]);
 
   useEffect (() => {
     //if (!questionairevaluesset) {
@@ -286,8 +288,21 @@ export function EventsSearch({
       console.log("onSubmit call..")
       // Reset restored search flag for fresh searches
       isRestoredSearch.current = false;
+      // Reset scroll flag for new search
+      setHasScrolledForSearch(false);
       // Close the mobile sheet when search is initiated
       setOpen(false);
+
+      // Scroll to results area immediately when search starts
+      setTimeout(() => {
+        if (resultsRef.current && !hasScrolledForSearch) {
+          resultsRef.current.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'start' 
+          });
+          setHasScrolledForSearch(true);
+        }
+      }, 100);
 
       let objectDate = new Date(searchDate);
       let day = objectDate.getDate();
@@ -369,6 +384,17 @@ export function EventsSearch({
 
       setIsLoading(false);
 
+      // Scroll to results section immediately after search completes
+      setTimeout(() => {
+        if (resultsRef.current && !hasScrolledForSearch) {
+          resultsRef.current.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'start' 
+          });
+          setHasScrolledForSearch(true);
+        }
+      }, 100); // Small delay to ensure DOM is updated
+
       // Clear success message after 5 seconds
       setTimeout(() => setSuccessMessage(""), 5000);
     },
@@ -376,7 +402,7 @@ export function EventsSearch({
 
   return (
     <div className="min-h-screen bg-linear-to-br from-background via-background to-muted/20">
-      <div className="max-w-4xl mx-auto px-4 md:px-8 py-4 md:py-6">
+      <div className="max-w-6xl mx-auto px-4 md:px-8 py-4 md:py-6">
         {/* Header Section */}
         <div className="mb-8">
           <div className="text-center mb-6">

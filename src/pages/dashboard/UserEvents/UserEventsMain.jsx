@@ -25,17 +25,7 @@ export function UserEventsMain({ profiledata, userhandle, latitude, longitude, u
             </p>
           </div>
 
-          <div className="flex items-center justify-center">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => window.location.reload()}
-              className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm"
-            >
-              <RefreshCw className="w-4 h-4 mr-2" />
-              Refresh
-            </Button>
-          </div>
+          
         </div>
 
       {/* Events Tabs */}

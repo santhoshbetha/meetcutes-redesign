@@ -41,6 +41,7 @@ export function useUserEvents1(dataIn) {
 }
 
 export function useUserEvents2(dataIn) {
+
   return useQuery({
     queryKey: userEvents2QueryKey(),
     queryFn: async () => {

@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,15 +6,45 @@ import { isObjEmpty, haversine } from "@/utils/util";
 import { useUserEvents2 } from "@/hooks/useEvents";
 import secureLocalStorage from "react-secure-storage";
 import { Separator } from '@/components/ui/separator';
+import { EventList } from "@/components/EventList";
 import { CalendarIcon, Search, Heart } from "lucide-react";
+
+const delay = ms => new Promise(res => setTimeout(res, ms));
 
 export function UserEventsSub2({ profiledata, userhandle, latitude, longitude }) {
   const navigate = useNavigate();
-  const { data } = useUserEvents2({
+  const [reload, setReload] = useState(true);
+  const  { isLoading, error, data, status, refetch }  = useUserEvents2({
       userhandle: userhandle,
       lat: latitude,
       long: longitude
   });
+
+  // Ensure we refetch when this tab mounts (and when userhandle becomes available)
+  // Rate-limited refetch: only refetch at most once every 20s when userhandle becomes available
+  const lastRefetchRef = useRef(0);
+  const [refreshDisabled, setRefreshDisabled] = useState(false);
+  useEffect(() => {
+    if (typeof refetch !== 'function' || !userhandle) return;
+    const now = Date.now();
+    
+    if (now - lastRefetchRef.current >= 20000) {
+      lastRefetchRef.current = now;
+      refetch();
+    } else {
+      console.log("UserEventsSub2 refetch skipped due to rate limiting");
+    }
+  }, [refetch, userhandle]);
+
+  useEffect(() => {
+    if (reload == false) {
+        delay(10000).then(async () => {
+            setReload(true)
+        })
+    }
+}, [reload]);
+
+  //console.log("UserEventsSub2 data:", data);
 
   useEffect(() => {
     if (!isObjEmpty (data)) {
@@ -32,10 +62,24 @@ export function UserEventsSub2({ profiledata, userhandle, latitude, longitude })
 
   return (
     <Card className="bg-transparent border-accent border-none shadow-none hover:shadow-none">
+      {isLoading && <p>Loading...</p>}
+      {error && <p>Error: {error.message}</p>}
       <div className="flex flex-row items-center justify-between md:mx-2 lg:mx-4">
         <CardTitle>
           <span className="md:text-lg">Your Upcoming Events</span>
         </CardTitle>
+        <div className="ml-2">
+          <Button variant="outline" disabled={refreshDisabled} onClick={() => {
+            if (typeof refetch === 'function') {
+              lastRefetchRef.current = Date.now();
+              refetch();
+              setRefreshDisabled(true);
+              setTimeout(() => setRefreshDisabled(false), 10000);
+            }
+          }}>
+            Refresh
+          </Button>
+        </div>
       </div>
       <Separator />
       <CardContent className="space-y-2">

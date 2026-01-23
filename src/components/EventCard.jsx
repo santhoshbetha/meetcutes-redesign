@@ -54,6 +54,35 @@ export function EventCard({ setSelectedEvent, event, userlatitude, userlongitude
     }
   }, [event, profiledata]);
 
+  // Listen for external updates to this event (register/unregister from dialog/page)
+  useEffect(() => {
+    const handler = (e) => {
+      try {
+        const detail = e?.detail || {};
+        const eventId = detail.eventId;
+        if (!eventId) return;
+        const thisEventId = event?.eventid || event?.id;
+        if (String(thisEventId) !== String(eventId)) return;
+
+        const updatedList = detail.attendeeslist;
+        if (!updatedList || updatedList.length === 0) {
+          setIsRegistered(false);
+          return;
+        }
+        const normalized = updatedList.map(h => (h || "").toString().toLowerCase());
+        if (normalized.includes((profiledata?.userhandle || "").toString().toLowerCase())) {
+          setIsRegistered(true);
+        } else {
+          setIsRegistered(false);
+        }
+      } catch (err) {
+        // ignore
+      }
+    };
+    window.addEventListener('event-updated', handler);
+    return () => window.removeEventListener('event-updated', handler);
+  }, [event, profiledata]);
+
   return (
     <Card
       key={event?.id}

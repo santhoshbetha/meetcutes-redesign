@@ -185,8 +185,8 @@ export function CreateEvent() {
     }
   });
 
-  console.log("formik.errors.state", formik.errors.state);
-  console.log("formik.errors.city", formik.errors.city);
+  //console.log("formik.errors.state", formik.errors.state);
+  //console.log("formik.errors.city", formik.errors.city);
 
   return (
       <DialogContent className='flex max-h-[min(900px,80vh)] min-w-[calc(70vw-2rem)] flex-col gap-0 p-0 sm:max-w-md bg-linear-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800'>

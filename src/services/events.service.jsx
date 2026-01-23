@@ -403,6 +403,7 @@ export const getUserEvents1 = async (dataIn) => {
 };
 
 export const getUserEvents2 = async (dataIn) => {
+  console.log("getUserEvents2 dataIn:", dataIn);
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 5000);
 
@@ -435,63 +436,63 @@ export const getUserEvents2 = async (dataIn) => {
       { signal: controller.signal }
     );
 
-  if (data2 && !error2) {
-    if (data2?.length != 0) {
-      data2?.forEach((e) => {
-        if (e?.attendeeslist != null) {
-          let result = e?.attendeeslist?.filter(
-            (attendee) =>
-              attendee.toLowerCase() == dataIn?.userhandle.toLowerCase(),
-          );
-          if (result.length > 0) {
-            userEvents.push(e);
-          }
-        }
-      });
-    }
-  }
-
-  let locationidlist = new Array();
-  userEvents?.forEach((e) => {
-    locationidlist.push(e?.locationid);
-  });
-
-  if (userEvents?.length > 0 && !error2) {
-    const { data: data3, error: error3 } = await supabase
-      .from("locations")
-      .select("locationid, locationname, address1, state, city, zipcode", { signal: controller.signal })
-      .filter("locationid", "in", `(${locationidlist})`); // `(${data})`
-
-    if (data3?.length > 0 && !error2) {
-      userEvents?.forEach((e) => {
-        data3?.forEach((l) => {
-          if (l.locationid == e.locationid) {
-            let newevent = { ...e, locationdata: l };
-            eventsdata.push(newevent);
+    if (data2 && !error2) {
+      if (data2?.length != 0) {
+        data2?.forEach((e) => {
+          if (e?.attendeeslist != null) {
+            let result = e?.attendeeslist?.filter(
+              (attendee) =>
+                attendee.toLowerCase() == dataIn?.userhandle.toLowerCase(),
+            );
+            if (result.length > 0) {
+              userEvents.push(e);
+            }
           }
         });
-      });
+      }
     }
 
-    return {
-      success: true,
-      data: eventsdata,
-    };
-  }
+    let locationidlist = new Array();
+    userEvents?.forEach((e) => {
+      locationidlist.push(e?.locationid);
+    });
 
-  if (!error2 && userEvents?.length == 0) {
-    return {
-      success: true,
-      data: [],
-    };
-  }
+    if (userEvents?.length > 0 && !error2) {
+      const { data: data3, error: error3 } = await supabase
+        .from("locations")
+        .select("locationid, locationname, address1, state, city, zipcode", { signal: controller.signal })
+        .filter("locationid", "in", `(${locationidlist})`); // `(${data})`
 
-  if (error2) {
-    return {
-      success: false,
-      msg: error2?.message,
-    };
-  }
+      if (data3?.length > 0 && !error2) {
+        userEvents?.forEach((e) => {
+          data3?.forEach((l) => {
+            if (l.locationid == e.locationid) {
+              let newevent = { ...e, locationdata: l };
+              eventsdata.push(newevent);
+            }
+          });
+        });
+      }
+
+      return {
+        success: true,
+        data: eventsdata,
+      };
+    }
+
+    if (!error2 && userEvents?.length == 0) {
+      return {
+        success: true,
+        data: [],
+      };
+    }
+
+    if (error2) {
+      return {
+        success: false,
+        msg: error2?.message,
+      };
+    }
   } catch (error) {
     return {
       success: false,
@@ -509,125 +510,128 @@ export const registerToAnEvent = async (dataIn) => {
   try {
     const { data, error } = await supabase
       .from("events")
-      .select("attendeeslist", { signal: controller.signal })
-      .eq("eventid", dataIn?.eventid)
+      .select("attendeesdata, attendeeslist", { signal: controller.signal })
+      .eq("eventid", dataIn?.eventId.toString()) //'8sZa5Zjjf1' //8sZa5Zjjf1
       .single();
 
-  if (data && !error) {
-    let data2out = {
-      data: null,
-      error: null,
-    };
-    if (
-      data?.attendeeslist == null ||
-      !data?.attendeeslist.includes(dataIn?.userhandle.toLowerCase())
-    ) {
-      if (data?.attendeeslist == null) {
-        //
-        // adding first attendee to the list
-        //
-        //  console.log("first add")
-        data2out = await supabase
-          .from("events")
-          .update({ attendeeslist: [`${dataIn?.userhandle.toLowerCase()}`] }, { signal: controller.signal })
-          .eq("eventid", dataIn?.eventid);
-      } else {
-        //   console.log("append to array")
-        data2out = await supabase.rpc("append_to_attendeeslist", {
-          userhandle: dataIn?.userhandle.toLowerCase(),
-          eventid: dataIn?.eventid,
-        }, { signal: controller.signal });
+    console.log("data:", data);
+    console.log("error:", error);
+
+    if (data && !error) {
+      let data2out = {
+        data: null,
+        error: null,
+      };
+      if (
+        data?.attendeeslist == null ||
+        !data?.attendeeslist.includes(dataIn?.userhandle.toLowerCase())
+      ) {
+        if (data?.attendeeslist == null) {
+           data2out = await supabase
+              .from("events")
+              .update({ attendeeslist: [dataIn?.userhandle.toLowerCase()] })
+              .eq("eventid", dataIn?.eventId.toString())
+              .abortSignal(controller.signal); // Chain the signal here
+
+          console.log("data2out data::", data2out);
+
+        } else {
+          //   console.log("append to array")
+          data2out = await supabase.rpc("append_to_attendeeslist", {
+                      userhandle: dataIn?.userhandle.toLowerCase(),
+                      eventid: dataIn?.eventId.toString(),
+                    }, { signal: controller.signal });
+        }
+
+        console.log("data2out data::", data2out.data);
+        console.log("data2out error::", data2out.error);
+
+        if (data2out.error) {
+          return {
+            success: false,
+            msg: data2out.error.message,
+          };
+        }
+
+        if (!data2out.error) {
+          const { data: data3, error: error3 } = await supabase.rpc(
+            "add_or_update_attendeesdata",
+            {
+              attendeesdata: JSON.stringify(dataIn?.attendeesdata),
+              eventid: dataIn?.eventId
+            },
+            { signal: controller.signal }
+          );
+
+          const { data: data4, error: error4 } = await supabase.rpc(
+            "update_eventsbackup",
+            {
+              //  userhandle: dataIn?.userhandle.toLowerCase(),
+              attendeesdata: JSON.stringify(dataIn?.attendeesdata),
+              eventid: dataIn?.eventId
+            },
+            { signal: controller.signal }
+          );
+        }
+      }
+    } else {
+      console.log("userhandle already exists in attendeeslist");
+    }
+
+    if (dataIn?.registeredattendees?.length > 0) {
+      let colValues = isObjEmpty(dataIn?.registeredattendees)? [] : [...dataIn?.registeredattendees];
+      colValues = [dataIn?.userhandle.toLowerCase(), ...colValues];
+
+      let listnew = ["mikehandle", "danielk"];
+
+      const { data: data5, error: error5 } = await supabase
+        .from("users")
+        .select("previouseventsattendeeslist, userhandle", { signal: controller.signal })
+        //  .filter('userhandle', 'in', `(${listnew})`);  //test works!!
+        .filter("userhandle", "in", `(${colValues})`);
+
+      let n;
+      if (data5 && !error5) {
+        if (data5?.length != 0) {
+          data5?.forEach(async (e) => {
+            if (isObjEmpty(e?.previouseventsattendeeslist)) {
+              n = [dataIn?.userhandle.toLowerCase()];
+            } else {
+              n = e?.previouseventsattendeeslist;
+              n.push(dataIn?.userhandle.toLowerCase());
+            }
+
+            const { data: data6, error: error6 } = await supabase
+              .from("users")
+              .update({ previouseventsattendeeslist: n }, { signal: controller.signal })
+              .eq("userhandle", e.userhandle);
+          });
+        }
       }
 
-      //console.log("data2out data::", data2out.data);
-      //console.log("data2out error::", data2out.error);
-
-      if (data2out.error) {
+      if (error5) {
         return {
           success: false,
-          msg: data2out.error.message,
+          msg: error5?.message,
         };
       }
-
-      if (!data2out.error) {
-        const { data: data3, error: error3 } = await supabase.rpc(
-          "add_or_update_attendeesdata",
-          {
-            attendeesdata: JSON.stringify(dataIn?.attendeesdata),
-            eventid: dataIn?.eventid,
-          },
-          { signal: controller.signal }
-        );
-
-        const { data: data4, error: error4 } = await supabase.rpc(
-          "update_eventsbackup",
-          {
-            //  userhandle: dataIn?.userhandle.toLowerCase(),
-            attendeesdata: JSON.stringify(dataIn?.attendeesdata),
-            eventid: dataIn?.eventid,
-          },
-          { signal: controller.signal }
-        );
-      }
-    }
-  } else {
-    console.log("userhandle already exists in attendeeslist");
-  }
-
-  if (dataIn?.registeredattendees?.length > 0) {
-    let colValues = isObjEmpty(dataIn?.registeredattendees)? [] : [...dataIn?.registeredattendees];
-    colValues = [dataIn?.userhandle.toLowerCase(), ...colValues];
-
-    let listnew = ["mikehandle", "danielk"];
-
-    const { data: data5, error: error5 } = await supabase
-      .from("users")
-      .select("previouseventsattendeeslist, userhandle", { signal: controller.signal })
-      //  .filter('userhandle', 'in', `(${listnew})`);  //test works!!
-      .filter("userhandle", "in", `(${colValues})`);
-
-    let n;
-    if (data5 && !error5) {
-      if (data5?.length != 0) {
-        data5?.forEach(async (e) => {
-          if (isObjEmpty(e?.previouseventsattendeeslist)) {
-            n = [dataIn?.userhandle.toLowerCase()];
-          } else {
-            n = e?.previouseventsattendeeslist;
-            n.push(dataIn?.userhandle.toLowerCase());
-          }
-
-          const { data: data6, error: error6 } = await supabase
-            .from("users")
-            .update({ previouseventsattendeeslist: n }, { signal: controller.signal })
-            .eq("userhandle", e.userhandle);
-        });
-      }
     }
 
-    if (error5) {
+    if (error) {
       return {
         success: false,
-        msg: error5?.message,
+        msg: error?.message,
       };
     }
-  }
 
-  if (error) {
     return {
-      success: false,
-      msg: error?.message,
+      success: true,
+      data: {
+        eventid: dataIn?.eventId.toString(),
+        userhandle: dataIn?.userhandle,
+        attendeesdata: dataIn?.attendeesdata,
+      },
     };
-  }
-
-  return {
-    success: true,
-    data: {
-      eventid: dataIn?.eventid,
-      userhandle: dataIn?.userhandle,
-      attendeesdata: dataIn?.attendeesdata,
-    },
-  };
   } catch (error) {
     return {
       success: false,
@@ -646,7 +650,7 @@ export const unregisterToAnEvent = async (dataIn) => {
     const { data, error } = await supabase
       .from("events")
       .select("attendeeslist", { signal: controller.signal })
-      .eq("eventid", dataIn?.eventid)
+      .eq("eventid", dataIn?.eventId.toString())
       .single();
 
   if (data && !error) {
@@ -658,7 +662,7 @@ export const unregisterToAnEvent = async (dataIn) => {
         "remove_from_attendeeslist",
         {
           userhandle: dataIn?.userhandle.toLowerCase(),
-          eventid: dataIn?.eventid,
+          eventid: dataIn?.eventId.toString(),
         },
         { signal: controller.signal }
       );
@@ -668,7 +672,7 @@ export const unregisterToAnEvent = async (dataIn) => {
           "add_or_update_attendeesdata",
           {
             attendeesdata: JSON.stringify(dataIn?.attendeesdata),
-            eventid: dataIn?.eventid,
+            eventid: dataIn?.eventId.toString(),
           },
           { signal: controller.signal }
         );
@@ -678,7 +682,7 @@ export const unregisterToAnEvent = async (dataIn) => {
           {
             //   userhandle: dataIn?.userhandle.toLowerCase(),
             attendeesdata: JSON.stringify(dataIn?.attendeesdata),
-            eventid: dataIn?.eventid,
+            eventid: dataIn?.eventId.toString(),
           },
           { signal: controller.signal }
         );
@@ -696,7 +700,7 @@ export const unregisterToAnEvent = async (dataIn) => {
   return {
     success: true,
     data: {
-      eventid: dataIn?.eventid,
+      eventid: dataIn?.eventId.toString(),
       userhandle: dataIn?.userhandle,
       attendeesdata: dataIn?.attendeesdata,
     },
@@ -719,11 +723,11 @@ export const postEventComment = async (dataIn) => {
     const { data, error } = await supabase
       .from("events")
       .update({ comments: JSON.stringify(dataIn?.commentsdata) }, { signal: controller.signal })
-      .eq("eventid", dataIn?.eventid);
+      .eq("eventid", dataIn?.eventId.toString());
     const { data: data2, error: error2 } = await supabase
       .from("events_backup")
       .update({ comments: JSON.stringify(dataIn?.commentsdata) }, { signal: controller.signal })
-      .eq("eventid", dataIn?.eventid);
+      .eq("eventid", dataIn?.eventId.toString());
 
     if (error) {
       return {
@@ -752,7 +756,7 @@ export const postUserComment = async (dataIn) => {
     const { data, error } = await supabase
       .from("users")
       .update({ comments: JSON.stringify(dataIn?.commentsdata) }, { signal: controller.signal })
-      .eq("eventid", dataIn?.eventid);
+      .eq("eventid", dataIn?.eventId.toString());
 
     if (error) {
       return {

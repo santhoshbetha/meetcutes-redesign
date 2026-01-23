@@ -5,20 +5,69 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
 import { isObjEmpty } from "../utils/util";
+import { useAuth } from "@/context/AuthContext";
+import { useRegisterToAnEvent, useUnregisterToAnEvent } from "@/hooks/useEvents";
 
 export default function EventDetailsDialog({ event, onClose, profiledata, loading = false }) {
   const [eventDetails, setEventDetails] = useState(event || {});
   const [isRegistered, setIsRegistered] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
   const [registrationMessage, setRegistrationMessage] = useState("");
-
-  console.log('EventDetailsDialog profiledata', profiledata);
+  const [attendeesdataObj, setAttendeesdataObj] = useState(null);
+  const [malesCount, setMalesCount] = useState(0);
+  const [femalesCount, setFemalesCount] = useState(0);
 
   useEffect(() => {
     if (event) {
-      setEventDetails(event);
+      // Merge event prop with any locally stored attendees info for this event
+      try {
+        const eventId = event?.eventid || event?.id;
+        const storageKey = `event_${eventId}_attendees`;
+        const stored = localStorage.getItem(storageKey);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          const merged = {
+            ...event,
+            attendeeslist: parsed.attendeeslist !== undefined ? parsed.attendeeslist : event.attendeeslist,
+            attendeesdata: parsed.attendeesdata !== undefined ? parsed.attendeesdata : event.attendeesdata,
+          };
+          setEventDetails(merged);
+        } else {
+          setEventDetails(event);
+        }
+      } catch (e) {
+        setEventDetails(event);
+      }
     }
   }, [event]);
+
+  // localStorage helpers
+  const getStorageKey = (eventId) => `event_${eventId}_attendees`;
+  const computeCountsFromData = (data) => {
+    try {
+      const arr = Array.isArray(data) ? data : (data ? JSON.parse(data) : []);
+      let males = 0;
+      let females = 0;
+      (arr || []).forEach((a) => {
+        const g = (a?.attendeegender || "").toString().toLowerCase();
+        if (g.startsWith("m")) males += 1;
+        else if (g.startsWith("f")) females += 1;
+      });
+      return { males, females };
+    } catch (err) {
+      return { males: 0, females: 0 };
+    }
+  };
+
+  const saveToLocalStorage = (eventId, attendeeslist, attendeesdata, malesParam, femalesParam) => {
+    try {
+      const counts = (typeof malesParam === 'number' && typeof femalesParam === 'number') ? { males: malesParam, females: femalesParam } : computeCountsFromData(attendeesdata);
+      const payload = { attendeeslist: attendeeslist ?? null, attendeesdata: attendeesdata ?? null, males: counts.males, females: counts.females, ts: Date.now() };
+      localStorage.setItem(getStorageKey(eventId), JSON.stringify(payload));
+    } catch (e) {
+      console.warn('Failed to save event attendees to localStorage', e);
+    }
+  };
 
   useEffect(() => {
     if (isObjEmpty(eventDetails?.attendeeslist)) {
@@ -39,27 +88,262 @@ export default function EventDetailsDialog({ event, onClose, profiledata, loadin
     }
   }, [eventDetails, profiledata]);
 
+  // Parse attendeesdata into an object/array for counts
+  useEffect(() => {
+    try {
+      if (!isObjEmpty(eventDetails?.attendeesdata)) {
+        const parsed = Array.isArray(eventDetails.attendeesdata) ? eventDetails.attendeesdata : JSON.parse(eventDetails.attendeesdata);
+        setAttendeesdataObj(parsed);
+      } else {
+        setAttendeesdataObj(null);
+      }
+    } catch (err) {
+      setAttendeesdataObj(null);
+    }
+  }, [eventDetails?.attendeesdata]);
+
+  // Compute male/female counts from attendeesdataObj
+  useEffect(() => {
+    if (Array.isArray(attendeesdataObj)) {
+      let males = 0;
+      let females = 0;
+      attendeesdataObj.forEach((a) => {
+        const g = (a?.attendeegender || "").toString().toLowerCase();
+        if (g.startsWith("m")) males += 1;
+        else if (g.startsWith("f")) females += 1;
+      });
+      setMalesCount(males);
+      setFemalesCount(females);
+    } else {
+      setMalesCount(event?.males || 0);
+      setFemalesCount(event?.females || 0);
+    }
+  }, [attendeesdataObj, event]);
+
+  // Listen for external updates to this event and update dialog state
+  useEffect(() => {
+    const handler = (e) => {
+      try {
+        const detail = e?.detail || {};
+        const eventId = detail.eventId;
+        const thisEventId = eventDetails?.eventid || eventDetails?.id;
+        if (!eventId || String(thisEventId) !== String(eventId)) return;
+
+        if (detail.attendeeslist !== undefined) {
+          const list = detail.attendeeslist && detail.attendeeslist.length > 0 ? detail.attendeeslist : null;
+          setEventDetails((prev) => ({ ...prev, attendeeslist: list }));
+        }
+
+        if (detail.attendeesdata !== undefined) {
+          const ad = detail.attendeesdata ? (Array.isArray(detail.attendeesdata) ? detail.attendeesdata : JSON.parse(detail.attendeesdata)) : null;
+          setEventDetails((prev) => ({ ...prev, attendeesdata: detail.attendeesdata }));
+          // if counts provided in detail, use them
+          if (detail.males !== undefined && detail.females !== undefined) {
+            setMalesCount(detail.males || 0);
+            setFemalesCount(detail.females || 0);
+          }
+        }
+      } catch (err) {
+        // ignore
+      }
+    };
+    window.addEventListener('event-updated', handler);
+    return () => window.removeEventListener('event-updated', handler);
+  }, [eventDetails]);
+
+  // Listen for storage events (other tabs/windows) and update dialog state
+  useEffect(() => {
+    const handler = (e) => {
+      try {
+        const eventId = eventDetails?.eventid || eventDetails?.id;
+        if (!eventId) return;
+        const key = getStorageKey(eventId);
+        if (e.key !== key) return;
+        if (!e.newValue) {
+          // cleared
+          setEventDetails((prev) => ({ ...prev, attendeeslist: null, attendeesdata: null }));
+          return;
+        }
+        const parsed = JSON.parse(e.newValue);
+        setEventDetails((prev) => ({ ...prev, attendeeslist: parsed.attendeeslist ?? prev.attendeeslist, attendeesdata: parsed.attendeesdata ?? prev.attendeesdata }));
+        if (parsed.males !== undefined && parsed.females !== undefined) {
+          setMalesCount(parsed.males || 0);
+          setFemalesCount(parsed.females || 0);
+        }
+      } catch (err) {
+        // ignore
+      }
+    };
+    window.addEventListener('storage', handler);
+    return () => window.removeEventListener('storage', handler);
+  }, [eventDetails]);
+
+  const { userSession } = useAuth();
+
+  const registerToAnEvent = useRegisterToAnEvent();
+  const unregisterToAnEvent = useUnregisterToAnEvent();
+
   const handleRegistration = async () => {
-    if (!profiledata?.userhandle) {
+    if (!userSession) {
       setRegistrationMessage("Please log in to register for events.");
       return;
     }
 
+    setRegistrationMessage("");
+
+    // Build new attendee object
+    const newattendee = {
+      attendeehandle: profiledata?.userhandle.toLowerCase(),
+      attendeegender: profiledata?.gender,
+    };
+
+    // Build attendeesdata array
+    let attendeesdataLocal;
+    let attendeesdataObj1;
+    if (isObjEmpty(eventDetails?.attendeesdata)) {
+      attendeesdataLocal = [newattendee];
+    } else {
+      if (Array.isArray(eventDetails?.attendeesdata) == false) {
+        attendeesdataObj1 = JSON.parse(eventDetails?.attendeesdata);
+      } else {
+        attendeesdataObj1 = eventDetails?.attendeesdata;
+      }
+      let temparray = [...attendeesdataObj1, newattendee];
+      attendeesdataLocal = temparray.filter((obj, index) => {
+        return index === temparray.findIndex((o) => obj.attendeehandle == o.attendeehandle);
+      });
+    }
+
+    // Build list of registered attendees from attendeesdata (different gender)
+    let registeredattendeesLocal = [];
+    if (!isObjEmpty(eventDetails?.attendeesdata)) {
+      (attendeesdataObj1 || []).forEach((eachattendee) => {
+        if (eachattendee?.attendeegender != profiledata?.gender) {
+          registeredattendeesLocal.push(eachattendee?.attendeehandle);
+        }
+      });
+    }
+
+    // Proceed to confirm/perform registration
+    await confirmRegistration(attendeesdataLocal, registeredattendeesLocal);
+  };
+
+  const confirmRegistration = async (attendeesdataParam, registeredattendeesParam) => {
     setIsRegistering(true);
     setRegistrationMessage("");
 
     try {
-      // Simulate API call - replace with actual registration logic
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const eventId = eventDetails?.eventid || eventDetails?.id;
+      if (!isRegistered) {
+        await registerToAnEvent.mutateAsync({
+          eventId: eventId,
+          userhandle: profiledata?.userhandle.toLowerCase(),
+          attendeesdata: attendeesdataParam,
+          registeredattendees: registeredattendeesParam,
+        });
 
-      if (isRegistered) {
-        setRegistrationMessage("You've been unregistered from this event.");
-        setIsRegistered(false);
-      } else {
+        if (!registerToAnEvent.isError) {
+          // Update local eventDetails to reflect registration
+          let newEvent = structuredClone(eventDetails);
+          let attendeeslistObj4;
+
+          if (!isObjEmpty(newEvent?.attendeeslist)) {
+            if (Array.isArray(newEvent?.attendeeslist) == false) {
+              attendeeslistObj4 = newEvent?.attendeeslist?.replace(/\{|\}/gm, "").split(",");
+            } else {
+              attendeeslistObj4 = newEvent?.attendeeslist;
+            }
+          }
+
+          setEventDetails({
+            ...eventDetails,
+            attendeesdata: JSON.stringify(attendeesdataParam),
+            attendeeslist: isObjEmpty(newEvent?.attendeeslist)
+              ? [profiledata?.userhandle.toLowerCase()]
+              : [...new Set([...(attendeeslistObj4 || []), profiledata?.userhandle.toLowerCase()])],
+          });
+          // Notify other components about the update
+          try {
+            const updatedList = isObjEmpty(newEvent?.attendeeslist)
+              ? [profiledata?.userhandle.toLowerCase()]
+              : [...new Set([...(attendeeslistObj4 || []), profiledata?.userhandle.toLowerCase()])];
+            const payload = {
+              eventId: eventId,
+              attendeeslist: updatedList,
+              attendeesdata: JSON.stringify(attendeesdataParam),
+            };
+            window.dispatchEvent(new CustomEvent('event-updated', { detail: payload }));
+            // persist to localStorage so other pages/tabs can pick up the change
+            try {
+              const counts = computeCountsFromData(attendeesdataParam);
+              saveToLocalStorage(eventId, updatedList, JSON.stringify(attendeesdataParam), counts.males, counts.females);
+            } catch (e) {
+              // ignore
+            }
+          } catch (e) {
+            console.warn('Failed to dispatch event-updated', e);
+          }
+        }
         setRegistrationMessage("Successfully registered for this event!");
         setIsRegistered(true);
+      } else {
+        await unregisterToAnEvent.mutateAsync({ eventId: eventId, userhandle: profiledata?.userhandle?.toLowerCase() });
+
+        // Update local eventDetails to remove the user
+        try {
+          let newEvent = structuredClone(eventDetails);
+          let currentList = [];
+          if (!isObjEmpty(newEvent?.attendeeslist)) {
+            if (Array.isArray(newEvent.attendeeslist) == false) {
+              currentList = newEvent.attendeeslist.replace(/\{|\}/gm, "").split(",");
+            } else {
+              currentList = [...newEvent.attendeeslist];
+            }
+          }
+          const cleanedHandle = profiledata?.userhandle?.toLowerCase();
+          const updatedList = currentList.filter((h) => h?.toLowerCase() !== cleanedHandle);
+
+          let currentData = [];
+          if (!isObjEmpty(newEvent?.attendeesdata)) {
+            if (Array.isArray(newEvent.attendeesdata) == false) {
+              currentData = JSON.parse(newEvent.attendeesdata);
+            } else {
+              currentData = [...newEvent.attendeesdata];
+            }
+          }
+          const updatedData = currentData.filter((a) => a?.attendeehandle?.toLowerCase() !== cleanedHandle);
+
+          newEvent.attendeeslist = updatedList.length > 0 ? updatedList : null;
+          newEvent.attendeesdata = updatedData.length > 0 ? JSON.stringify(updatedData) : null;
+          setEventDetails(newEvent);
+
+          // Notify other components about the update
+          try {
+            const payload = {
+              eventId: eventId,
+              attendeeslist: updatedList,
+              attendeesdata: newEvent.attendeesdata,
+            };
+            window.dispatchEvent(new CustomEvent('event-updated', { detail: payload }));
+            // persist to localStorage so other pages/tabs can pick up the change
+            try {
+              const counts2 = computeCountsFromData(newEvent.attendeesdata);
+              saveToLocalStorage(eventId, updatedList, newEvent.attendeesdata, counts2.males, counts2.females);
+            } catch (e) {
+              // ignore
+            }
+          } catch (e) {
+            console.warn('Failed to dispatch event-updated', e);
+          }
+        } catch (e) {
+          console.warn('Failed to update local eventDetails after unregister', e);
+        }
+
+        setRegistrationMessage("You've been unregistered from this event.");
+        setIsRegistered(false);
       }
-    } catch {
+    } catch (error) {
+      console.error("Registration error:", error);
       setRegistrationMessage("Registration failed. Please try again.");
     } finally {
       setIsRegistering(false);
@@ -183,11 +467,11 @@ export default function EventDetailsDialog({ event, onClose, profiledata, loadin
             </h3>
             <div className="grid grid-cols-2 gap-2 pl-7">
               <div className="p-4 bg-background/50 rounded-lg border border-border/30">
-                <p className="text-2xl font-bold text-blue-600">{event?.males || 0}</p>
+                <p className="text-2xl font-bold text-blue-600">{malesCount || 0}</p>
                 <p className="text-sm text-muted-foreground">Males</p>
               </div>
               <div className="p-4 bg-background/50 rounded-lg border border-border/30">
-                <p className="text-2xl font-bold text-pink-600">{event?.females || 0}</p>
+                <p className="text-2xl font-bold text-pink-600">{femalesCount || 0}</p>
                 <p className="text-sm text-muted-foreground">Females</p>
               </div>
             </div>

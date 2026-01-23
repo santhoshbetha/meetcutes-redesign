@@ -26,14 +26,21 @@ export const AuthProvider = ({children}) => {
       //console.log("updateUserData res ", res)
       if (res.success == true){
         setProfiledata({...res.data});
+            } else {
+                // Ensure profiledata is at least an empty object so UIs depending on its presence don't spin forever
+                setProfiledata({});
       }
       setProfileLoading(false);
     }
 
     useEffect(() => {
       supabase.auth.getSession().then(({ data: { session } }) => {
-          setUserSession(session);
-          setUser(session?.user ?? null);
+                    setUserSession(session);
+                    setUser(session?.user ?? null);
+                    // If there is an existing session on initial load, fetch profile data
+                    if (session?.user) {
+                        updateUserData(session.user);
+                    }
       });
   
       const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
