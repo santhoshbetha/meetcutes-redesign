@@ -19,10 +19,11 @@ export function AuthConfirm() {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState(null);
   const [actionType, setActionType] = useState(null);
+  const next = searchParams.get('next') || '/changepassword';
 
   useEffect(() => {
     const processAuthAction = async () => {
-      const token = searchParams.get('token');
+      const token = searchParams.get('token_hash');
       const type = searchParams.get('type');
       const errorParam = searchParams.get('error');
       const errorDescription = searchParams.get('error_description');
@@ -88,7 +89,7 @@ export function AuthConfirm() {
           setTimeout(() => {
             switch (type) {
               case 'recovery':
-                navigate('/changepassword');
+                navigate(next, { replace: true });
                 break;
               case 'invite':
                 navigate('/dashboard');
