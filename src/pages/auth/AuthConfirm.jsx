@@ -27,6 +27,8 @@ export function AuthConfirm() {
       const errorParam = searchParams.get('error');
       const errorDescription = searchParams.get('error_description');
 
+      console.log("AuthConfirm: Processing authentication action", { token, type, errorParam, errorDescription });
+
       if (errorParam) {
         setError(errorDescription || 'An authentication error occurred.');
         return;
@@ -66,6 +68,8 @@ export function AuthConfirm() {
             throw new Error('Unsupported authentication action.');
         }
 
+        console.log("AuthConfirm: OTP verification result", result);
+
         if (result.error) {
           setError(result.error.message);
           toast.error(`Authentication failed: ${result.error.message}`);
@@ -93,6 +97,7 @@ export function AuthConfirm() {
       } catch (err) {
         setError('An unexpected error occurred during authentication.');
         toast.error('Authentication failed. Please try again.');
+        console.error("AuthConfirm: Unexpected error during authentication", err);
       } finally {
         setProcessing(false);
       }
@@ -143,7 +148,7 @@ export function AuthConfirm() {
 
   if (processing) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-muted/20 p-4">
+      <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-background via-background to-muted/20 p-4">
         <Card className="w-full max-w-md shadow-2xl bg-card/95 backdrop-blur-sm border-0">
           <CardContent className="p-8 text-center">
             <div className="flex items-center justify-center mb-4">
@@ -159,7 +164,7 @@ export function AuthConfirm() {
 
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-muted/20 p-4">
+      <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-background via-background to-muted/20 p-4">
         <Card className="w-full max-w-md shadow-2xl bg-card/95 backdrop-blur-sm border-0">
           <CardHeader className="pb-6">
             <div className="flex items-center justify-center mb-4">
