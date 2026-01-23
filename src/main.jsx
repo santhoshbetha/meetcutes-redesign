@@ -5,6 +5,7 @@ import { AuthProvider } from "./context/AuthContext.jsx";
 import "./index.css";
 import App from "./App.jsx";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import registerServiceWorker from "./serviceWorkerRegistration.js";
 
 const queryClient = new QueryClient()
 
@@ -17,6 +18,9 @@ try {
     document.documentElement.classList.add('dark');
   }
 } catch (e) {}
+
+// Register service worker
+registerServiceWorker();
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
