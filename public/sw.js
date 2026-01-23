@@ -1,9 +1,9 @@
 // Service Worker for MeetCutes
 // Simplified version to avoid potential issues
 
-const CACHE_NAME = 'meetcutes-v1';
-const STATIC_CACHE = 'meetcutes-static-v1';
-const API_CACHE = 'meetcutes-api-v1';
+const CACHE_NAME = 'meetcutes-v2'; // Updated version to force cache invalidation
+const STATIC_CACHE = 'meetcutes-static-v2';
+const API_CACHE = 'meetcutes-api-v2';
 
 // Install event - cache static assets
 self.addEventListener('install', event => {
@@ -13,8 +13,8 @@ self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(STATIC_CACHE).then(cache => {
       return cache.addAll([
-        '/',
-        '/index.html',
+        // Don't cache index.html - let it be served fresh to get latest asset references
+        // '/index.html',
         // Add other critical static assets here if needed
       ]);
     })
@@ -50,8 +50,8 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // Don't intercept requests for JavaScript, CSS, and meta.json to avoid caching issues
-  if (request.url.includes('.js') || request.url.includes('.css') || request.url.includes('/assets/') || request.url.includes('meta.json')) {
+  // Don't intercept requests for JavaScript, CSS, index.html, and meta.json to avoid caching issues
+  if (request.url.includes('.js') || request.url.includes('.css') || request.url.includes('/assets/') || request.url.includes('meta.json') || request.url.includes('index.html')) {
     return; // Let the browser handle these directly
   }
 
