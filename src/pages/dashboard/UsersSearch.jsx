@@ -85,6 +85,13 @@ export function UsersSearch({ userhandle, gender, latitude, longitude, questiona
     }
   }, [allUsers, setSearchUsersData]);
 
+  // Restore search data from context on mount
+  useEffect(() => {
+    if (searchUsersData && searchUsersData.length > 0 && !searchdone.current) {
+      searchdone.current = true;
+    }
+  }, [searchUsersData]);
+
   useEffect (() => {
     //if (!questionairevaluesset) { 
     //  setError("Finish questinaire to start searching")
@@ -167,16 +174,16 @@ export function UsersSearch({ userhandle, gender, latitude, longitude, questiona
     });
   };
 
-  console.log("searchUsersData", searchUsersData);
-
   const filteredResults = useMemo(() => {
-    if (!allUsers || !Array.isArray(allUsers)) return [];
-    if (ethnicityFilter.length === 0 || ethnicityFilter.includes('all')) return allUsers;
-    return allUsers.filter((u) => {
+    // Use context data if available and no new search has been performed
+    const dataToFilter = searchUsersData && searchUsersData.length > 0 && !searchParams ? searchUsersData : allUsers;
+    if (!dataToFilter || !Array.isArray(dataToFilter)) return [];
+    if (ethnicityFilter.length === 0 || ethnicityFilter.includes('all')) return dataToFilter;
+    return dataToFilter.filter((u) => {
       const e = (u.ethnicity || u.ethnicity_text || "").toString().toLowerCase();
       return ethnicityFilter.some((sel) => e.includes(String(sel).toLowerCase()));
     });
-  }, [allUsers, ethnicityFilter]);
+  }, [allUsers, searchUsersData, searchParams, ethnicityFilter]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 md:px-8 py-4 md:py-6">
@@ -427,13 +434,13 @@ export function UsersSearch({ userhandle, gender, latitude, longitude, questiona
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <h2 className="text-lg font-semibold text-foreground">Search Results</h2>
-              {allUsers && (
+              {filteredResults && (
                 <Badge variant="secondary" className="ml-2 text-sm px-3 py-1 bg-primary/10 text-primary border-primary/20">
                   {Array.isArray(filteredResults) ? filteredResults.length : 0} matches found
                 </Badge>
               )}
             </div>
-            {allUsers && Array.isArray(allUsers) && allUsers.length > 0 && (
+            {filteredResults && Array.isArray(filteredResults) && filteredResults.length > 0 && (
               <div className="flex items-center gap-2">
                 <Popover>
                   <PopoverTrigger asChild>
