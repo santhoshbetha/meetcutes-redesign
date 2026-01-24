@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from 'react'
-import { Spinner } from '@/components/ui/Spinner'
+import { Spinner } from '@/components/ui/spinner'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Container } from '@/components/Container'
