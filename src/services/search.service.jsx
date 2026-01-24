@@ -7,7 +7,7 @@ const digits = (num, count = 0) => {
   return count;
 };
 
-export const searchUsers = async (searchinput) => {
+export const searchUsers = async (searchinput, pageParam = 0, limit = 20) => {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 5000);
 
@@ -18,24 +18,30 @@ export const searchUsers = async (searchinput) => {
     let ageto = searchinput.ageto;
     let agefrom = searchinput.agefrom;
 
-    var cols = {
-      gender: gender == "Male" ? "Female" : "Male",
+    // Client shows 20 items per page, server fetches 100 items every 5 pages
+    const clientLimit = 20; // Always 20 items per client page
+    const serverLimit = 100; // Server fetches 100 items at a time
+    const pagesPerServerFetch = 5; // 5 client pages per server fetch (5 * 20 = 100)
+
+    // Calculate which server page to fetch based on client page
+    const serverPage = Math.floor(pageParam / pagesPerServerFetch);
+
+    const requestBody = {
+      gender: gender,
       agefrom: agefrom,
       ageto: ageto,
       lat: lat,
       long: lng,
       searchdistance: searchinput?.searchdistance,
       ethnicity: searchinput?.ethnicity,
+      page: serverPage,
+      limit: serverLimit, // Server fetches 100 items
     };
 
-    const { data, error } = await supabase.rpc("search_by_distance", {
-      gender: cols.gender,
-      agefrom: cols.agefrom,
-      ageto: cols.ageto,
-      lat: cols.lat,
-      long: cols.long,
-      searchdistance: cols.searchdistance,
-    }, { signal: controller.signal });
+    const { data, error } = await supabase.functions.invoke('search-users', {
+      body: requestBody,
+      signal: controller.signal
+    });
 
     if (error) {
       return {
@@ -45,16 +51,26 @@ export const searchUsers = async (searchinput) => {
     }
 
     // Filter out users who have set visibility to 'events-only'
-    let filteredData = data?.filter(user => user.visibilityPreference !== 'events-only') || [];
+    let serverData = data?.users?.filter(user => user.visibilityPreference !== 'events-only') || [];
 
     // Filter by ethnicity if provided
-    if (cols.ethnicity && cols.ethnicity.length > 0 && !cols.ethnicity.includes("all")) {
-      filteredData = filteredData.filter(user => cols.ethnicity.includes(user.ethnicity));
+    if (requestBody.ethnicity && requestBody.ethnicity.length > 0 && !requestBody.ethnicity.includes("all")) {
+      serverData = serverData.filter(user => requestBody.ethnicity.includes(user.ethnicity));
     }
+
+    // Calculate which 20 items to return for this client page
+    const clientPageWithinServerBatch = pageParam % pagesPerServerFetch;
+    const startIndex = clientPageWithinServerBatch * clientLimit;
+    const endIndex = startIndex + clientLimit;
+    const paginatedData = serverData.slice(startIndex, endIndex);
+
+    // Check if there are more pages available
+    const hasMore = data?.hasMore || (serverData.length > endIndex);
 
     return {
       success: true,
-      data: filteredData,
+      data: paginatedData,
+      nextPage: hasMore ? pageParam + 1 : undefined,
     };
   } catch (error) {
     if (error.name === 'AbortError') {
@@ -159,6 +175,76 @@ export const searchUser = async (searchtext) => {
     return {
       success: false,
       msg: error?.message || error
+    };
+  } finally {
+    clearTimeout(timeoutId);
+  }
+};
+
+export const searchEvents = async (searchinput, pageParam = 0, limit = 20) => {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+  try {
+    let lat = searchinput.lat;
+    let lng = searchinput.long;
+    let startdate = searchinput.startdate;
+    let enddate = searchinput.enddate;
+
+    // Client shows 20 items per page, server fetches 100 items every 5 pages
+    const clientLimit = 20; // Always 20 items per client page
+    const serverLimit = 100; // Server fetches 100 items at a time
+    const pagesPerServerFetch = 5; // 5 client pages per server fetch (5 * 20 = 100)
+
+    // Calculate which server page to fetch based on client page
+    const serverPage = Math.floor(pageParam / pagesPerServerFetch);
+
+    const requestBody = {
+      lat: lat,
+      long: lng,
+      searchdistance: searchinput?.searchdistance,
+      startdate: startdate,
+      enddate: enddate,
+      page: serverPage,
+      limit: serverLimit, // Server fetches 100 items
+    };
+
+    const { data, error } = await supabase.functions.invoke('search-events', {
+      body: requestBody,
+      signal: controller.signal
+    });
+
+    if (error) {
+      return {
+        success: false,
+        msg: error?.message,
+      };
+    }
+
+    // Calculate which 20 items to return for this client page
+    const clientPageWithinServerBatch = pageParam % pagesPerServerFetch;
+    const startIndex = clientPageWithinServerBatch * clientLimit;
+    const endIndex = startIndex + clientLimit;
+    const paginatedData = (data?.events || []).slice(startIndex, endIndex);
+
+    // Check if there are more pages available
+    const hasMore = data?.hasMore || ((data?.events || []).length > endIndex);
+
+    return {
+      success: true,
+      data: paginatedData,
+      nextPage: hasMore ? pageParam + 1 : undefined,
+    };
+  } catch (error) {
+    if (error.name === 'AbortError') {
+      return {
+        success: false,
+        msg: 'Request timed out',
+      };
+    }
+    return {
+      success: false,
+      msg: error?.message || 'An error occurred',
     };
   } finally {
     clearTimeout(timeoutId);

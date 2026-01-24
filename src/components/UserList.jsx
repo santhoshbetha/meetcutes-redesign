@@ -10,8 +10,6 @@ export function UserList({ users, isLoading }) {
   const [currentPage, setCurrentPage] = useState(1);
   const usersPerPage = 8;
 
-  console.log('UserList users::', users);
-
   // Calculate total pages
   const totalPages = Math.ceil(users.length / usersPerPage);
 

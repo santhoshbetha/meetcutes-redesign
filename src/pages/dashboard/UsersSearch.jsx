@@ -18,12 +18,14 @@ import { SearchAndUserEventsDataContext } from '@/context/SearchAndUserEventsDat
 import { searchUsers } from "../../services/search.service";
 import { isObjEmpty } from "../../utils/util";
 import { Badge } from "@/components/ui/badge";
-import { Search, RefreshCw, Filter, Users, Heart, MapPin, ChevronsUpDown } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { Search, RefreshCw, Filter, Users, Heart, MapPin, ChevronsUpDown, Loader2 } from "lucide-react";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { useInfiniteQuery } from "@tanstack/react-query";
 
 let distanceMap = new Map([
   ["5", 8046],
@@ -41,6 +43,47 @@ export function UsersSearch({ userhandle, gender, latitude, longitude, questiona
   const [searchError, setSearchError] = useState(null);
   const {searchUsersData, setSearchUsersData} = useContext(SearchAndUserEventsDataContext);
   const searchdone = useRef(false);
+
+  // Form state for search parameters
+  const [searchParams, setSearchParams] = useState(null);
+
+  // Infinite query for search results
+  const {
+    data,
+    error: queryError,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading: isQueryLoading,
+    refetch,
+    isRefetching
+  } = useInfiniteQuery({
+    queryKey: ['searchUsers', searchParams],
+    queryFn: async ({ pageParam = 0 }) => {
+      if (!searchParams) return { success: false, data: [] };
+      return await searchUsers(searchParams, pageParam, 20);
+    },
+    getNextPageParam: (lastPage) => {
+      if (lastPage?.success && lastPage?.nextPage !== undefined) {
+        return lastPage.nextPage;
+      }
+      return undefined;
+    },
+    enabled: !!searchParams && !error,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
+  // Flatten the paginated data
+  const allUsers = useMemo(() => {
+    return data?.pages?.flatMap(page => page.data || []) || [];
+  }, [data]);
+
+  // Update context when data changes
+  useEffect(() => {
+    if (allUsers.length > 0) {
+      setSearchUsersData(allUsers);
+    }
+  }, [allUsers, setSearchUsersData]);
 
   useEffect (() => {
     //if (!questionairevaluesset) { 
@@ -61,6 +104,15 @@ export function UsersSearch({ userhandle, gender, latitude, longitude, questiona
         setError("")
     }
   }, [userhandle, latitude, questionairevaluesset, userstate, onetimepaymentrequired]);
+
+  // Handle query errors
+  useEffect(() => {
+    if (queryError) {
+      setSearchError(queryError?.message || 'Search failed');
+    } else {
+      setSearchError(null);
+    }
+  }, [queryError]);
 
   const formik = useFormik({
     initialValues: {
@@ -88,18 +140,10 @@ export function UsersSearch({ userhandle, gender, latitude, longitude, questiona
           longitude: longitude,
           searchdistance: distanceMap.get(values.searchdistance),
       }
-      setIsLoading(true);
 
-      const res = await searchUsers(searchdata);
-      console.log('searchUsers res::', res);
-      if (res.success) {
-          setSearchUsersData(res.data);
-          if (res.data?.length == 0) {
-            console.log("Search results Zero")
-          }
-      }
-      searchdone.current = true
-      setIsLoading(false);
+      // Set search parameters to trigger the query
+      setSearchParams(searchdata);
+      searchdone.current = true;
     },
   });
 
@@ -126,13 +170,13 @@ export function UsersSearch({ userhandle, gender, latitude, longitude, questiona
   console.log("searchUsersData", searchUsersData);
 
   const filteredResults = useMemo(() => {
-    if (!searchUsersData || !Array.isArray(searchUsersData)) return [];
-    if (ethnicityFilter.length === 0 || ethnicityFilter.includes('all')) return searchUsersData;
-    return searchUsersData.filter((u) => {
+    if (!allUsers || !Array.isArray(allUsers)) return [];
+    if (ethnicityFilter.length === 0 || ethnicityFilter.includes('all')) return allUsers;
+    return allUsers.filter((u) => {
       const e = (u.ethnicity || u.ethnicity_text || "").toString().toLowerCase();
       return ethnicityFilter.some((sel) => e.includes(String(sel).toLowerCase()));
     });
-  }, [searchUsersData, ethnicityFilter]);
+  }, [allUsers, ethnicityFilter]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 md:px-8 py-4 md:py-6">
@@ -146,17 +190,6 @@ export function UsersSearch({ userhandle, gender, latitude, longitude, questiona
             <p className="text-muted-foreground">
               Discover amazing people and build meaningful relationships
             </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => window.location.reload()}
-              className="hidden md:flex"
-            >
-              <RefreshCw className="w-4 h-4 mr-2" />
-              Refresh
-            </Button>
           </div>
         </div>
 
@@ -266,8 +299,8 @@ export function UsersSearch({ userhandle, gender, latitude, longitude, questiona
               </div>
             </div>
 
-            <Button onClick={() => formik.handleSubmit()} className="w-full" disabled={isLoading || !!error}>
-              {isLoading ? (
+            <Button onClick={() => formik.handleSubmit()} className="w-full" disabled={isQueryLoading || isRefetching || !!error}>
+              {isQueryLoading || isRefetching ? (
                 <>
                   <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
                   Searching...
@@ -353,8 +386,8 @@ export function UsersSearch({ userhandle, gender, latitude, longitude, questiona
 
             {/* Search Button */}
             <div className="hidden md:block">
-              <Button type="submit" className="w-full md:w-auto" disabled={isLoading || !!error}>
-                {isLoading ? (
+              <Button type="submit" className="w-full md:w-auto" disabled={isQueryLoading || isRefetching || !!error}>
+                {isQueryLoading || isRefetching ? (
                   <>
                     <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
                     Searching...
@@ -373,17 +406,34 @@ export function UsersSearch({ userhandle, gender, latitude, longitude, questiona
 
       {/* Results Section */}
       <div className="space-y-4">
+        {/* Loading Progress Bar */}
+        {(isLoading || isQueryLoading || isFetchingNextPage || isRefetching) && (
+          <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
+            <CardContent className="pt-6 pb-6">
+              <div className="flex flex-col items-center gap-4">
+                <div className="flex items-center gap-3">
+                  <RefreshCw className="w-5 h-5 text-primary animate-spin" />
+                  <span className="text-sm font-medium text-foreground">
+                    {isLoading || isQueryLoading ? "Searching for users..." : "Loading more users..."}
+                  </span>
+                </div>
+                <Progress value={undefined} className="w-full max-w-md" />
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {searchdone.current && (
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <h2 className="text-lg font-semibold text-foreground">Search Results</h2>
-              {searchUsersData && (
+              {allUsers && (
                 <Badge variant="secondary" className="ml-2 text-sm px-3 py-1 bg-primary/10 text-primary border-primary/20">
                   {Array.isArray(filteredResults) ? filteredResults.length : 0} matches found
                 </Badge>
               )}
             </div>
-            {searchUsersData && Array.isArray(searchUsersData) && searchUsersData.length > 0 && (
+            {allUsers && Array.isArray(allUsers) && allUsers.length > 0 && (
               <div className="flex items-center gap-2">
                 <Popover>
                   <PopoverTrigger asChild>
@@ -430,8 +480,9 @@ export function UsersSearch({ userhandle, gender, latitude, longitude, questiona
                     </div>
                   </PopoverContent>
                 </Popover>
-                <Button variant="outline" size="sm">
-                  Sort
+                <Button variant="outline" size="sm" onClick={() => refetch()}>
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Refresh
                 </Button>
               </div>
             )}
@@ -443,10 +494,34 @@ export function UsersSearch({ userhandle, gender, latitude, longitude, questiona
           {!isObjEmpty(filteredResults) && (
             <UserList
               users={filteredResults}
-              isLoading={isLoading}
+              isLoading={isQueryLoading || isRefetching}
             />
           )}
         </div>
+
+        {/* Load More Button */}
+        {hasNextPage && (
+          <div className="flex justify-center py-4">
+            <Button
+              onClick={() => fetchNextPage()}
+              disabled={isFetchingNextPage}
+              variant="outline"
+              className="w-full md:w-auto"
+            >
+              {isFetchingNextPage ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Loading more...
+                </>
+              ) : (
+                <>
+                  <ChevronsUpDown className="w-4 h-4 mr-2" />
+                  Load More Results
+                </>
+              )}
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );

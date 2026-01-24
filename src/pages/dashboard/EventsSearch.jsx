@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { format } from "date-fns";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Link } from "react-router-dom";
@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { CalendarIcon, MapPin, Clock, Users, Filter, Search, RefreshCw, SlidersHorizontal, CheckCircle } from "lucide-react";
+import { CalendarIcon, MapPin, Clock, Users, Filter, Search, RefreshCw, SlidersHorizontal, CheckCircle, ChevronsUpDown, Loader2 } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import {
   Popover,
@@ -23,14 +23,15 @@ import {
 import { EventList } from "@/components/EventList";
 import { useFormik } from "formik";
 import { cn } from "@/lib/utils";
-import { useQuery } from "@tanstack/react-query"
-import { getEventsData } from "@/services/events.service";
+import { useInfiniteQuery } from "@tanstack/react-query"
+import { searchEvents } from "@/services/search.service";
 import { isObjEmpty } from "@/utils/util";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Progress } from "@/components/ui/progress";
 import {
   Sheet,
   SheetContent,
@@ -211,37 +212,48 @@ export function EventsSearch({
   }, []);
   const eventsSearchQueryKey = () => ["eventssearch"];
 
-  const {status, data: querydata, error: fetcherror, refetch} = useQuery({
+  const {
+    status,
+    data: infiniteData,
+    error: fetcherror,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    refetch
+  } = useInfiniteQuery({
     queryKey: eventsSearchQueryKey(),
-    queryFn: async () => {
+    queryFn: async ({ pageParam = 0 }) => {
       if (!isObjEmpty(searchinfo)) {
-          const response = await getEventsData(searchinfo);
-          return response.data || null;
+        const response = await searchEvents(searchinfo, pageParam);
+        return response.data || [];
       } else {
-          return null;
+        return [];
       }
     },
-    // enabled: false,
-    refetchInterval: 7 * (60 * 1000), // 7 min
+    getNextPageParam: (lastPage, pages) => {
+      return lastPage.length === 20 ? pages.length : undefined;
+    },
+    enabled: !isObjEmpty(searchinfo),
     refetchOnMount: false
   });
 
+  // Flatten the infinite query data
+  const querydata = useMemo(() => {
+    return infiniteData?.pages?.flat() || [];
+  }, [infiniteData?.pages]);
+
   useEffect (() => {
     if (!isObjEmpty(querydata)) {
-        setSearchData(querydata);
-        // Save search results to localStorage
-        saveToStorage(STORAGE_KEYS.SEARCH_RESULTS, querydata);
+      // Calculate distances and set search data
+      const dataWithDistances = querydata.map(event => ({
+        ...event,
+        distance: haversine(latitude, longitude, event.latitude, event.longitude)
+      }));
+      setSearchData(dataWithDistances);
+      // Save search results to localStorage
+      saveToStorage(STORAGE_KEYS.SEARCH_RESULTS, dataWithDistances);
     }
-  }, [querydata]);
-
-  useEffect(() => {
-    if (!isObjEmpty (searchData)) {
-        for (let key in searchData) {
-            const distance = haversine(latitude, longitude, searchData[key].latitude, searchData[key].longitude);
-            searchData[key].distance = distance;
-        }
-    }
-  }, [searchData]);
+  }, [querydata, latitude, longitude]);
 
   useEffect(() => {
     if (searchsuccess.current && !isObjEmpty(searchData) && resultsRef.current && !hasScrolledForSearch) {
@@ -836,6 +848,23 @@ export function EventsSearch({
 
         {/* Results Section */}
         <div ref={resultsRef} className="space-y-6">
+          {/* Loading Progress Bar */}
+          {(isLoading || isFetchingNextPage) && (
+            <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
+              <CardContent className="pt-6 pb-6">
+                <div className="flex flex-col items-center gap-4">
+                  <div className="flex items-center gap-3">
+                    <RefreshCw className="w-5 h-5 text-primary animate-spin" />
+                    <span className="text-sm font-medium text-foreground">
+                      {isLoading ? "Searching for events..." : "Loading more events..."}
+                    </span>
+                  </div>
+                  <Progress value={undefined} className="w-full max-w-md" />
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {searchsuccess.current && (
             <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
               <CardContent className="pt-6 pb-6">
@@ -878,6 +907,30 @@ export function EventsSearch({
                 setIsLoading={setIsLoading}
                 profiledata={profiledata}
               />
+            </div>
+          )}
+
+          {/* Load More Button */}
+          {hasNextPage && (
+            <div className="flex justify-center py-4">
+              <Button
+                onClick={() => fetchNextPage()}
+                disabled={isFetchingNextPage}
+                variant="outline"
+                className="w-full md:w-auto"
+              >
+                {isFetchingNextPage ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Loading more...
+                  </>
+                ) : (
+                  <>
+                    <ChevronsUpDown className="w-4 h-4 mr-2" />
+                    Load More Events
+                  </>
+                )}
+              </Button>
             </div>
           )}
          
