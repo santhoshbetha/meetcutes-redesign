@@ -37,7 +37,7 @@ import { ChangeLocation } from "@/components/ChangeLocation";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 
 export function Settings() {
-  const { user, profiledata, setProfiledata } = useAuth();
+  const { user, profiledata, setProfiledata, logout } = useAuth();
   const isOnline = useOnlineStatus();
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -73,18 +73,19 @@ export function Settings() {
       const res = await deleteUser(user?.id);
 
       if (res.success) {
-        toast.success('Account deleted successfully!', {
+        toast.success('Account deactivated successfully!', {
           position: 'top-center',
         });
-        // Navigate to login or home page after successful deletion
+        logout();
+        // Navigate to home page immediately after logout
         navigate("/");
       } else {
-        toast.error(res.msg || 'Failed to delete account', {
+        toast.error(res.msg || 'Failed to deactivate account', {
           position: 'top-center',
         });
       }
     } catch {
-      toast.error('An error occurred while deleting your account', {
+      toast.error('An error occurred while deactivating your account', {
         position: 'top-center',
       });
     } finally {
@@ -160,10 +161,10 @@ export function Settings() {
             <AlertDialogHeader>
               <AlertDialogTitle className="flex items-center gap-2">
                 <AlertTriangle className="w-5 h-5 text-destructive" />
-                Delete Account
+                Deactivate Account
               </AlertDialogTitle>
               <AlertDialogDescription>
-                This action cannot be undone. This will permanently delete your account and remove all your data from our servers.
+                This will deactivate your account and hide your profile from other users. Your data will be preserved and you can contact support to reactivate your account if needed.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
@@ -176,10 +177,10 @@ export function Settings() {
                 {confirmClick ? (
                   <>
                     <Spinner size="small" className="mr-2" />
-                    Deleting...
+                    Deactivating...
                   </>
                 ) : (
-                  'Delete Account'
+                  'Deactivate Account'
                 )}
               </AlertDialogAction>
             </AlertDialogFooter>
@@ -198,7 +199,7 @@ export function Settings() {
           <button
             type="button"
             className="text-red-700 rounded bg-transparent border-0"
-            onClick={() => navigate("/dashboard")}
+            onClick={() => navigate("/")}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -523,9 +524,9 @@ export function Settings() {
               <CardContent className="p-6">
                 <div className="flex items-start justify-between">
                   <div className="space-y-2">
-                    <h3 className="font-semibold text-destructive">Delete Account</h3>
+                    <h3 className="font-semibold text-destructive">Deactivate Account</h3>
                     <p className="text-sm text-muted-foreground">
-                      Permanently delete your account and all associated data. This action cannot be undone.
+                      Deactivate your account and hide your profile from other users. Your data will be preserved for potential reactivation.
                     </p>
                   </div>
                   <Button
@@ -533,7 +534,7 @@ export function Settings() {
                     onClick={() => setConfirmPopup(true)}
                     className="bg-destructive hover:bg-destructive/90"
                   >
-                    Delete Account
+                    Deactivate Account
                   </Button>
                 </div>
               </CardContent>

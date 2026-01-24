@@ -15,8 +15,7 @@ import * as Yup from "yup";
 import { Formik } from "formik";
 import { Link, useNavigate } from "react-router-dom";
 import usePasswordToggle from "@/hooks/usePasswordToggle";
-import secureLocalStorage from "react-secure-storage";
-import supabase from "@/lib/supabase";
+import { getUserProfile } from "@/services/user.service";
 
 export function LoginPage() {
   const navigate = useNavigate();
@@ -41,15 +40,34 @@ export function LoginPage() {
         });
 
         if (data && !error) {
+            // Check if user account is deleted
+            const profileRes = await getUserProfile(data.user.id);
+            
+            if (profileRes.success && profileRes.data) {
+                if (profileRes.data.userstate === "delete") {
+                    setError("This account has been deleted. Please contact support if you believe this is an error.");
+                    // Sign out the user since they're not allowed to login
+                    await supabase.auth.signOut();
+                    return;
+                }
+            }
+            
             navigate('/dashboard')
         }
+        
+        console.log('Login data:', data);
+        console.log('Login error:', error);
 
+        console.log('error?.includes', error.toString().includes('Email not confirmed'));
+
+        console.log('Login error 33:');
         if (error) {
+          console.log('Login error 22:');
             // Check if the error is related to email not being verified
-            if (error.message?.includes('Email not confirmed') ||
-                error.message?.includes('email_not_confirmed') ||
-                error.message?.includes('not confirmed') ||
-                error.message?.includes('verify your email')) {
+            if (error?.toString().includes('Email not confirmed') ||
+                error?.toString().includes('email_not_confirmed') ||
+                error?.toString().includes('not confirmed') ||
+                error?.toString().includes('verify your email')) {
               // Redirect to email not verified page with the email
               navigate('/email-not-verified', {
                 state: { email: values.email.trim() }
@@ -106,7 +124,7 @@ export function LoginPage() {
             Welcome Back
           </CardTitle>
           <CardDescription className="text-center text-base">
-            Enter your credentials to access your account
+            Enter your credentials to access your account 22
           </CardDescription>
         </CardHeader>
         <CardContent className="px-8 pb-8">

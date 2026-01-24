@@ -13,10 +13,36 @@ export const AuthProvider = ({children}) => {
     const [profiledata, setProfiledata] = useState(null);
     const [userSession, setUserSession] = useState(null);
     const [profileLoading, setProfileLoading] = useState(false);
+    const [justLoggedIn, setJustLoggedIn] = useState(false);
 
     const setAuth = (authUser) => {
-        setUser(authUser)
-    }
+        setUser(authUser);
+    };
+
+    const resetJustLoggedIn = () => {
+        setJustLoggedIn(false);
+    };
+
+    // Logout function to clear all session data
+    const logout = async () => {
+        try {
+            await supabase.auth.signOut();
+            setUser(null);
+            setUserSession(null);
+            setProfiledata(null);
+            setJustLoggedIn(false);
+            
+            // Clear all stored data
+            localStorage.clear();
+            secureLocalStorage.clear();
+            
+            // Force dark mode for homepage after logout
+            localStorage.setItem("theme", "dark");
+            document.documentElement.classList.add("dark");
+        } catch (error) {
+            console.error("Error during logout:", error);
+        }
+    };
 
     //const setUserData = (userData) => {
     //  setProfiledata({...userData})
@@ -27,6 +53,17 @@ export const AuthProvider = ({children}) => {
       let res = await getProfileData(user?.id);
       //console.log("updateUserData res ", res)
       if (res.success == true){
+        // Check if user account is deleted
+        if (res.data.userstate === "delete") {
+          console.log("User account is deleted, signing out");
+          toast.error("This account has been deleted. Please contact support if you believe this is an error.");
+          await supabase.auth.signOut();
+          setUser(null);
+          setUserSession(null);
+          setProfiledata(null);
+          setJustLoggedIn(false);
+          return;
+        }
         setProfiledata({...res.data});
             } else {
                 // Ensure profiledata is at least an empty object so UIs depending on its presence don't spin forever
@@ -98,6 +135,7 @@ export const AuthProvider = ({children}) => {
                 setUser(null);
                 setUserSession(null);
                 setProfiledata(null);
+                setJustLoggedIn(false);
                 return;
             }
         }
@@ -109,6 +147,11 @@ export const AuthProvider = ({children}) => {
             setUserSession(session);
             updateUserData(session?.user)
             
+            // Set justLoggedIn flag for new sign-ins (not initial session detection)
+            if (event === 'SIGNED_IN') {
+                setJustLoggedIn(true);
+            }
+            
             // Set dark mode as default for logged-in users if no theme preference exists
             const savedTheme = localStorage.getItem("theme");
             if (!savedTheme) {
@@ -119,6 +162,7 @@ export const AuthProvider = ({children}) => {
             setAuth(null);
             //setUser(null);
             setUserSession(null);
+            setJustLoggedIn(false);
         }
       });
   
@@ -151,8 +195,11 @@ export const AuthProvider = ({children}) => {
             userSession,
             profiledata,
             profileLoading,
+            justLoggedIn,
+            resetJustLoggedIn,
             setProfiledata,
-            setAuth
+            setAuth,
+            logout
         }}>
             {children}
         </AuthContext.Provider>

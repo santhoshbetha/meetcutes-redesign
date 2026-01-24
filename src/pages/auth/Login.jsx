@@ -52,6 +52,9 @@ export function Login({ setOpenLogin, setOpenSignup }) {
         if (data && !error) {
             navigate('/dashboard')
         }
+
+        console.log('Login data:', data);
+        console.log('Login error:', error);
   
         if (error) {
             // Check if the error is related to email not being verified

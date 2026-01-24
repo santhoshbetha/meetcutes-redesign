@@ -11,13 +11,19 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Mail, AlertTriangle, RefreshCw, LogOut, CheckCircle } from "lucide-react";
 import supabase from "@/lib/supabase";
 import { toast } from "sonner";
+import { useAuth } from "@/context/AuthContext";
 
 export function EmailNotVerified() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { justLoggedIn } = useAuth();
   const [email] = useState(location.state?.email || '');
   const [resending, setResending] = useState(false);
   const [countdown, setCountdown] = useState(0);
+  const [emailsent, setEmailsent] = useState(false);
+
+  console.log('EmailNotVerified email:', email);
+  console.log('EmailNotVerified countdown:', countdown);
 
   useEffect(() => {
     // If no email provided, redirect to login
@@ -34,12 +40,13 @@ export function EmailNotVerified() {
         setCountdown(countdown - 1);
       }, 1000);
     } else if (countdown === 0 && countdown !== null) {
-      // Countdown finished, redirect to login for security
-      navigate('/login');
+      // Countdown finished - only redirect if not on email-not-verified route
+      if (emailsent) {
+        navigate('/login');
+      }
     }
     return () => clearTimeout(timer);
-  }, [countdown, navigate]);
-
+  }, [countdown, navigate, emailsent]);
 
   const handleResendVerification = async () => {
     if (!email) {
@@ -60,6 +67,7 @@ export function EmailNotVerified() {
         // Start countdown timer for security
         setCountdown(10);
         toast.success('Verification email sent! This page will close in 10 seconds for security.');
+        setEmailsent(true);
       }
     } catch (err) {
       toast.error('Unable to resend verification email.');

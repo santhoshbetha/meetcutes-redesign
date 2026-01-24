@@ -16,7 +16,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 const delay = ms => new Promise(res => setTimeout(res, ms));
 
 export function TermsPopup() {
-    const {user, profiledata, setProfiledata} = useAuth();
+    const {user, profiledata, setProfiledata, resetJustLoggedIn} = useAuth();
     const [agree, setAgree] = useState(false);
     let [disabledclass, setDisabledclass] = useState("disabled");
     const [termsAdding, setTermsAdding] = useState(false);
@@ -28,9 +28,11 @@ export function TermsPopup() {
         delay(1200).then(() => {
             if (profiledata?.termsaccepted == false) {
                 setShowModal(true)
+                // Reset the justLoggedIn flag since TermsPopup is now shown
+                resetJustLoggedIn();
             }
         })
-    }, [profiledata]);
+    }, [profiledata, resetJustLoggedIn]);
 
     const onDisagreeClick = async (e) => {
         e.preventDefault();

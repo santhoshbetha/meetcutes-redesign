@@ -162,10 +162,10 @@ export const deleteUser = async (userId) => {
   const timeoutId = setTimeout(() => controller.abort(), 5000);
 
   try {
-    // First delete from users table
+    // Update userstate to "delete" instead of actually deleting
     const { error: userError } = await supabase
       .from("users")
-      .delete({ signal: controller.signal })
+      .update({ userstate: "delete" }, { signal: controller.signal })
       .eq("userid", userId);
 
     if (userError) {
@@ -174,10 +174,6 @@ export const deleteUser = async (userId) => {
         msg: userError.message
       };
     }
-
-    // Then delete from auth (this requires admin privileges or RLS policies)
-    // For now, we'll just delete from the users table
-    // The auth deletion would need to be handled server-side or with proper permissions
 
     return {
       success: true,

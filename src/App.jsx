@@ -35,7 +35,7 @@ import GlobalLoadingSpinner from './components/GlobalLoadingSpinner';
 import { InternetStatusBanner } from './components/InternetStatusBanner';
 
 function App() {
-  const { user, profiledata } = useAuth();
+  const { user, profiledata, justLoggedIn } = useAuth();
   const [openLogin, setOpenLogin] = useState(false);
   const [openSignup, setOpenSignup] = useState(false);
   const [showInitialLoading, setShowInitialLoading] = useState(false);
@@ -214,7 +214,7 @@ function App() {
             </Suspense>
             
             {/* Terms Popup - shows after login if terms not accepted */}
-            {user && profiledata && profiledata.termsaccepted == false && (
+            {user && profiledata && justLoggedIn && profiledata.termsaccepted == false && (
               <TermsPopup />
             )}
           </>
