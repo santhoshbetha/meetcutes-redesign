@@ -14,7 +14,7 @@ import { useAuth } from "../context/AuthContext";
 import { isObjEmpty } from "../utils/util";
 import { useRegisterToAnEvent, useUnregisterToAnEvent, eventDetailsQueryOptions } from '@/hooks/useEvents'
 import { useSuspenseQuery } from '@tanstack/react-query'
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 
 const delay = ms => new Promise(res => setTimeout(res, ms));
 

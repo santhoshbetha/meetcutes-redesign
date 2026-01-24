@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Mail, AlertTriangle, RefreshCw, LogOut, CheckCircle } from "lucide-react";
 import supabase from "@/lib/supabase";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 
 export function EmailNotVerified() {
   const navigate = useNavigate();

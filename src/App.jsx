@@ -30,7 +30,7 @@ import { useAuth } from "./context/AuthContext";
 import { SearchAndUserEventsDataContextProvider } from './context/SearchAndUserEventsDataContext';
 import { AutoCompleteDataContextProvider } from './context/AutoCompleteDataContext';
 import { GlobalLoadingProvider } from './context/GlobalLoadingContext';
-import { Toaster } from "react-hot-toast";
+import { Toaster } from "sonner";
 import GlobalLoadingSpinner from './components/GlobalLoadingSpinner';
 import { InternetStatusBanner } from './components/InternetStatusBanner';
 
@@ -222,6 +222,7 @@ function App() {
           </AutoCompleteDataContextProvider>
         </div>
       </GlobalLoadingProvider>
+      <Toaster />
     </>
   );
 }

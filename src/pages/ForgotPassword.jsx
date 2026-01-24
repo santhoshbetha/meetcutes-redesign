@@ -12,7 +12,7 @@ import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { checkIfUserExists, getPasswordRetryCount, updatePasswordRetryCount } from "@/services/register.service";
 import { updateUserInfo } from "@/services/user.service";
 import supabase from "@/lib/supabase";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 
 function isObjEmpty(val) {
   return val == null ||

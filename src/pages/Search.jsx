@@ -10,7 +10,7 @@ import { searchUser } from "../services/search.service";
 import { Spinner } from "../components/ui/Spinner";
 import { UserCard } from "../components/UserCard";
 import { Search as SearchIcon, Users, AlertCircle, CheckCircle } from "lucide-react";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 
 export function Search() {
   const navigate = useNavigate();

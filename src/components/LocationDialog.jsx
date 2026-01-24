@@ -21,7 +21,7 @@ import { isObjEmpty } from "../utils/util";
 import { updateUserInfo } from "../services/user.service";
 import dayjs from "dayjs";
 import { haversine } from "../utils/util";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 
 const delay = ms => new Promise(res => setTimeout(res, ms));
 

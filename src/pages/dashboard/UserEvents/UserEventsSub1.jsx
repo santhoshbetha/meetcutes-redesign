@@ -14,6 +14,7 @@ const delay = ms => new Promise(res => setTimeout(res, ms));
 
 export function UserEventsSub1({profiledata, userhandle, latitude, longitude, error }) {
   const [reload, setReload] = useState(true);
+  const [createEventOpen, setCreateEventOpen] = useState(false);
   const { isLoading, error: error1, data, status, refetch } = useUserEvents1({
       userid: profiledata?.userid
   });
@@ -53,13 +54,13 @@ export function UserEventsSub1({profiledata, userhandle, latitude, longitude, er
           <CardTitle>
             <span className="md:text-lg">Events you have created</span>
           </CardTitle>
-          <Dialog>
+          <Dialog open={createEventOpen} onOpenChange={setCreateEventOpen}>
             <DialogTrigger asChild>
               <button disabled={!!error} className="text-sm md:text-base font-medium text-primary hover:text-primary/80 transition-colors">
                   Create Event
               </button>
             </DialogTrigger>
-            <CreateEvent/>
+            <CreateEvent onClose={() => setCreateEventOpen(false)}/>
           </Dialog>
           <div className="ml-2">
             <Button variant="outline" disabled={refreshDisabled} onClick={() => {
@@ -77,7 +78,7 @@ export function UserEventsSub1({profiledata, userhandle, latitude, longitude, er
         <Separator />
         <CardContent className="space-y-2">
           {isObjEmpty(data) && (
-            <Card className="mt-3 w-full bg-gradient-to-br from-primary/5 via-background to-muted/20 border-2 border-primary/10 shadow-lg backdrop-blur-sm">
+            <Card className="mt-3 w-full bg-linear-to-br from-primary/5 via-background to-muted/20 border-2 border-primary/10 shadow-lg backdrop-blur-sm">
               <CardContent className="pt-8 pb-8 text-center">
                 <div className="w-16 h-16 rounded-full bg-primary/10 mx-auto mb-4 flex items-center justify-center">
                   <Plus className="w-8 h-8 text-primary" />
@@ -88,14 +89,14 @@ export function UserEventsSub1({profiledata, userhandle, latitude, longitude, er
                 <p className="text-muted-foreground mb-6 max-w-md mx-auto">
                   Start creating amazing events and connect with people in your community. Your events will appear here once created.
                 </p>
-                <Dialog>
+                <Dialog open={createEventOpen} onOpenChange={setCreateEventOpen}>
                   <DialogTrigger asChild>
                     <Button className="bg-primary hover:bg-primary/90" disabled={!!error}>
                       <Sparkles className="w-4 h-4 mr-2" />
                       Create Your First Event
                     </Button>
                   </DialogTrigger>
-                  <CreateEvent/>
+                  <CreateEvent onClose={() => setCreateEventOpen(false)}/>
                 </Dialog>
               </CardContent>
             </Card>

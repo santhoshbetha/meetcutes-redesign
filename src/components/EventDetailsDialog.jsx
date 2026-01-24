@@ -366,7 +366,7 @@ export default function EventDetailsDialog({ event, onClose, profiledata, loadin
 
   return (
     <div className="fixed inset-0 z-50 grid place-items-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="relative w-full max-w-2xl bg-background rounded-2xl shadow-2xl animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto dark:border-3">
+      <div className="relative w-full max-w-2xl bg-background rounded-2xl shadow-2xl animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto border border-border dark:border-3">
         {/* Global Loading Overlay */}
         {loading && (
           <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center rounded-2xl">
@@ -405,13 +405,13 @@ export default function EventDetailsDialog({ event, onClose, profiledata, loadin
                 onClick={() => window.open(`/event/${event?.id || event?.eventid}`, '_blank')}
                 title="Open in new tab"
               >
-                <ExternalLink className="w-5 h-5 text-dark group-hover:text-foreground" />
+                <ExternalLink className="w-5 h-5 text-muted-foreground group-hover:text-foreground" />
               </Button>
               <Button
                 className="bg-background hover:bg-muted rounded-lg transition-colors group"
                 onClick={onClose}
               >
-                <X className="w-5 h-5 text-dark group-hover:text-foreground" />
+                <X className="w-5 h-5 text-muted-foreground group-hover:text-foreground" />
               </Button>
             </div>
           </div>

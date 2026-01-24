@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Spinner } from "@/components/ui/Spinner";
 import { useFormik } from "formik";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { Separator } from "@/components/ui/separator";
 import {
   Select,

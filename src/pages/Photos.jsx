@@ -8,7 +8,7 @@ import { useOnlineStatus } from '@/hooks/useOnlineStatus';
 import { ImageUploader } from '@/components/ImageUploader';
 import { ImageLoader } from '@/components/ImageLoader';
 import { Spinner } from '@/components/ui/Spinner';
-import toast from 'react-hot-toast';
+import { toast } from "sonner";
 import { Separator } from '@/components/ui/separator';
 import {
   Camera,

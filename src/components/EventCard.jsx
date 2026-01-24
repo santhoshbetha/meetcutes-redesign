@@ -147,9 +147,9 @@ export function EventCard({ setSelectedEvent, event, userlatitude, userlongitude
 
         {/* Interests tags */}
         <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-3 sm:mb-4">
-          {interests.map((interest, index) => (
+          {interests.map((interest) => (
             <Badge
-              key={index}
+              key={interest.name}
               variant="secondary"
               className="text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 transition-colors"
             >

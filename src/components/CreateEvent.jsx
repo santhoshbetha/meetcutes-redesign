@@ -1,4 +1,4 @@
-import { useState, useContext } from "react";
+import { useState, useContext, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -29,10 +29,324 @@ import { DialogTitle, DialogContent } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { MapPin, Clock } from "lucide-react";
 import { Combobox } from "@/components/ui/combobox";
+import { GeocoderAutocomplete } from "@geoapify/geocoder-autocomplete";
+import { GeoapifyContext, GeoapifyGeocoderAutocomplete } from '@geoapify/react-geocoder-autocomplete';
+import "@geoapify/geocoder-autocomplete/styles/minimal.css";
+import { toast } from "sonner";
+
+// Custom styles for GeoapifyGeocoderAutocomplete to match app theme
+const geoapifyStyles = `
+  .geoapify-custom-autocomplete .geoapify-autocomplete-input {
+    background-color: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+    border-radius: 0.375rem !important;
+    color: #111827 !important;
+    font-size: 0.875rem !important;
+    line-height: 1.25rem !important;
+    padding: 0.5rem 0.75rem !important;
+    width: 100% !important;
+    height: 2.5rem !important;
+    transition: all 0.2s ease-in-out !important;
+  }
+
+  .geoapify-custom-autocomplete .geoapify-autocomplete-input:focus {
+    outline: none !important;
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2) !important;
+  }
+
+  .geoapify-custom-autocomplete .geoapify-autocomplete-input::placeholder {
+    color: #6b7280 !important;
+  }
+
+  /* Clear/Reset button (X) styling */
+  .geoapify-custom-autocomplete .geoapify-autocomplete-input ~ button,
+  .geoapify-custom-autocomplete button[class*="clear"],
+  .geoapify-custom-autocomplete button[class*="reset"],
+  .geoapify-custom-autocomplete .geoapify-autocomplete-clear,
+  .geoapify-custom-autocomplete .geoapify-clear-button,
+  .geoapify-autocomplete-clear,
+  .geoapify-clear-button {
+    color: #6b7280 !important;
+    background: transparent !important;
+    border: none !important;
+    cursor: pointer !important;
+    padding: 0 !important;
+    font-size: 1.2rem !important;
+    line-height: 1 !important;
+    opacity: 0.7 !important;
+    transition: opacity 0.2s ease-in-out !important;
+  }
+
+  .geoapify-custom-autocomplete .geoapify-autocomplete-input ~ button:hover,
+  .geoapify-custom-autocomplete button[class*="clear"]:hover,
+  .geoapify-custom-autocomplete button[class*="reset"]:hover,
+  .geoapify-custom-autocomplete .geoapify-autocomplete-clear:hover,
+  .geoapify-custom-autocomplete .geoapify-clear-button:hover,
+  .geoapify-autocomplete-clear:hover,
+  .geoapify-clear-button:hover {
+    opacity: 1 !important;
+    color: #374151 !important;
+  }
+
+  /* Dark mode clear button */
+  .dark .geoapify-custom-autocomplete .geoapify-autocomplete-input ~ button,
+  .dark .geoapify-custom-autocomplete button[class*="clear"],
+  .dark .geoapify-custom-autocomplete button[class*="reset"],
+  .dark .geoapify-custom-autocomplete .geoapify-autocomplete-clear,
+  .dark .geoapify-custom-autocomplete .geoapify-clear-button,
+  .dark .geoapify-autocomplete-clear,
+  .dark .geoapify-clear-button {
+    color: #9ca3af !important;
+  }
+
+  .dark .geoapify-custom-autocomplete .geoapify-autocomplete-input ~ button:hover,
+  .dark .geoapify-custom-autocomplete button[class*="clear"]:hover,
+  .dark .geoapify-custom-autocomplete button[class*="reset"]:hover,
+  .dark .geoapify-custom-autocomplete .geoapify-autocomplete-clear:hover,
+  .dark .geoapify-custom-autocomplete .geoapify-clear-button:hover,
+  .dark .geoapify-autocomplete-clear:hover,
+  .dark .geoapify-clear-button:hover {
+    color: #d1d5db !important;
+  }
+
+  /* Universal input styling within our wrapper - highest priority */
+  .geoapify-custom-autocomplete input {
+    background-color: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+    border-radius: 0.375rem !important;
+    color: #111827 !important;
+    font-size: 0.875rem !important;
+    line-height: 1.25rem !important;
+    padding: 0.5rem 0.75rem !important;
+    width: 100% !important;
+    height: 2.5rem !important;
+    transition: all 0.2s ease-in-out !important;
+    box-sizing: border-box !important;
+  }
+
+  .geoapify-custom-autocomplete input:focus {
+    outline: none !important;
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2) !important;
+  }
+
+  .geoapify-custom-autocomplete input::placeholder {
+    color: #6b7280 !important;
+  }
+
+  /* Dark mode universal input styling */
+  .dark .geoapify-custom-autocomplete input {
+    background-color: #1f2937 !important;
+    color: #f9fafb !important;
+    border-color: #374151 !important;
+  }
+
+  .dark .geoapify-custom-autocomplete input:focus {
+    border-color: #60a5fa !important;
+    box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.2) !important;
+  }
+
+  .dark .geoapify-custom-autocomplete input::placeholder {
+    color: #6b7280 !important;
+  }
+
+  /* Dark mode styles */
+  .dark .geoapify-custom-autocomplete .geoapify-autocomplete-input {
+    background-color: #1f2937 !important;
+    color: #f9fafb !important;
+    border-color: #374151 !important;
+  }
+
+  /* Dropdown styles */
+  .geoapify-custom-autocomplete .geoapify-autocomplete-dropdown,
+  .geoapify-autocomplete-dropdown {
+    background-color: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+    border-radius: 0.375rem !important;
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1) !important;
+    margin-top: 0.25rem !important;
+  }
+
+  .dark .geoapify-custom-autocomplete .geoapify-autocomplete-dropdown,
+  .dark .geoapify-autocomplete-dropdown {
+    background-color: #1f2937 !important;
+    border-color: #374151 !important;
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.3), 0 4px 6px -4px rgb(0 0 0 / 0.3) !important;
+  }
+
+  .geoapify-custom-autocomplete .geoapify-autocomplete-item,
+  .geoapify-autocomplete-item {
+    color: #111827 !important;
+    padding: 0.5rem 0.75rem !important;
+    cursor: pointer !important;
+    transition: background-color 0.15s ease-in-out !important;
+  }
+
+  .dark .geoapify-custom-autocomplete .geoapify-autocomplete-item,
+  .dark .geoapify-autocomplete-item {
+    color: #f9fafb !important;
+  }
+
+  .geoapify-custom-autocomplete .geoapify-autocomplete-item:hover,
+  .geoapify-autocomplete-item:hover {
+    background-color: #f3f4f6 !important;
+  }
+
+  .dark .geoapify-custom-autocomplete .geoapify-autocomplete-item:hover,
+  .dark .geoapify-autocomplete-item:hover {
+    background-color: #374151 !important;
+  }
+
+  .geoapify-custom-autocomplete .geoapify-autocomplete-item-selected,
+  .geoapify-autocomplete-item-selected {
+    background-color: #3b82f6 !important;
+    color: #ffffff !important;
+  }
+
+  /* Dark theme styling for .geoapify-autocomplete-items */
+  .geoapify-custom-autocomplete .geoapify-autocomplete-items,
+  .geoapify-autocomplete-items {
+    background-color: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+    border-radius: 0.375rem !important;
+    color: #111827 !important;
+  }
+
+  .dark .geoapify-custom-autocomplete .geoapify-autocomplete-items,
+  .dark .geoapify-autocomplete-items {
+    background-color: #1f2937 !important;
+    border-color: #374151 !important;
+    color: #f9fafb !important;
+  }
+
+  /* Individual items within .geoapify-autocomplete-items */
+  .geoapify-custom-autocomplete .geoapify-autocomplete-items > *,
+  .geoapify-autocomplete-items > * {
+    color: #111827 !important;
+    padding: 0.5rem 0.75rem !important;
+    cursor: pointer !important;
+    transition: background-color 0.15s ease-in-out !important;
+    border-bottom: 1px solid #f3f4f6 !important;
+  }
+
+  .geoapify-custom-autocomplete .geoapify-autocomplete-items > *:last-child,
+  .geoapify-autocomplete-items > *:last-child {
+    border-bottom: none !important;
+  }
+
+  .geoapify-custom-autocomplete .geoapify-autocomplete-items > *:hover,
+  .geoapify-autocomplete-items > *:hover {
+    background-color: #f3f4f6 !important;
+  }
+
+  .dark .geoapify-custom-autocomplete .geoapify-autocomplete-items > *,
+  .dark .geoapify-autocomplete-items > * {
+    color: #f9fafb !important;
+    border-bottom-color: #374151 !important;
+  }
+
+  .dark .geoapify-custom-autocomplete .geoapify-autocomplete-items > *:hover,
+  .dark .geoapify-autocomplete-items > *:hover {
+    background-color: #374151 !important;
+  }
+
+  /* Scrollbar styles for dropdown */
+  .geoapify-custom-autocomplete .geoapify-autocomplete-dropdown::-webkit-scrollbar,
+  .geoapify-autocomplete-dropdown::-webkit-scrollbar {
+    width: 6px !important;
+  }
+
+  .geoapify-custom-autocomplete .geoapify-autocomplete-dropdown::-webkit-scrollbar-track,
+  .geoapify-autocomplete-dropdown::-webkit-scrollbar-track {
+    background: #f9fafb !important;
+    border-radius: 3px !important;
+  }
+
+  .dark .geoapify-custom-autocomplete .geoapify-autocomplete-dropdown::-webkit-scrollbar-track,
+  .dark .geoapify-autocomplete-dropdown::-webkit-scrollbar-track {
+    background: #111827 !important;
+  }
+
+  .geoapify-custom-autocomplete .geoapify-autocomplete-dropdown::-webkit-scrollbar-thumb,
+  .geoapify-autocomplete-dropdown::-webkit-scrollbar-thumb {
+    background: #d1d5db !important;
+    border-radius: 3px !important;
+  }
+
+  .dark .geoapify-custom-autocomplete .geoapify-autocomplete-dropdown::-webkit-scrollbar-thumb,
+  .dark .geoapify-autocomplete-dropdown::-webkit-scrollbar-thumb {
+    background: #4b5563 !important;
+  }
+
+  .geoapify-custom-autocomplete .geoapify-autocomplete-dropdown::-webkit-scrollbar-thumb:hover,
+  .geoapify-autocomplete-dropdown::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af !important;
+  }
+
+  /* Additional dropdown container styles */
+  .geoapify-custom-autocomplete div[class*="dropdown"],
+  .geoapify-custom-autocomplete [class*="dropdown"],
+  div[class*="geoapify"][class*="dropdown"],
+  [class*="geoapify"][class*="dropdown"] {
+    background-color: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+    border-radius: 0.375rem !important;
+  }
+
+  .dark .geoapify-custom-autocomplete div[class*="dropdown"],
+  .dark .geoapify-custom-autocomplete [class*="dropdown"],
+  .dark div[class*="geoapify"][class*="dropdown"],
+  .dark [class*="geoapify"][class*="dropdown"] {
+    background-color: #1f2937 !important;
+    border-color: #374151 !important;
+  }
+
+  /* Additional universal selectors for maximum coverage */
+  .geoapify-custom-autocomplete * {
+    box-sizing: border-box !important;
+  }
+
+  /* Force styling on any element that might be the dropdown */
+  .geoapify-custom-autocomplete > div > div:last-child,
+  .geoapify-custom-autocomplete > div > [class]:last-child {
+    background-color: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+    border-radius: 0.375rem !important;
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1) !important;
+  }
+
+  .dark .geoapify-custom-autocomplete > div > div:last-child,
+  .dark .geoapify-custom-autocomplete > div > [class]:last-child {
+    background-color: #1f2937 !important;
+    border-color: #374151 !important;
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.3), 0 4px 6px -4px rgb(0 0 0 / 0.3) !important;
+  }
+`;
+if (typeof document !== 'undefined') {
+  const injectStyles = () => {
+    const existingStyle = document.getElementById('geoapify-custom-styles');
+    if (!existingStyle) {
+      const styleSheet = document.createElement("style");
+      styleSheet.id = 'geoapify-custom-styles';
+      styleSheet.type = "text/css";
+      styleSheet.innerText = geoapifyStyles;
+      document.head.appendChild(styleSheet);
+      //console.log('Geoapify styles injected:', geoapifyStyles);
+    }
+  };
+
+  // Run immediately or on DOM content loaded
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', injectStyles);
+  } else {
+    injectStyles();
+  }
+}
 
 const validationSchema = Yup.object({
   location: Yup.string().required("Location name is required"),
-  address1: Yup.string(),
+  address1: Yup.string().required("Street address is required"),
   state: Yup.string().required("State is required"),
   city: Yup.string().required("City is required"),
   zip: Yup.string().required("Zipcode is required").matches(/^\d{5}$/, "Must be 5 digits"),
@@ -112,14 +426,46 @@ const getCityOptions = (stateIn) => {
   return [];
 };
 
-export function CreateEvent() {
+export function CreateEvent({ onClose }) {
   const navigate = useNavigate()
   const isOnline = useOnlineStatus();
   const { userSession, profiledata } = useAuth();
   const {autocompletedata} = useContext(AutoCompleteDataContext);
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false);
-  let locationid = null;
+  const [addressLoading, setAddressLoading] = useState(false);
+  const autocompleteRef = useRef(null);
+
+  useEffect(() => {
+    const handleInput = (e) => {
+      const value = e.target.value;
+      if (value && value.length >= 3) {
+        setAddressLoading(true);
+      } else {
+        setAddressLoading(false);
+      }
+    };
+
+    // Wait for the Geoapify component to render, then attach listener
+    const timer = setTimeout(() => {
+      if (autocompleteRef.current) {
+        const input = autocompleteRef.current.querySelector('input');
+        if (input) {
+          input.addEventListener('input', handleInput);
+        }
+      }
+    }, 1000); // Wait 1 second for Geoapify to render
+
+    return () => {
+      clearTimeout(timer);
+      if (autocompleteRef.current) {
+        const input = autocompleteRef.current.querySelector('input');
+        if (input) {
+          input.removeEventListener('input', handleInput);
+        }
+      }
+    };
+  }, []);
 
   const formik = useFormik({
     initialValues: {
@@ -137,15 +483,24 @@ export function CreateEvent() {
     
     onSubmit: async (values) => {
         if (!isOnline) {
-            alert('You are offline. check your internet connection.')
+            toast({
+                title: "Offline",
+                description: "You are offline. Check your internet connection.",
+                variant: "destructive",
+            });
             return;
         }
         if (!userSession) {
-            alert ("Error, logout and login again")
+            toast({
+                title: "Error",
+                description: "Error, logout and login again",
+                variant: "destructive",
+            });
             return;
         }
         
-        autocompletedata.forEach((each) => {
+        let locationid = null;
+          autocompletedata.forEach((each) => {
           if (each.address1 == values.address1 && each.state == values.state && each.city == values.city && each.zipcode == values.zip) {
               locationid = each.locationid
           }
@@ -170,20 +525,63 @@ export function CreateEvent() {
 
         if (postresp == -2) {
           setLoading(false)
-          alert ("Create Event Failed! Far from your area!!")
+          toast.error("Far from your area!!");
         }
         if (postresp == 0) {
-          alert ("Create Event Succesful")
+          toast.success("Create Event Successful");
+          onClose();
           navigate('/dashboard')
         } else if (postresp == -1) {
           setLoading(false)
-          alert ("Create Event Failed. Try again")
+          toast.error("Try again");
         } else if (postresp == -3) {
           setLoading(false)
-          alert ("Timing Conflicts!!")
+          toast.error("Timing Conflicts!!");
         }
     }
   });
+
+  const onPlaceSelect = (value) => {
+    console.log("Selected Address Object:", value);
+    if (value && value.properties) {
+      const properties = value.properties;
+
+      // Extract address components from Geoapify response
+      const addressLine1 = properties.address_line1 || properties.formatted || "";
+      const city = properties.city || properties.locality || "";
+      const state = properties.state || properties.region || "";
+      const zip = properties.postcode || properties.postal_code || "";
+      const lat = properties.lat || properties.latitude || null;
+      const lon = properties.lon || properties.longitude || null;
+
+      console.log("Extracted address components:", {
+        addressLine1,
+        city,
+        state,
+        zip,
+        lat,
+        lon
+      });
+
+      // Update formik values
+      formik.setFieldValue("address1", addressLine1);
+      formik.setFieldValue("city", city);
+      formik.setFieldValue("state", state);
+      formik.setFieldValue("zip", zip);
+
+      // Mark fields as touched for validation
+      formik.setFieldTouched("address1", true);
+      formik.setFieldTouched("city", true);
+      formik.setFieldTouched("state", true);
+      formik.setFieldTouched("zip", true);
+    }
+  };
+
+  const onSuggestionChange = (suggestions) => {
+    console.log("Current suggestions:", suggestions);
+    // Hide loading when suggestions are received
+    setAddressLoading(false);
+  };
 
   //console.log("formik.errors.state", formik.errors.state);
   //console.log("formik.errors.city", formik.errors.city);
@@ -251,21 +649,39 @@ export function CreateEvent() {
                     </div>
 
                     {/* Street Address */}
-                    <div className="space-y-2" hidden>
+                    <div className="space-y-2">
                       <Label
                         htmlFor="streetAddress"
-                        className="text-sm font-medium text-gray-700"
+                        className="text-sm font-medium text-foreground flex items-center gap-2"
                       >
+                        <MapPin className="w-4 h-4" />
                         Street Address
                       </Label>
-                      <AutoComplete
-                        data={autocompletedata}
-                        formik={formik}
-                      />
+                      <div className="geoapify-custom-autocomplete relative" ref={autocompleteRef}>
+                        <GeoapifyContext apiKey={import.meta.env.VITE_REACT_APP_GEOAPIFY_API_KEY || import.meta.env.REACT_APP_GEOAPIFY_API_KEY}>
+                          <GeoapifyGeocoderAutocomplete
+                            placeholder="Enter address here"
+                            lang="en"
+                            limit={5}
+                            types={["address"]}
+                            countryCodes={["us"]}
+                            placeSelect={onPlaceSelect}
+                            suggestionsChange={onSuggestionChange}
+                          />
+                        </GeoapifyContext>
+                        {addressLoading && (
+                          <div className="absolute right-3 top-1/2 -translate-y-1/2 z-10">
+                            <div className="animate-spin rounded-full h-4 w-4 border-2 border-gray-300 border-t-blue-600 dark:border-gray-600 dark:border-t-blue-400"></div>
+                          </div>
+                        )}
+                      </div>
+                      {formik.errors.address1 && formik.touched.address1 && (
+                        <p className="text-red-500 text-sm">{formik.errors.address1}</p>
+                      )}
                     </div>
 
                     {/* State, City, Zipcode Row */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4" hidden>
                       <div className="space-y-2">
                         <Label
                           htmlFor="state"

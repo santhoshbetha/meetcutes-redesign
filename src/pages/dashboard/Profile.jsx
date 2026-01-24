@@ -18,7 +18,7 @@ import { isObjEmpty } from "@/utils/util";
 import { updateUserInfo } from "@/services/user.service";
 import { uploadImage } from "@/services/image.service";
 import { useOnlineStatus } from '@/hooks/useOnlineStatus';
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 
 export function Profile() {
   const { user, userSession, profiledata, setProfiledata } = useAuth();

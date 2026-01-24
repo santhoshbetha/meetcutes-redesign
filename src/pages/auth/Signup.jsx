@@ -29,7 +29,7 @@ import * as Yup from "yup";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import usePasswordToggle from "@/hooks/usePasswordToggle";
 import { checkIfUserExists } from "../../services/register.service";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { coords } from "@/lib/defaultcoords";
 import { cities } from "@/lib/cities"
 import supabase from "@/lib/supabase";

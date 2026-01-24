@@ -147,9 +147,9 @@ export function EventList({ events, userlatitude, userlongitude, setIsLoading, p
           <div
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6 transition-opacity duration-300 opacity-100"
           >
-            {currentEvents?.map((event) => (
+            {currentEvents?.map((event, index) => (
               <EventCard
-                key={event?.id}
+                key={event?.id || `event-${index}`}
                 setSelectedEvent={setSelectedEvent}
                 event={event}
                 userlatitude={userlatitude}
