@@ -11,8 +11,6 @@ export function Home({ setOpenLogin }) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    console.log('Home user effect', user, profiledata);
-
     if (user && profiledata) {
         navigate('/dashboard')
     } else {
