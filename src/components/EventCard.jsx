@@ -28,7 +28,19 @@ const getSampleInterests = () => {
 export function EventCard({ setSelectedEvent, event, userlatitude, userlongitude, profiledata }) {
   const [distance, setDistance] = useState(0);
   const [isRegistered, setIsRegistered] = useState(false);
+  const [attendingCount, setAttendingCount] = useState(0);
   const interests = getSampleInterests();
+
+  // Function to get attendees count from attendeeslist
+  const getAttendeesCount = (attendeeslist) => {
+    if (isObjEmpty(attendeeslist)) return 0;
+    
+    if (Array.isArray(attendeeslist) === false) {  // if string (from postgres)
+      return attendeeslist?.replace(/\{|\}/gm, "").split(",").filter(attendee => attendee && attendee.trim()).length;
+    } else {
+      return attendeeslist.filter(attendee => attendee && attendee.trim()).length;
+    }
+  };
 
   useEffect(() => {
     const distance = haversine(userlatitude, userlongitude, event?.latitude, event?.longitude);
@@ -37,7 +49,8 @@ export function EventCard({ setSelectedEvent, event, userlatitude, userlongitude
 
   useEffect(() => {
     if (isObjEmpty(event?.attendeeslist)) {
-        setIsRegistered(false)
+        setIsRegistered(false);
+        setAttendingCount(0);
     } else {
         let attendeeslistObj3
         if (Array.isArray(event?.attendeeslist) == false) {  // if string (from postgres)
@@ -45,6 +58,9 @@ export function EventCard({ setSelectedEvent, event, userlatitude, userlongitude
         } else {
             attendeeslistObj3 = event?.attendeeslist
         }
+
+        const count = attendeeslistObj3.filter(attendee => attendee && attendee.trim()).length;
+        setAttendingCount(count);
 
         if (attendeeslistObj3?.map(attendee => attendee?.toLowerCase()).includes(profiledata?.userhandle?.toLowerCase())) {
             setIsRegistered(true)
@@ -67,8 +83,15 @@ export function EventCard({ setSelectedEvent, event, userlatitude, userlongitude
         const updatedList = detail.attendeeslist;
         if (!updatedList || updatedList.length === 0) {
           setIsRegistered(false);
+          setAttendingCount(0);
           return;
         }
+        
+        const count = Array.isArray(updatedList) 
+          ? updatedList.filter(attendee => attendee && attendee.trim()).length 
+          : updatedList.replace(/\{|\}/gm, "").split(",").filter(attendee => attendee && attendee.trim()).length;
+        setAttendingCount(count);
+        
         const normalized = updatedList.map(h => (h || "").toString().toLowerCase());
         if (normalized.includes((profiledata?.userhandle || "").toString().toLowerCase())) {
           setIsRegistered(true);
@@ -170,7 +193,7 @@ export function EventCard({ setSelectedEvent, event, userlatitude, userlongitude
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1 text-xs text-muted-foreground">
             <Users className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
-            <span>{(event?.males || 0) + (event?.females || 0)} attending</span>
+            <span>{attendingCount} attending</span>
           </div>
           <div className="px-2 sm:px-3 py-1.5 sm:py-2 bg-linear-to-r from-primary/20 to-primary/10 rounded-lg border border-primary/20">
             <p className="text-xs sm:text-sm font-bold text-primary">

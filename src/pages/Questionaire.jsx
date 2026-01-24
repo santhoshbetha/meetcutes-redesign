@@ -42,6 +42,8 @@ export default function Questionaire() {
   const [q13value, setQ13Value] = useState(20);
   const [q14value, setQ14Value] = useState(20);
 
+  console.log("profiledata?.gender", profiledata?.gender)
+
   const handleChange1 = (val) => {
     setQ1Value(val[0]);
     setValueschanged(true);
@@ -228,9 +230,14 @@ export default function Questionaire() {
             Questionnaire
           </CardTitle>
             {!isObjEmpty(profiledata?.questionairevaluesset) && profiledata?.questionairevaluesset != true && (
-              <h4>
-                  Slide below options as your thoughts align with (be truthful not rightful)
-              </h4>
+              <div>
+                <h4>
+                    Please slide the options below towards the direction your thoughts align on each. Be honest about your preferences.
+                </h4>
+                <p className="text-sm text-muted-foreground mt-2">
+                  💡 <strong>Middle position</strong> = Neutral/No strong preference • <strong>Slide left</strong> = Lean toward leftt option • <strong>Slide right</strong> = Lean toward right option
+                </p>
+              </div>
             )}
             {!isObjEmpty(profiledata?.questionairevaluesset) && profiledata?.questionairevaluesset == true && (
               <h4>
@@ -246,7 +253,7 @@ export default function Questionaire() {
             className=""
             onSubmit={formik.handleSubmit}
           >
-            {profiledata?.gender === 'male' ? (
+            {profiledata?.gender == 'Male' ? (
               <>
                 <div className="grid grid-cols-12 gap-1">
                   <div className="col-span-2 text-sm">Android</div>

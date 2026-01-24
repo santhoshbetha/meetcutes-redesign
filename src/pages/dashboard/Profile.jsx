@@ -307,7 +307,7 @@ export function Profile() {
                 </div>
 
                 {/* Quick Stats */}
-                <div className="grid grid-cols-2 gap-3 mt-6 pt-4 border-t border-border/50">
+                <div className="grid grid-cols-2 gap-3 mt-6 pt-4 border-t border-border/50" hidden>
                   <div className="text-center">
                     <div className="text-lg font-bold text-foreground">12</div>
                     <div className="text-xs text-muted-foreground uppercase tracking-wide">Events Attending</div>

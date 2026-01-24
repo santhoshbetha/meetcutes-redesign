@@ -8,6 +8,13 @@ import { Spinner } from '@/components/ui/Spinner';
 import { getUserProfile } from "@/services/user.service";
 import { isObjEmpty } from "@/utils/util";
 import { useAuth } from "@/context/AuthContext";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { Slider } from "@/components/ui/slider";
 
 const CDNURL = 'https://yrxymkmmfrkrfccmutvr.supabase.co/storage/v1/object/public/meetfirst/images';
 
@@ -21,6 +28,9 @@ export function UserProfile() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [imageUseCover, setImageUseCover] = useState({});
   const carouselRef = useRef(null);
+
+  console.log('UserProfile render questionairevaluesset::', userData?.questionairevaluesset);
+  console.log('UserProfile render questionairevalues::', userData?.questionairevalues);
   
   // Generate a more detailed dummy avatar based on user data
   const generateDummyAvatar = () => {
@@ -322,7 +332,7 @@ export function UserProfile() {
                   </div>
 
                   {/* Quick Stats */}
-                  <div className="grid grid-cols-2 gap-3 mt-6 pt-4 border-t border-border/50 w-full">
+                  <div className="grid grid-cols-2 gap-3 mt-6 pt-4 border-t border-border/50 w-full" hidden>
                     <div className="text-center">
                       <div className="text-lg font-bold text-foreground">12</div>
                       <div className="text-xs text-muted-foreground uppercase tracking-wide">Events Attending</div>
@@ -479,6 +489,378 @@ export function UserProfile() {
             </Card>
           </div>
         </div>
+
+        {/* Questionnaire Values Accordion */}
+        {userData?.questionairevaluesset && (
+          <div className="mt-8">
+            <Accordion type="single" collapsible className="w-full">
+              <AccordionItem value="questionnaire" className="border-2 border-border rounded-lg shadow-xl bg-card/95 backdrop-blur-sm">
+                <AccordionTrigger className="px-6 py-4 hover:no-underline">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <Settings className="w-5 h-5 text-primary" />
+                    </div>
+                    <div className="text-left">
+                      <h3 className="text-xl font-bold text-foreground">Questionnaire Values</h3>
+                      <p className="text-sm text-muted-foreground">View this person's preferences and opinions</p>
+                    </div>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="px-6 pb-6">
+                  <div className="space-y-6">
+                    {userData?.gender == 'Male' ? (
+                      <>
+                        {/* Male Questions */}
+                        <div className="space-y-4">
+                          <div className="grid grid-cols-12 gap-4 items-center">
+                            <div className="col-span-2 text-sm font-medium text-foreground">Android</div>
+                            <div className="col-span-8">
+                              <Slider
+                                value={[userData.questionairevalues.q1 || 20]}
+                                max={100}
+                                step={1}
+                                disabled
+                                className="pointer-events-none"
+                              />
+                            </div>
+                            <div className="col-span-2 text-sm text-muted-foreground text-right">iPhone</div>
+                          </div>
+
+                          <div className="grid grid-cols-12 gap-4 items-center">
+                            <div className="col-span-2 text-sm font-medium text-foreground">Capitalism</div>
+                            <div className="col-span-8">
+                              <Slider
+                                value={[userData.questionairevalues.q2 || 20]}
+                                max={100}
+                                step={1}
+                                disabled
+                                className="pointer-events-none"
+                              />
+                            </div>
+                            <div className="col-span-2 text-sm text-muted-foreground text-right">Equal Opportunities</div>
+                          </div>
+
+                          <div className="grid grid-cols-12 gap-4 items-center">
+                            <div className="col-span-2 text-sm font-medium text-foreground">Truck</div>
+                            <div className="col-span-8">
+                              <Slider
+                                value={[userData.questionairevalues.q3 || 20]}
+                                max={100}
+                                step={1}
+                                disabled
+                                className="pointer-events-none"
+                              />
+                            </div>
+                            <div className="col-span-2 text-sm text-muted-foreground text-right">BMW</div>
+                          </div>
+
+                          <div className="grid grid-cols-12 gap-4 items-center">
+                            <div className="col-span-2 text-sm font-medium text-foreground">Socialism</div>
+                            <div className="col-span-8">
+                              <Slider
+                                value={[userData.questionairevalues.q4 || 20]}
+                                max={100}
+                                step={1}
+                                disabled
+                                className="pointer-events-none"
+                              />
+                            </div>
+                            <div className="col-span-2 text-sm text-muted-foreground text-right">Pyramid Scheme</div>
+                          </div>
+
+                          <div className="grid grid-cols-12 gap-4 items-center">
+                            <div className="col-span-2 text-sm font-medium text-foreground">Modern Family</div>
+                            <div className="col-span-8">
+                              <Slider
+                                value={[userData.questionairevalues.q5 || 20]}
+                                max={100}
+                                step={1}
+                                disabled
+                                className="pointer-events-none"
+                              />
+                            </div>
+                            <div className="col-span-2 text-sm text-muted-foreground text-right">Traditional Family</div>
+                          </div>
+
+                          <div className="grid grid-cols-12 gap-4 items-center">
+                            <div className="col-span-2 text-sm font-medium text-foreground">Suit/Formal dress</div>
+                            <div className="col-span-8">
+                              <Slider
+                                value={[userData.questionairevalues.q6 || 20]}
+                                max={100}
+                                step={1}
+                                disabled
+                                className="pointer-events-none"
+                              />
+                            </div>
+                            <div className="col-span-2 text-sm text-muted-foreground text-right">Jeans and T-shirt</div>
+                          </div>
+
+                          <div className="grid grid-cols-12 gap-4 items-center">
+                            <div className="col-span-2 text-sm font-medium text-foreground">Partner</div>
+                            <div className="col-span-8">
+                              <Slider
+                                value={[userData.questionairevalues.q7 || 20]}
+                                max={100}
+                                step={1}
+                                disabled
+                                className="pointer-events-none"
+                              />
+                            </div>
+                            <div className="col-span-2 text-sm text-muted-foreground text-right">Title Wife</div>
+                          </div>
+
+                          <div className="grid grid-cols-12 gap-4 items-center">
+                            <div className="col-span-2 text-sm font-medium text-foreground">Concerts/Clubs</div>
+                            <div className="col-span-8">
+                              <Slider
+                                value={[userData.questionairevalues.q8 || 20]}
+                                max={100}
+                                step={1}
+                                disabled
+                                className="pointer-events-none"
+                              />
+                            </div>
+                            <div className="col-span-2 text-sm text-muted-foreground text-right">Movie at home</div>
+                          </div>
+
+                          <div className="grid grid-cols-12 gap-4 items-center">
+                            <div className="col-span-2 text-sm font-medium text-foreground">End goal Happiness</div>
+                            <div className="col-span-8">
+                              <Slider
+                                value={[userData.questionairevalues.q9 || 20]}
+                                max={100}
+                                step={1}
+                                disabled
+                                className="pointer-events-none"
+                              />
+                            </div>
+                            <div className="col-span-2 text-sm text-muted-foreground text-right">End goal Family/kids</div>
+                          </div>
+
+                          <div className="grid grid-cols-12 gap-4 items-center">
+                            <div className="col-span-2 text-sm font-medium text-foreground">Credit card</div>
+                            <div className="col-span-8">
+                              <Slider
+                                value={[userData.questionairevalues.q10 || 20]}
+                                max={100}
+                                step={1}
+                                disabled
+                                className="pointer-events-none"
+                              />
+                            </div>
+                            <div className="col-span-2 text-sm text-muted-foreground text-right">Cash/Debit card</div>
+                          </div>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        {/* Female Questions */}
+                        <div className="space-y-4">
+                          <div className="grid grid-cols-12 gap-4 items-center">
+                            <div className="col-span-2 text-sm font-medium text-foreground">Android</div>
+                            <div className="col-span-8">
+                              <Slider
+                                value={[userData.questionairevalues.q1 || 20]}
+                                max={100}
+                                step={1}
+                                disabled
+                                className="pointer-events-none"
+                              />
+                            </div>
+                            <div className="col-span-2 text-sm text-muted-foreground text-right">iPhone</div>
+                          </div>
+
+                          <div className="grid grid-cols-12 gap-4 items-center">
+                            <div className="col-span-2 text-sm font-medium text-foreground">Trader Joe's</div>
+                            <div className="col-span-8">
+                              <Slider
+                                value={[userData.questionairevalues.q2 || 20]}
+                                max={100}
+                                step={1}
+                                disabled
+                                className="pointer-events-none"
+                              />
+                            </div>
+                            <div className="col-span-2 text-sm text-muted-foreground text-right">ALDI/WINCO</div>
+                          </div>
+
+                          <div className="grid grid-cols-12 gap-4 items-center">
+                            <div className="col-span-2 text-sm font-medium text-foreground">Tesla</div>
+                            <div className="col-span-8">
+                              <Slider
+                                value={[userData.questionairevalues.q3 || 20]}
+                                max={100}
+                                step={1}
+                                disabled
+                                className="pointer-events-none"
+                              />
+                            </div>
+                            <div className="col-span-2 text-sm text-muted-foreground text-right">Toyota</div>
+                          </div>
+
+                          <div className="grid grid-cols-12 gap-4 items-center">
+                            <div className="col-span-2 text-sm font-medium text-foreground">Costco</div>
+                            <div className="col-span-8">
+                              <Slider
+                                value={[userData.questionairevalues.q4 || 20]}
+                                max={100}
+                                step={1}
+                                disabled
+                                className="pointer-events-none"
+                              />
+                            </div>
+                            <div className="col-span-2 text-sm text-muted-foreground text-right">Whole Foods</div>
+                          </div>
+
+                          <div className="grid grid-cols-12 gap-4 items-center">
+                            <div className="col-span-2 text-sm font-medium text-foreground">Woman Rights</div>
+                            <div className="col-span-8">
+                              <Slider
+                                value={[userData.questionairevalues.q5 || 20]}
+                                max={100}
+                                step={1}
+                                disabled
+                                className="pointer-events-none"
+                              />
+                            </div>
+                            <div className="col-span-2 text-sm text-muted-foreground text-right">Transwoman is woman</div>
+                          </div>
+
+                          <div className="grid grid-cols-12 gap-4 items-center">
+                            <div className="col-span-2 text-sm font-medium text-foreground">Pro-Choice</div>
+                            <div className="col-span-8">
+                              <Slider
+                                value={[userData.questionairevalues.q6 || 20]}
+                                max={100}
+                                step={1}
+                                disabled
+                                className="pointer-events-none"
+                              />
+                            </div>
+                            <div className="col-span-2 text-sm text-muted-foreground text-right">Pro-Life</div>
+                          </div>
+
+                          <div className="grid grid-cols-12 gap-4 items-center">
+                            <div className="col-span-2 text-sm font-medium text-foreground">KOHL'S</div>
+                            <div className="col-span-8">
+                              <Slider
+                                value={[userData.questionairevalues.q7 || 20]}
+                                max={100}
+                                step={1}
+                                disabled
+                                className="pointer-events-none"
+                              />
+                            </div>
+                            <div className="col-span-2 text-sm text-muted-foreground text-right">NORDSTROM</div>
+                          </div>
+
+                          <div className="grid grid-cols-12 gap-4 items-center">
+                            <div className="col-span-2 text-sm font-medium text-foreground">Enchanted (film)</div>
+                            <div className="col-span-8">
+                              <Slider
+                                value={[userData.questionairevalues.q8 || 20]}
+                                max={100}
+                                step={1}
+                                disabled
+                                className="pointer-events-none"
+                              />
+                            </div>
+                            <div className="col-span-2 text-sm text-muted-foreground text-right">Barbie (film)</div>
+                          </div>
+
+                          <div className="grid grid-cols-12 gap-4 items-center">
+                            <div className="col-span-2 text-sm font-medium text-foreground">Power Couple</div>
+                            <div className="col-span-8">
+                              <Slider
+                                value={[userData.questionairevalues.q9 || 20]}
+                                max={100}
+                                step={1}
+                                disabled
+                                className="pointer-events-none"
+                              />
+                            </div>
+                            <div className="col-span-2 text-sm text-muted-foreground text-right">Traditional Relationship</div>
+                          </div>
+
+                          <div className="grid grid-cols-12 gap-4 items-center">
+                            <div className="col-span-2 text-sm font-medium text-foreground">Concerts/Clubs</div>
+                            <div className="col-span-8">
+                              <Slider
+                                value={[userData.questionairevalues.q10 || 20]}
+                                max={100}
+                                step={1}
+                                disabled
+                                className="pointer-events-none"
+                              />
+                            </div>
+                            <div className="col-span-2 text-sm text-muted-foreground text-right">Movie at home</div>
+                          </div>
+
+                          <div className="grid grid-cols-12 gap-4 items-center">
+                            <div className="col-span-2 text-sm font-medium text-foreground">Title Husband</div>
+                            <div className="col-span-8">
+                              <Slider
+                                value={[userData.questionairevalues.q11 || 20]}
+                                max={100}
+                                step={1}
+                                disabled
+                                className="pointer-events-none"
+                              />
+                            </div>
+                            <div className="col-span-2 text-sm text-muted-foreground text-right">Partner</div>
+                          </div>
+
+                          <div className="grid grid-cols-12 gap-4 items-center">
+                            <div className="col-span-2 text-sm font-medium text-foreground">End goal Happiness</div>
+                            <div className="col-span-8">
+                              <Slider
+                                value={[userData.questionairevalues.q12 || 20]}
+                                max={100}
+                                step={1}
+                                disabled
+                                className="pointer-events-none"
+                              />
+                            </div>
+                            <div className="col-span-2 text-sm text-muted-foreground text-right">End goal Family/kids</div>
+                          </div>
+
+                          <div className="grid grid-cols-12 gap-4 items-center">
+                            <div className="col-span-2 text-sm font-medium text-foreground">Credit card</div>
+                            <div className="col-span-8">
+                              <Slider
+                                value={[userData.questionairevalues.q13 || 20]}
+                                max={100}
+                                step={1}
+                                disabled
+                                className="pointer-events-none"
+                              />
+                            </div>
+                            <div className="col-span-2 text-sm text-muted-foreground text-right">Cash/Debit card</div>
+                          </div>
+
+                          <div className="grid grid-cols-12 gap-4 items-center">
+                            <div className="col-span-2 text-sm font-medium text-foreground">Dog Mom/Cat Mom</div>
+                            <div className="col-span-8">
+                              <Slider
+                                value={[userData.questionairevalues.q14 || 20]}
+                                max={100}
+                                step={1}
+                                disabled
+                                className="pointer-events-none"
+                              />
+                            </div>
+                            <div className="col-span-2 text-sm text-muted-foreground text-right">Pet Owner</div>
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          </div>
+        )}
       </div>
     </div>
   );

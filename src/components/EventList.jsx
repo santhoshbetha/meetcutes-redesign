@@ -13,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { haversine } from "../utils/util";
 
 export function EventList({ events, userlatitude, userlongitude, setIsLoading, profiledata }) {
   const [selectedEvent, setSelectedEvent] = useState(null);
@@ -28,10 +29,14 @@ export function EventList({ events, userlatitude, userlongitude, setIsLoading, p
     if (sortBy === "Date") {
       return eventsCopy.sort((a, b) => new Date(a.eventdate || a.date) - new Date(b.eventdate || b.date));
     } else if (sortBy === "Distance") {
-      return eventsCopy.sort((a, b) => (a.distance || 0) - (b.distance || 0));
+      // Calculate distance for each event and sort
+      return eventsCopy.map(event => ({
+        ...event,
+        distance: haversine(userlatitude, userlongitude, event.latitude, event.longitude)
+      })).sort((a, b) => (a.distance || 0) - (b.distance || 0));
     }
     return eventsCopy;
-  }, [events, sortBy]);
+  }, [events, sortBy, userlatitude, userlongitude]);
 
   // Calculate total pages
   const totalPages = Math.ceil(sortedEvents?.length / eventsPerPage);

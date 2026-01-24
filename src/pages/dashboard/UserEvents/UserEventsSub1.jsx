@@ -8,7 +8,7 @@ import { useUserEvents1 } from "@/hooks/useEvents";
 import { isObjEmpty } from "@/utils/util";
 import { Dialog, DialogTrigger } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
-import { Plus, Sparkles } from "lucide-react";
+import { Plus, Sparkles, RefreshCw } from "lucide-react";
 
 const delay = ms => new Promise(res => setTimeout(res, ms));
 
@@ -51,9 +51,27 @@ export function UserEventsSub1({profiledata, userhandle, latitude, longitude, er
         {isLoading && <p>Loading...</p>}
         {error1 && <p>Error: {error1.message}</p>}
         <div className="flex flex-row items-center justify-between md:mx-2 lg:mx-4">
-          <CardTitle>
-            <span className="md:text-lg">Events you have created</span>
-          </CardTitle>
+          <div className="flex items-center gap-3">
+            <CardTitle>
+              <span className="md:text-lg">Events you have created</span>
+            </CardTitle>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              disabled={refreshDisabled} 
+              onClick={() => {
+                if (typeof refetch === 'function') {
+                  lastRefetchRef.current = Date.now();
+                  refetch();
+                  setRefreshDisabled(true);
+                  setTimeout(() => setRefreshDisabled(false), 10000);
+                }
+              }}
+              className="h-8 w-8 p-0"
+            >
+              <RefreshCw className="h-4 w-4" />
+            </Button>
+          </div>
           <Dialog open={createEventOpen} onOpenChange={setCreateEventOpen}>
             <DialogTrigger asChild>
               <button disabled={!!error} className="text-sm md:text-base font-medium text-primary hover:text-primary/80 transition-colors">
@@ -62,18 +80,6 @@ export function UserEventsSub1({profiledata, userhandle, latitude, longitude, er
             </DialogTrigger>
             <CreateEvent onClose={() => setCreateEventOpen(false)}/>
           </Dialog>
-          <div className="ml-2">
-            <Button variant="outline" disabled={refreshDisabled} onClick={() => {
-              if (typeof refetch === 'function') {
-                lastRefetchRef.current = Date.now();
-                refetch();
-                setRefreshDisabled(true);
-                setTimeout(() => setRefreshDisabled(false), 10000);
-              }
-            }}>
-              Refresh
-            </Button>
-          </div>
         </div>
         <Separator />
         <CardContent className="space-y-2">
