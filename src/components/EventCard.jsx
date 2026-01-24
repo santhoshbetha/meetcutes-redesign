@@ -108,9 +108,14 @@ export function EventCard({ setSelectedEvent, event, userlatitude, userlongitude
             {getEventIcon(event?.locationdata?.locationname)}
           </div>
           <div className="flex-1 min-w-0">
+            {/* Event Title */}
             <h3 className="text-lg sm:text-xl font-bold text-foreground group-hover:text-primary transition-colors duration-300 mb-1 truncate">
-              {event?.locationdata?.locationname}
+              {event?.title || event?.name || 'Event Title'}
             </h3>
+            {/* Location Name */}
+            <p className="text-sm sm:text-base font-medium text-muted-foreground mb-2 truncate">
+              📍 {event?.locationdata?.locationname || event?.location}
+            </p>
             <div className="w-6 h-0.5 sm:w-8 bg-linear-to-r from-primary to-primary/60 rounded-full"></div>
           </div>
         </div>
@@ -146,7 +151,7 @@ export function EventCard({ setSelectedEvent, event, userlatitude, userlongitude
         </div>
 
         {/* Interests tags */}
-        <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-3 sm:mb-4">
+        <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-3 sm:mb-4" hidden>
           {interests.map((interest) => (
             <Badge
               key={interest.name}

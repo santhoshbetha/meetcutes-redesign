@@ -28,8 +28,6 @@ import { LoadingButton } from '@/components/ui/loading-button';
 import { DialogTitle, DialogContent } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { MapPin, Clock } from "lucide-react";
-import { Combobox } from "@/components/ui/combobox";
-import { GeocoderAutocomplete } from "@geoapify/geocoder-autocomplete";
 import { GeoapifyContext, GeoapifyGeocoderAutocomplete } from '@geoapify/react-geocoder-autocomplete';
 import "@geoapify/geocoder-autocomplete/styles/minimal.css";
 import { toast } from "sonner";
@@ -345,6 +343,7 @@ if (typeof document !== 'undefined') {
 }
 
 const validationSchema = Yup.object({
+  title: Yup.string().required("Event title is required"),
   location: Yup.string().required("Location name is required"),
   address1: Yup.string().required("Street address is required"),
   state: Yup.string().required("State is required"),
@@ -433,8 +432,11 @@ export function CreateEvent({ onClose }) {
   const {autocompletedata} = useContext(AutoCompleteDataContext);
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false);
+  const [successLoading, setSuccessLoading] = useState(false);
   const [addressLoading, setAddressLoading] = useState(false);
   const autocompleteRef = useRef(null);
+  const [eventlat, setEventLat] = useState(null);
+  const [eventlng, setEventLng] = useState(null);
 
   useEffect(() => {
     const handleInput = (e) => {
@@ -469,6 +471,7 @@ export function CreateEvent({ onClose }) {
 
   const formik = useFormik({
     initialValues: {
+        title: "",
         location: "",
         address1: "",
         state: "",
@@ -480,64 +483,78 @@ export function CreateEvent({ onClose }) {
         description: ""
     },
     validationSchema,
+    validateOnChange: false, // Only validate on blur and submit
+    validateOnBlur: true,
     
     onSubmit: async (values) => {
-        if (!isOnline) {
-            toast({
-                title: "Offline",
-                description: "You are offline. Check your internet connection.",
-                variant: "destructive",
-            });
-            return;
-        }
-        if (!userSession) {
-            toast({
-                title: "Error",
-                description: "Error, logout and login again",
-                variant: "destructive",
-            });
-            return;
-        }
-        
-        let locationid = null;
-          autocompletedata.forEach((each) => {
-          if (each.address1 == values.address1 && each.state == values.state && each.city == values.city && each.zipcode == values.zip) {
-              locationid = each.locationid
-          }
+      if (!isOnline) {
+        toast({
+          title: "Offline",
+          description: "You are offline. Check your internet connection.",
+          variant: "destructive",
         });
-
-        const postresp = await postNewEvent(
-          values.location,
-          values.address1, //addressOne
-          values.state,
-          values.city, 
-          values.zip, 
-          values.date.toISOString().substring(0, 10).toString(),
-          values.startTime,
-          values.endTime, 
-          values.description,
-          profiledata?.userid,
-          profiledata?.latitude,
-          profiledata?.longitude,
-          locationid,
-          setLoading
-        )
-
-        if (postresp == -2) {
-          setLoading(false)
-          toast.error("Far from your area!!");
+        return;
+      }
+      if (!userSession) {
+        toast({
+          title: "Error",
+          description: "Error, logout and login again",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      let locationid = null;
+        autocompletedata.forEach((each) => {
+        if (each.address1 == values.address1 && each.state == values.state && each.city == values.city && each.zipcode == values.zip) {
+            locationid = each.locationid
         }
-        if (postresp == 0) {
-          toast.success("Create Event Successful");
+      });
+
+      const postresp = await postNewEvent(
+        values.title,
+        values.location,
+        values.address1, //addressOne
+        values.state,
+        values.city, 
+        values.zip,
+        eventlat,
+        eventlng,
+        values.date.toISOString().substring(0, 10).toString(),
+        values.startTime,
+        values.endTime, 
+        values.description,
+        profiledata?.userid,
+        profiledata?.latitude,
+        profiledata?.longitude,
+        locationid,
+        setLoading
+      )
+
+      console.log("Post New Event Response:", postresp);
+
+      if (postresp == -2) {
+        setLoading(false)
+        toast.error("Far from your area. try within 150 miles!!");
+      }
+      if (postresp == 0) {
+        toast.success("Create Event Successful");
+        setLoading(false);
+        setSuccessLoading(true);
+        
+        // Close dialog and navigate after 5 seconds
+        setTimeout(() => {
+          setSuccessLoading(false);
           onClose();
-          navigate('/dashboard')
-        } else if (postresp == -1) {
-          setLoading(false)
-          toast.error("Try again");
-        } else if (postresp == -3) {
-          setLoading(false)
-          toast.error("Timing Conflicts!!");
-        }
+          navigate('/dashboard');
+        }, 5000);
+      } else if (postresp == -1) {
+        setLoading(false)
+        toast.error("Create Event Failed. Try again");
+      } else if (postresp == -3) {
+        setLoading(false)
+        toast.error("Event timing conflicts at the given location. try different time!!");
+      }
     }
   });
 
@@ -563,17 +580,17 @@ export function CreateEvent({ onClose }) {
         lon
       });
 
+      setEventLat(lat);
+      setEventLng(lon); 
+
       // Update formik values
       formik.setFieldValue("address1", addressLine1);
       formik.setFieldValue("city", city);
       formik.setFieldValue("state", state);
       formik.setFieldValue("zip", zip);
 
-      // Mark fields as touched for validation
-      formik.setFieldTouched("address1", true);
-      formik.setFieldTouched("city", true);
-      formik.setFieldTouched("state", true);
-      formik.setFieldTouched("zip", true);
+      // Don't mark fields as touched when filled by autocomplete
+      // This prevents validation errors from showing immediately
     }
   };
 
@@ -623,6 +640,31 @@ export function CreateEvent({ onClose }) {
                       className="px-4 sm:px-6 md:px-8 lg:px-12 pb-8 sm:pb-12 space-y-4 sm:space-y-6 bg-white dark:bg-gray-900 rounded-b-2xl mt-4"
                       onSubmit={formik.handleSubmit}
                   >
+                    {/* Event Title */}
+                    <div className="space-y-2">
+                      <Label
+                        htmlFor="title"
+                        className="text-sm font-medium text-foreground flex items-center gap-2"
+                      >
+                        <CalendarIcon className="w-4 h-4" />
+                        Event Title
+                      </Label>
+                      <Input
+                        id='title'
+                        name='title'
+                        type='text'
+                        onChange={formik.handleChange}
+                        onBlur={formik.handleBlur}
+                        value={formik.values.title}
+                        className="bg-background border-border focus:border-primary focus:ring-primary/20 h-10"
+                        placeholder="e.g., Coffee Meetup or Age range based title"
+                        required
+                      />
+                      {formik.errors.title && formik.touched.title && (
+                        <p className="text-red-500 text-sm">{formik.errors.title}</p>
+                      )}
+                    </div>
+
                     {/* Location Name */}
                     <div className="space-y-2">
                       <Label
@@ -630,7 +672,7 @@ export function CreateEvent({ onClose }) {
                         className="text-sm font-medium text-foreground flex items-center gap-2"
                       >
                         <MapPin className="w-4 h-4" />
-                        Location Name
+                        Venue/Location Name
                       </Label>
                       <Input
                         id='location'
@@ -664,7 +706,7 @@ export function CreateEvent({ onClose }) {
                             lang="en"
                             limit={5}
                             types={["address"]}
-                            countryCodes={["us"]}
+                            filterByCountryCode={["us"]}
                             placeSelect={onPlaceSelect}
                             suggestionsChange={onSuggestionChange}
                           />
@@ -680,8 +722,8 @@ export function CreateEvent({ onClose }) {
                       )}
                     </div>
 
-                    {/* State, City, Zipcode Row */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4" hidden>
+                    {/* State, City, Zipcode Row 
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4" hidden>
                       <div className="space-y-2">
                         <Label
                           htmlFor="state"
@@ -757,6 +799,7 @@ export function CreateEvent({ onClose }) {
                         )}
                       </div>
                     </div>
+                    */}
 
                     {/* Date and Time Row */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
@@ -772,8 +815,8 @@ export function CreateEvent({ onClose }) {
                               <Button
                                   variant={"outline"}
                                   className={cn(
-                                      "w-full justify-start text-left font-normal h-10",
-                                      !formik.values.date && "text-muted-foreground"
+                                    "w-full justify-start text-left font-normal h-10",
+                                    !formik.values.date && "text-muted-foreground"
                                   )}
                               >
                               <CalendarIcon />
@@ -786,7 +829,6 @@ export function CreateEvent({ onClose }) {
                                   selected={formik.values.date}
                                   onSelect={(date) => {
                                     formik.setFieldValue('date', date);
-                                    formik.setFieldTouched('date', true);
                                     setOpen(false);
                                   }}
                                   initialFocus
@@ -813,7 +855,6 @@ export function CreateEvent({ onClose }) {
                             type='time'
                             onChange={(e) => {
                                 formik.setFieldValue('startTime', e.target.value);
-                                formik.setFieldTouched('startTime', true);
                             }}
                             onBlur={formik.handleBlur}
                             value={formik.values.startTime}
@@ -841,7 +882,6 @@ export function CreateEvent({ onClose }) {
                             type='time'
                             onChange={(e) => {
                               formik.setFieldValue('endTime', e.target.value);
-                              formik.setFieldTouched('endTime', true);
                             }}
                             onBlur={formik.handleBlur}
                             value={formik.values.endTime}
@@ -869,7 +909,6 @@ export function CreateEvent({ onClose }) {
                         value={formik.values.description}
                         onChange={(e) => {
                           formik.setFieldValue('description', e.target.value);
-                          formik.setFieldTouched('description', true);
                         }}
                         onBlur={formik.handleBlur}
                         className="bg-card dark:bg-slate-800 dark:text-white border-gray-300 dark:border-gray-700 focus:border-primary focus:ring-primary/20 min-h-[120px] resize-none"
@@ -902,6 +941,19 @@ export function CreateEvent({ onClose }) {
           </div>
         </div>
         </ScrollArea>
+        {successLoading && (
+          <div className="absolute inset-0 bg-white/80 dark:bg-slate-900/80 flex items-center justify-center z-50">
+            <div className="text-center">
+              <MeetCutesSpinner size="large" />
+              <p className="mt-4 text-lg font-semibold text-gray-700 dark:text-gray-300">
+                Event Created Successfully!
+              </p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Redirecting to dashboard...
+              </p>
+            </div>
+          </div>
+        )}
     </DialogContent>
   );
 }

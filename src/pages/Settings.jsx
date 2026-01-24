@@ -434,31 +434,6 @@ export function Settings() {
                 </CardContent>
               </Card>
 
-              {/* Coordinates */}
-              <Card className="border border-border/50 hover:border-primary/50 transition-colors">
-                <CardContent className="p-6">
-                  <div className="flex items-start gap-4">
-                    <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0">
-                      <Target className="w-5 h-5 text-blue-600" />
-                    </div>
-                    <div className="flex-1 space-y-2">
-                      <h3 className="font-semibold text-foreground">Coordinates</h3>
-                      <p className="text-sm text-muted-foreground">
-                        View and manage your location coordinates
-                      </p>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => setIsCoordinatesModalOpen(true)}
-                        className="mt-2"
-                      >
-                        View Coordinates
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
               {/* Change Location */}
               <Card className="border border-border/50 hover:border-primary/50 transition-colors">
                 <CardContent className="p-6">
@@ -479,6 +454,31 @@ export function Settings() {
                         </DialogTrigger>
                         <ChangeLocation />
                       </Dialog>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Coordinates */}
+              <Card className="border border-border/50 hover:border-primary/50 transition-colors">
+                <CardContent className="p-6">
+                  <div className="flex items-start gap-4">
+                    <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0">
+                      <Target className="w-5 h-5 text-blue-600" />
+                    </div>
+                    <div className="flex-1 space-y-2">
+                      <h3 className="font-semibold text-foreground">Coordinates</h3>
+                      <p className="text-sm text-muted-foreground">
+                        View and manage your location coordinates
+                      </p>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setIsCoordinatesModalOpen(true)}
+                        className="mt-2"
+                      >
+                        View Coordinates
+                      </Button>
                     </div>
                   </div>
                 </CardContent>

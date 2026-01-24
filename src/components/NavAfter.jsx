@@ -16,14 +16,13 @@ import secureLocalStorage from "react-secure-storage";
 import { successAlert } from "@/services/alert.service";
 import { logoutUser } from "../services/user.service";
 import { useAuth } from "@/context/AuthContext";
-import { AutoCompleteDataContext } from "@/context/AutoCompleteDataContext";
 import { SearchAndUserEventsDataContext } from "@/context/SearchAndUserEventsDataContext";
 
 const NavAfter = () => {
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const queryClient = useQueryClient();
-  const {setAutoCompletedata} = useContext(AutoCompleteDataContext);
+  //const {setAutoCompletedata} = useContext(AutoCompleteDataContext);
   const {setSearchUsersData} = useContext(SearchAndUserEventsDataContext);
   const { user, profiledata } = useAuth();
 
@@ -40,7 +39,7 @@ const NavAfter = () => {
           localStorage.clear(); 
           setSearchUsersData(null)
           secureLocalStorage.clear()
-          setAutoCompletedata(null)
+          //setAutoCompletedata(null)
           // Force dark mode for homepage after logout
           document.documentElement.classList.add("dark");
           navigate('/')
@@ -49,7 +48,7 @@ const NavAfter = () => {
           localStorage.clear(); 
           setSearchUsersData(null)
           secureLocalStorage.clear()
-          setAutoCompletedata(null)
+          //setAutoCompletedata(null)
           // Force dark mode for homepage after logout
           document.documentElement.classList.add("dark");
           navigate('/')

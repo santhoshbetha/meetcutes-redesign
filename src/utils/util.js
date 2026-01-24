@@ -1,4 +1,6 @@
 import { createEvent } from "@/services/events.service";
+import { toast } from "sonner";
+import secureLocalStorage from "react-secure-storage";
 
 // API base URL (Vite env var fallback). Set VITE_API_URL in your .env if needed.
 const url = import.meta?.env?.VITE_API_URL || "";
@@ -10,8 +12,6 @@ export function isObjEmpty(val) {
     (Object.keys(val || {}).length === 0 && val?.constructor === Object)
   );
 }
-
-const delay = ms => new Promise(res => setTimeout(res, ms));
 
 var deg2rad = function (value) {
   return value * 0.017453292519943295;
@@ -77,11 +77,14 @@ const getCoordsAndAddress = async (address1, city, state, zip) => {
 };
 
 export const postNewEvent = async (
+  title,
   location,
   address1,
   state,
   city,
   zip,
+  eventlat,
+  eventlng,
   date1,
   startTime,
   endTime,
@@ -93,32 +96,36 @@ export const postNewEvent = async (
   setLoading,
 ) => {
   let addressOne;
-  let eventlat = null;
-  let eventlng = null;
+  let event_lat = eventlat;
+  let event_lng = eventlng;
   setLoading(true);
 
-  if (locationid == null) {
+  if (locationid == null || eventlat == null || eventlng == null) {
     const coordsandaddress = await getCoordsAndAddress(
       address1,
       city,
       state,
       zip,
     );
-    eventlat = coordsandaddress.lat;
-    eventlng = coordsandaddress.lng;
+    event_lat = coordsandaddress.lat;
+    event_lng = coordsandaddress.lng;
     addressOne = coordsandaddress.addressOut;
 
-    if (eventlat != null && eventlng != null) {
-      const distance = haversine(userlat, userlng, eventlat, eventlng);
+    if (event_lat != null && event_lng != null) {
+      const distance = haversine(userlat, userlng, event_lat, event_lng);
       if (distance > 150) {
         setLoading(false);
         return -2;
       }
     }
 
-    if (eventlat == null || eventlng == null) {
+    if (event_lat == null || event_lng == null) {
       setLoading(false);
-      alert("Address Error! try again or rephrase or recheck city");
+      toast({
+        title: "Address Error",
+        description: "Try again or rephrase or recheck city",
+        variant: "destructive",
+      });
       return;
     } else {
       if (addressOne == null) {
@@ -144,8 +151,11 @@ export const postNewEvent = async (
     end_time: endTime,
     comments: [],
     attendees: [],
+    title: title,
     description: description,
   });
+
+  console.log("Create Event Response:", res);
 
   if (res.success) {
     setLoading(false);
@@ -153,6 +163,9 @@ export const postNewEvent = async (
   } else {
     console.error(res.msg);
     setLoading(false);
+    if (res.msg == "conflict"){
+      return -3;
+    }
     return -1;
   }
 };
@@ -348,11 +361,40 @@ export const postUserTags = async (tagsdata, useruserid, userid, taggerid) => {
   }
 };
 
-export async function doesSessionExist() {
-  // Use global Session if available (avoid no-undef). Return false when not present.
-  const sess = globalThis?.Session;
-  if (sess && typeof sess.doesSessionExist === "function") {
-    return await sess.doesSessionExist();
+// Global function to handle authentication errors
+export const handleAuthError = (error) => {
+  // Check if error is related to authentication/token expiration
+  if (error?.message?.includes('JWT') ||
+      error?.message?.includes('token') ||
+      error?.message?.includes('expired') ||
+      error?.message?.includes('unauthorized') ||
+      error?.status === 401 ||
+      error?.status === 403) {
+
+    console.log("Authentication error detected, logging out user");
+    toast({
+      title: "Session Expired",
+      description: "Authentication error detected, logging out user",
+      variant: "destructive",
+    });
+    
+    // Clear all stored data
+    localStorage.clear();
+    secureLocalStorage.clear();
+    // Note: setSearchUsersData(null) should be called from components that have access to SearchAndUserEventsDataContext
+    
+    // Import supabase here to avoid circular dependencies
+    import("@/lib/supabase").then(({ default: supabase }) => {
+      supabase.auth.signOut().then(() => {
+        // Clear local state and redirect
+        window.location.href = '/';
+      }).catch(err => {
+        console.error("Error during auth error logout:", err);
+        // Force redirect even if signOut fails
+        window.location.href = '/';
+      });
+    });
+    return true; // Indicates auth error was handled
   }
-  return false;
-}
+  return false; // Not an auth error
+};

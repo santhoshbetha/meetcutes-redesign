@@ -34,7 +34,7 @@ import { Separator } from '@/components/ui/separator';
 import { MeetCutesSpinner } from '@/components/ui/MeetCutesSpinner';
 
 export function Dashboard() {
-  const {user, profiledata, profileLoading, setProfiledata} = useAuth();
+  const {user, profiledata, profileLoading, setProfiledata, userSession} = useAuth();
   const [searchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState(searchParams.get('tab') || "profile");
   const [sidebarOpen, setSidebarOpen] = useState(false);

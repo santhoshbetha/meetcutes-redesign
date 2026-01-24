@@ -41,6 +41,30 @@ export default function EventDetailsDialog({ event, onClose, profiledata, loadin
     }
   }, [event]);
 
+  // Scroll to center the dialog when it opens
+  useEffect(() => {
+    if (event) {
+      // Small delay to ensure the dialog is rendered before scrolling
+      const timer = setTimeout(() => {
+        // Scroll to center the dialog vertically on screen
+        const dialogHeight = 600; // Approximate height of the dialog
+        const viewportHeight = window.innerHeight;
+        const scrollY = window.scrollY;
+        const centerPosition = scrollY + (viewportHeight / 2) - (dialogHeight / 2);
+        
+        // Only scroll if the dialog would be positioned too low
+        if (centerPosition > scrollY + 100) {
+          window.scrollTo({
+            top: Math.max(0, centerPosition - 100), // Add some padding from top
+            behavior: 'smooth'
+          });
+        }
+      }, 100);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [event]);
+
   // localStorage helpers
   const getStorageKey = (eventId) => `event_${eventId}_attendees`;
   const computeCountsFromData = (data) => {
@@ -383,8 +407,11 @@ export default function EventDetailsDialog({ event, onClose, profiledata, loadin
               <div className="text-4xl">{getEventIcon(event?.locationdata?.locationname || event?.name)}</div>
               <div>
                 <h2 className="text-2xl md:text-3xl font-bold text-primary mb-2">
-                  {event?.locationdata?.locationname || event?.name}
+                  {event?.title || event?.name || 'Event Title'}
                 </h2>
+                <p className="text-lg font-medium text-muted-foreground mb-3">
+                  📍 {event?.locationdata?.locationname || event?.location}
+                </p>
                 <div className="flex items-center gap-2">
                   <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">
                     Event

@@ -1,6 +1,8 @@
 import { createContext, useState, useContext, useEffect } from "react";
 import supabase from "@/lib/supabase";
 import { getProfileData } from "@/services/user.service";
+import { toast } from "sonner";
+import secureLocalStorage from "react-secure-storage";
 
 const AuthContext = createContext();
 
@@ -33,6 +35,48 @@ export const AuthProvider = ({children}) => {
       setProfileLoading(false);
     }
 
+    // Function to check if JWT token is expired
+    const isTokenExpired = (session) => {
+        if (!session || !session.expires_at) return true;
+        const now = Math.floor(Date.now() / 1000); // Current time in seconds
+        return session.expires_at < now;
+    };
+
+    // Function to handle logout when token is expired
+    const handleTokenExpired = async () => {
+        console.log("JWT token expired, logging out user");
+        toast({
+            title: "Session Expired",
+            description: "Your session has expired. Please log in again.",
+            variant: "destructive",
+        });
+        try {
+            await supabase.auth.signOut();
+            setUser(null);
+            setUserSession(null);
+            setProfiledata(null);
+            
+            // Clear all stored data
+            localStorage.clear();
+            secureLocalStorage.clear();
+            
+            // Force dark mode for homepage after logout
+            localStorage.setItem("theme", "dark");
+            document.documentElement.classList.add("dark");
+            // Redirect to home page
+            window.location.href = '/';
+        } catch (error) {
+            console.error("Error during token expiration logout:", error);
+        }
+    };
+
+    // Function to check token expiration periodically
+    const checkTokenExpiration = () => {
+        if (userSession && isTokenExpired(userSession)) {
+            handleTokenExpired();
+        }
+    };
+
     useEffect(() => {
       supabase.auth.getSession().then(({ data: { session } }) => {
                     setUserSession(session);
@@ -44,7 +88,20 @@ export const AuthProvider = ({children}) => {
       });
   
       const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
-        //console.log(`Supabase auth event: ${event}`);
+        console.log(`Supabase auth event: ${event}`);
+        
+        // Handle token expiration events
+        if (event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED') {
+            if (event === 'SIGNED_OUT' && userSession && !session) {
+                // User was signed out, possibly due to expired token
+                console.log("User signed out, clearing session data");
+                setUser(null);
+                setUserSession(null);
+                setProfiledata(null);
+                return;
+            }
+        }
+        
         if (session) {
             //console.log("session?.user::", session?.user)
             setAuth(session?.user);
@@ -69,6 +126,24 @@ export const AuthProvider = ({children}) => {
           authListener.subscription.unsubscribe();
       };
     }, []);
+
+    // Set up periodic token expiration check
+    useEffect(() => {
+        if (userSession) {
+            // Check token expiration every 5 minutes
+            const tokenCheckInterval = setInterval(checkTokenExpiration, 5 * 60 * 1000);
+            
+            // Also check immediately and after 1 minute to catch recently expired tokens
+            const initialCheck = setTimeout(checkTokenExpiration, 1000);
+            const oneMinuteCheck = setTimeout(checkTokenExpiration, 60 * 1000);
+            
+            return () => {
+                clearInterval(tokenCheckInterval);
+                clearTimeout(initialCheck);
+                clearTimeout(oneMinuteCheck);
+            };
+        }
+    }, [userSession]);
 
     return (
         <AuthContext.Provider value={{

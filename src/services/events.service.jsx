@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import supabase from "@/lib/supabase";
 import ShortUniqueId from "short-unique-id";
-import { isObjEmpty } from "@/utils/util";
+import { isObjEmpty, handleAuthError } from "@/utils/util";
 
 export const createEvent = async (dataIn) => {
   const controller = new AbortController();
@@ -155,6 +155,7 @@ export const createEvent = async (dataIn) => {
           longitude: longitude,
           endtime: dataIn?.end_time,
           description: dataIn?.description,
+          title: dataIn?.title,
         }, { signal: controller.signal })
         .select();
 
@@ -171,12 +172,20 @@ export const createEvent = async (dataIn) => {
             latitude: latitude,
             longitude: longitude,
             endtime: dataIn?.end_time,
+            title: dataIn?.title,
             description: dataIn?.description,
           }, { signal: controller.signal })
           .select();
       }
 
       if (error6) {
+        // Check if this is an authentication error
+        if (handleAuthError(error6)) {
+          return {
+            success: false,
+            msg: "Session expired. Please log in again.",
+          };
+        }
         return {
           success: false,
           msg: error6.message,
@@ -189,6 +198,15 @@ export const createEvent = async (dataIn) => {
     };
   } catch (error) {
     clearTimeout(timeoutId);
+    
+    // Check if this is an authentication error
+    if (handleAuthError(error)) {
+      return {
+        success: false,
+        msg: "Session expired. Please log in again.",
+      };
+    }
+    
     return {
       success: false,
       msg: error.message,

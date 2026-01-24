@@ -155,7 +155,7 @@ export function UsersSearch({ userhandle, gender, latitude, longitude, questiona
               className="hidden md:flex"
             >
               <RefreshCw className="w-4 h-4 mr-2" />
-              Refresh22
+              Refresh
             </Button>
           </div>
         </div>

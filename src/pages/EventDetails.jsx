@@ -95,7 +95,7 @@ export default function EventDetails() {
 
         // This would be replaced with actual API call
         // For demo purposes, we'll use the eventdata from the query
-        console.log("Event data fetched:", eventdata);
+        
         // Merge any locally stored attendees info for this event
         try {
           const eventId = eventdata?.eventid || eventdata?.id;
@@ -563,8 +563,11 @@ export default function EventDetails() {
             <div className="text-6xl">{getEventIcon(event?.locationdata?.locationname || event?.name)}</div>
             <div className="flex-1">
               <h1 className="text-4xl md:text-5xl font-bold text-primary mb-3">
-                {event?.locationdata?.locationname || event?.name}
+                {event?.title || event?.name || 'Event Title'}
               </h1>
+              <p className="text-xl font-medium text-muted-foreground mb-4">
+                📍 {event?.locationdata?.locationname || event?.location}
+              </p>
               <div className="flex items-center gap-3 mb-4">
                 <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20 text-lg px-4 py-2">
                   Event
