@@ -556,7 +556,7 @@ export default function EventDetails() {
           </div>
         </div>
       )}
-      <div className="max-w-4xl mx-auto px-4 md:px-8 py-6">
+      <div className="max-w-4xl mx-auto px-4 md:px-8 py-6 border-4 border-primary/20 rounded-lg bg-card shadow-lg">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-start gap-6">
