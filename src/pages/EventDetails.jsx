@@ -726,15 +726,15 @@ export default function EventDetails() {
         {/* Event Description and Discussion Tabs - Full Width */}
         <Card className="p-6 mt-8">
           <Tabs defaultValue="description" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
+            <TabsList className="grid w-full grid-cols-1">
               <TabsTrigger value="description" className="flex items-center gap-2">
                 <FileText className="w-4 h-4" />
                 Event Description
               </TabsTrigger>
-              <TabsTrigger value="discussion" className="flex items-center gap-2">
+              {/* <TabsTrigger value="discussion" className="flex items-center gap-2">
                 <MessageCircle className="w-4 h-4" />
                 Discussion ({comments.length})
-              </TabsTrigger>
+              </TabsTrigger> */}
             </TabsList>
 
             <TabsContent value="description" className="mt-6">
@@ -745,6 +745,7 @@ export default function EventDetails() {
               </p>
             </TabsContent>
 
+            {false && (
             <TabsContent value="discussion" className="mt-6">
               <div className="space-y-6">
                 {/* Comment Input */}
@@ -809,6 +810,7 @@ export default function EventDetails() {
                 </div>
               </div>
             </TabsContent>
+            )}
           </Tabs>
         </Card>
       </div>
