@@ -97,18 +97,18 @@ export default function EventDetailsDialog({ event, onClose, profiledata, loadin
     if (isObjEmpty(eventDetails?.attendeeslist)) {
         setIsRegistered(false)
     } else {
-        let attendeeslistObj3
-        if (Array.isArray(eventDetails?.attendeeslist) == false) {  // if string (from postgres)
-            attendeeslistObj3 = eventDetails?.attendeeslist?.replace(/\{|\}/gm, "").split(",")
-        } else {
-            attendeeslistObj3 = eventDetails?.attendeeslist
-        }
+      let attendeeslistObj3
+      if (Array.isArray(eventDetails?.attendeeslist) == false) {  // if string (from postgres)
+          attendeeslistObj3 = eventDetails?.attendeeslist?.replace(/\{|\}/gm, "").split(",")
+      } else {
+          attendeeslistObj3 = eventDetails?.attendeeslist
+      }
 
-        if (attendeeslistObj3?.map(attendee => attendee?.toLowerCase()).includes(profiledata?.userhandle.toLowerCase())) {
-            setIsRegistered(true)
-        } else {
-            setIsRegistered(false)
-        }
+      if (attendeeslistObj3?.map(attendee => attendee?.toLowerCase()).includes(profiledata?.userhandle.toLowerCase())) {
+          setIsRegistered(true)
+      } else {
+          setIsRegistered(false)
+      }
     }
   }, [eventDetails, profiledata]);
 

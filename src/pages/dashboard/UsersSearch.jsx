@@ -127,31 +127,33 @@ export function UsersSearch({ userhandle, gender, latitude, longitude, questiona
       agefrom: 21,
       ageto: 21,
     },
+
     onSubmit: async (values) => {
-     console.log("onSubmit call..")
-     
-     // Validate required fields
-     if (!values.searchdistance) {
-       setSearchError("Please select distance before searching.");
-       return;
-     }
-     
-     // Clear any previous search error
-     setSearchError(null);
-     
-      let searchdata = {
-          gender: gender,
-          agefrom: values.agefrom < 21 ? 21 : values.agefrom,
-          ageto: values.ageto,//values.ageto < values.agefrom ? (values.agefrom < 21 ? 21 : values.agefrom) : values.ageto,
-          latitude: latitude,
-          longitude: longitude,
-          searchdistance: distanceMap.get(values.searchdistance),
+      console.log("onSubmit call..")
+      
+      // Validate required fields
+      if (!values.searchdistance) {
+        setSearchError("Please select distance before searching.");
+        return;
       }
+      
+      // Clear any previous search error
+      setSearchError(null);
+      
+      let searchdata = {
+        gender: gender,
+        agefrom: values.agefrom < 21 ? 21 : values.agefrom,
+        ageto: values.ageto,//values.ageto < values.agefrom ? (values.agefrom < 21 ? 21 : values.agefrom) : values.ageto,
+        latitude: latitude,
+        longitude: longitude,
+        searchdistance: distanceMap.get(values.searchdistance)
+      };
 
       // Set search parameters to trigger the query
       setSearchParams(searchdata);
       searchdone.current = true;
     },
+
   });
 
   // Clear search error when form values change
@@ -173,6 +175,8 @@ export function UsersSearch({ userhandle, gender, latitude, longitude, questiona
       return [...prev, eth];
     });
   };
+
+  console.log("searchUsersData", searchUsersData);
 
   const filteredResults = useMemo(() => {
     // Use context data if available and no new search has been performed
@@ -440,7 +444,7 @@ export function UsersSearch({ userhandle, gender, latitude, longitude, questiona
                 </Badge>
               )}
             </div>
-            {filteredResults && Array.isArray(filteredResults) && filteredResults.length > 0 && (
+            {searchUsersData && Array.isArray(searchUsersData) && searchUsersData.length > 0 && (
               <div className="flex items-center gap-2">
                 <Popover>
                   <PopoverTrigger asChild>

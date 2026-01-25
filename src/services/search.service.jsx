@@ -11,6 +11,8 @@ export const searchUsers = async (searchinput, pageParam = 0, limit = 20) => {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 5000);
 
+  console.log("Search input:", searchinput);
+
   try {
     const gender = searchinput.gender;
     let lat = searchinput.latitude;
@@ -19,7 +21,7 @@ export const searchUsers = async (searchinput, pageParam = 0, limit = 20) => {
     let agefrom = searchinput.agefrom;
 
     // Client shows 20 items per page, server fetches 100 items every 5 pages
-    const clientLimit = 20; // Always 20 items per client page
+    const clientLimit = limit; // Always 20 items per client page
     const serverLimit = 100; // Server fetches 100 items at a time
     const pagesPerServerFetch = 5; // 5 client pages per server fetch (5 * 20 = 100)
 
@@ -42,6 +44,10 @@ export const searchUsers = async (searchinput, pageParam = 0, limit = 20) => {
       body: requestBody,
       signal: controller.signal
     });
+
+    console.log("Search request body:", requestBody);
+    console.log("Search response data:", data); 
+    console.log("Search response error:", error);
 
     if (error) {
       return {
@@ -185,6 +191,8 @@ export const searchEvents = async (searchinput, pageParam = 0, limit = 20) => {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 5000);
 
+  console.log("Searching events with input:", searchinput, "pageParam:", pageParam, "limit:", limit);
+
   try {
     let lat = searchinput.lat;
     let lng = searchinput.long;
@@ -192,7 +200,7 @@ export const searchEvents = async (searchinput, pageParam = 0, limit = 20) => {
     let enddate = searchinput.enddate;
 
     // Client shows 20 items per page, server fetches 100 items every 5 pages
-    const clientLimit = 20; // Always 20 items per client page
+    const clientLimit = limit; // Always 20 items per client page
     const serverLimit = 100; // Server fetches 100 items at a time
     const pagesPerServerFetch = 5; // 5 client pages per server fetch (5 * 20 = 100)
 
@@ -213,6 +221,9 @@ export const searchEvents = async (searchinput, pageParam = 0, limit = 20) => {
       body: requestBody,
       signal: controller.signal
     });
+
+    console.log("Search events result:", data);
+    console.log("Search events error:", error);
 
     if (error) {
       return {

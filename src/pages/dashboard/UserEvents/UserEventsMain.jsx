@@ -4,7 +4,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UserEventsSub1 } from "./UserEventsSub1";
 import { UserEventsSub2 } from "./UserEventsSub2";
 import { Calendar, Users, RefreshCw } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { isObjEmpty } from "../../../utils/util";
 
 export function UserEventsMain({ 

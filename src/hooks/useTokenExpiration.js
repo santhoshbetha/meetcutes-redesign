@@ -6,7 +6,11 @@ import { useAuth } from '@/context/AuthContext';
  * This hook provides additional token checking beyond the AuthContext
  */
 export const useTokenExpiration = () => {
-  const { userSession } = useAuth();
+  const { userSession, profiledata } = useAuth();
+
+  //const now22 = Math.floor(Date.now() / 1000);
+  //console.log('useTokenExpiration hook initialized, userSession::',userSession.expires_at < now22);
+  //console.log('useTokenExpiration hook initialized, profiledata::', profiledata);
 
   useEffect(() => {
     if (!userSession) return;

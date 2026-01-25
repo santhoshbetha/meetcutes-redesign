@@ -51,7 +51,7 @@ export function UserEventsSub1({profiledata, userhandle, latitude, longitude, er
         {isLoading && <p>Loading...</p>}
         {error1 && <p>Error: {error1.message}</p>}
         <div className="flex flex-row items-center justify-between md:mx-2 lg:mx-4">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <CardTitle>
               <span className="md:text-lg">Events you have created</span>
             </CardTitle>
@@ -74,9 +74,10 @@ export function UserEventsSub1({profiledata, userhandle, latitude, longitude, er
           </div>
           <Dialog open={createEventOpen} onOpenChange={setCreateEventOpen}>
             <DialogTrigger asChild>
-              <button disabled={!!error} className="text-sm md:text-base font-medium text-primary hover:text-primary/80 transition-colors">
-                  Create Event
-              </button>
+              <Button disabled={!!error}>
+                <Plus className="w-4 h-4 mr-2" />
+                Create Event
+              </Button>
             </DialogTrigger>
             <CreateEvent onClose={() => setCreateEventOpen(false)}/>
           </Dialog>

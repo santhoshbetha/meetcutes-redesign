@@ -143,7 +143,7 @@ export function EventsSearch({
   const [successMessage, setSuccessMessage] = useState("");
   const [formError, setFormError] = useState("");
 
-  const [searchData, setSearchData] = useState();
+  const [searchResults, setSearchResults] = useState();
   const resultsRef = useRef(null);
   const [hasScrolledForSearch, setHasScrolledForSearch] = useState(false);
   const [showNoEventsDialog, setShowNoEventsDialog] = useState(false);
@@ -185,7 +185,7 @@ export function EventsSearch({
       searchsuccess.current = true;
       isRestoredSearch.current = true;
       if (storedSearchResults) {
-        setSearchData(storedSearchResults);
+        setSearchResults(storedSearchResults);
       }
       if (storedSearchParams) {
         searchinfo = storedSearchParams;
@@ -210,6 +210,7 @@ export function EventsSearch({
       }
     }
   }, []);
+
   const eventsSearchQueryKey = () => ["eventssearch"];
 
   const {
@@ -249,25 +250,25 @@ export function EventsSearch({
         ...event,
         distance: haversine(latitude, longitude, event.latitude, event.longitude)
       }));
-      setSearchData(dataWithDistances);
+      setSearchResults(dataWithDistances);
       // Save search results to localStorage
       saveToStorage(STORAGE_KEYS.SEARCH_RESULTS, dataWithDistances);
     }
   }, [querydata, latitude, longitude]);
 
   useEffect(() => {
-    if (searchsuccess.current && !isObjEmpty(searchData) && resultsRef.current && !hasScrolledForSearch) {
+    if (searchsuccess.current && !isObjEmpty(searchResults) && resultsRef.current && !hasScrolledForSearch) {
       // Scroll to results section with smooth behavior
       resultsRef.current.scrollIntoView({ 
         behavior: 'smooth', 
         block: 'start' 
       });
       setHasScrolledForSearch(true);
-    } else if (searchsuccess.current && isObjEmpty(searchData) && !isRestoredSearch.current) {
+    } else if (searchsuccess.current && isObjEmpty(searchResults) && !isRestoredSearch.current) {
       // Show no events found dialog only for fresh searches, not restored ones
       setShowNoEventsDialog(true);
     }
-  }, [searchData, hasScrolledForSearch]);
+  }, [searchResults, hasScrolledForSearch]);
 
   useEffect (() => {
     //if (!questionairevaluesset) {
@@ -377,16 +378,16 @@ export function EventsSearch({
       const res = await refetch();
 
       if (res.status == "success") {
-          //setSearchData(res.data);
-          if (res.data.length == 0) {
-              setSearchData([]);
+          //setSearchResults(res.data);
+          if (res.data.pages[0].length == 0) {
+              setSearchResults([]);
               setSuccessMessage("Search completed! No events found in your area.");
           } else {
               // Don't show success message when events are found to avoid flicker
-              // searchData will be set by the querydata useEffect
+              // searchResults will be set by the querydata useEffect
           }
       } else {
-          setSearchData([]);
+          setSearchResults([]);
           setSuccessMessage("Search completed, but no events were found.");
       }
       searchsuccess.current = true;
@@ -449,7 +450,7 @@ export function EventsSearch({
                   clearSearchStorage();
                   searchinfo = null;
                   searchsuccess.current = false;
-                  setSearchData(null);
+                  setSearchResults(null);
                   setSuccessMessage("");
                   formik.resetForm();
                   setSearchDate(new Date(Date.now()));
@@ -879,12 +880,12 @@ export function EventsSearch({
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    {searchData && (
+                    {searchResults && (
                       <Badge variant="secondary" className="px-3 py-1 text-sm bg-primary/10 text-primary border-primary/20">
-                        {Array.isArray(searchData) ? searchData.length : 0} events found
+                        {Array.isArray(searchResults) ? searchResults.length : 0} events found
                       </Badge>
                     )}
-                    {searchData && Array.isArray(searchData) && searchData.length > 0 && (
+                    {searchResults && Array.isArray(searchResults) && searchResults.length > 0 && (
                       <Button variant="outline" size="sm" className="bg-white/50 dark:bg-gray-700/50">
                         <Filter className="w-4 h-4 mr-2" />
                         Sort
@@ -897,10 +898,10 @@ export function EventsSearch({
           )}
 
           {/* Event List */}
-          {!isObjEmpty(searchData) && (
+          {!isObjEmpty(searchResults) && (
             <div className="min-h-100">
               <EventList
-                events={searchData}
+                events={searchResults}
                 userhandle={userhandle}
                 userlatitude={latitude}
                 userlongitude={longitude}
@@ -935,7 +936,7 @@ export function EventsSearch({
           )}
          
           {/* Empty State - Hidden when using dialog */}
-          {searchsuccess.current && isObjEmpty(searchData) && (
+          {searchsuccess.current && isObjEmpty(searchResults) && (
             <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
               <CardContent className="pt-12 pb-12 text-center">
                 <div className="w-16 h-16 rounded-full bg-muted mx-auto mb-4 flex items-center justify-center">

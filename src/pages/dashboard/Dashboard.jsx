@@ -16,6 +16,7 @@ import { updatePasswordRetryCount } from '@/services/register.service';
 import { successAlert } from "@/services/alert.service";
 import { useQueryClient } from "@tanstack/react-query";
 import secureLocalStorage from "react-secure-storage";
+import { useTokenExpiration } from "../../hooks/useTokenExpiration";
 import {
   Search,
   Calendar,
@@ -43,6 +44,9 @@ export function Dashboard() {
   const queryClient = useQueryClient();
   const {logininitsDone, setLogininitsDone, setSearchUsersData} = useContext(SearchAndUserEventsDataContext);
   const {autocompletedata, setAutoCompletedata} = useContext(AutoCompleteDataContext);
+
+  // Use token expiration hook to automatically log out when token expires
+  useTokenExpiration();
 
   const navigationItems = [
     {

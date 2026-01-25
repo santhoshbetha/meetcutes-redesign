@@ -98,7 +98,7 @@ export function EventCard({ setSelectedEvent, event, userlatitude, userlongitude
     <Card
       key={event?.id}
       onClick={() => setSelectedEvent(event)}
-      className="group relative p-3 shadow-lg border border-border/80 hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 hover:scale-[1.01] cursor-pointer hover:border-primary bg-card overflow-hidden"
+      className="group relative p-3 shadow-lg border-2 border-border/80 hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 hover:scale-[1.01] cursor-pointer hover:border-primary bg-card overflow-hidden"
     >
       {/* Gradient overlay on hover */}
       <div className="absolute inset-0 bg-linear-to-br from-primary/5 via-transparent to-primary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
