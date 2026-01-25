@@ -176,8 +176,6 @@ export function UsersSearch({ userhandle, gender, latitude, longitude, questiona
     });
   };
 
-  console.log("searchUsersData", searchUsersData);
-
   const filteredResults = useMemo(() => {
     // Use context data if available and no new search has been performed
     const dataToFilter = searchUsersData && searchUsersData.length > 0 && !searchParams ? searchUsersData : allUsers;

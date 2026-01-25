@@ -7,6 +7,13 @@ import { Spinner } from "@/components/ui/spinner";
 import { isObjEmpty } from "../utils/util";
 import { useAuth } from "@/context/AuthContext";
 import { useRegisterToAnEvent, useUnregisterToAnEvent } from "@/hooks/useEvents";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+} from "@/components/ui/alert-dialog";
 
 export default function EventDetailsDialog({ event, onClose, profiledata, loading = false }) {
   const [eventDetails, setEventDetails] = useState(event || {});
@@ -38,30 +45,6 @@ export default function EventDetailsDialog({ event, onClose, profiledata, loadin
       } catch (e) {
         setEventDetails(event);
       }
-    }
-  }, [event]);
-
-  // Scroll to center the dialog when it opens
-  useEffect(() => {
-    if (event) {
-      // Small delay to ensure the dialog is rendered before scrolling
-      const timer = setTimeout(() => {
-        // Scroll to center the dialog vertically on screen
-        const dialogHeight = 600; // Approximate height of the dialog
-        const viewportHeight = window.innerHeight;
-        const scrollY = window.scrollY;
-        const centerPosition = scrollY + (viewportHeight / 2) - (dialogHeight / 2);
-        
-        // Only scroll if the dialog would be positioned too low
-        if (centerPosition > scrollY + 100) {
-          window.scrollTo({
-            top: Math.max(0, centerPosition - 100), // Add some padding from top
-            behavior: 'smooth'
-          });
-        }
-      }, 100);
-      
-      return () => clearTimeout(timer);
     }
   }, [event]);
 
@@ -389,8 +372,9 @@ export default function EventDetailsDialog({ event, onClose, profiledata, loadin
   };
 
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="relative w-full max-w-2xl bg-background rounded-2xl shadow-2xl animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto border border-border dark:border-3">
+    <AlertDialog open={true} onOpenChange={onClose}>
+      <AlertDialogTitle></AlertDialogTitle>
+      <AlertDialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto p-0">
         {/* Global Loading Overlay */}
         {loading && (
           <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center rounded-2xl">
@@ -400,16 +384,16 @@ export default function EventDetailsDialog({ event, onClose, profiledata, loadin
             </div>
           </div>
         )}
-        <div className="p-6 md:p-8">
-          <div className="flex justify-between items-start mb-6">
+        <div className="p-4 md:p-6">
+          <div className="flex justify-between items-start mb-4">
             {/* Event Title */}
-            <div className="flex items-start gap-4 flex-1">
-              <div className="text-4xl">{getEventIcon(event?.locationdata?.locationname || event?.name)}</div>
+            <div className="flex items-start gap-3 flex-1">
+              <div className="text-3xl">{getEventIcon(event?.locationdata?.locationname || event?.name)}</div>
               <div>
-                <h2 className="text-2xl md:text-3xl font-bold text-primary mb-2">
+                <h2 className="text-xl md:text-2xl font-bold text-primary mb-1">
                   {event?.title || event?.name || 'Event Title'}
                 </h2>
-                <p className="text-lg font-medium text-muted-foreground mb-3">
+                <p className="text-base font-medium text-muted-foreground mb-2">
                   📍 {event?.locationdata?.locationname || event?.location}
                 </p>
                 <div className="flex items-center gap-2">
@@ -432,36 +416,40 @@ export default function EventDetailsDialog({ event, onClose, profiledata, loadin
                 onClick={() => window.open(`/event/${event?.id || event?.eventid}`, '_blank')}
                 title="Open in new tab"
               >
-                <ExternalLink className="w-5 h-5 text-muted-foreground group-hover:text-foreground" />
+                <ExternalLink className="w-4 h-4 text-muted-foreground group-hover:text-foreground" />
               </Button>
               <Button
                 className="bg-background hover:bg-muted rounded-lg transition-colors group"
                 onClick={onClose}
               >
-                <X className="w-5 h-5 text-muted-foreground group-hover:text-foreground" />
+                <X className="w-4 h-4 text-muted-foreground group-hover:text-foreground" />
               </Button>
             </div>
           </div>
 
+          <AlertDialogDescription className="sr-only">
+            View detailed information about this event including date, time, location, and attendee information. You can register or unregister for the event from this dialog.
+          </AlertDialogDescription>
+
           {/* Event Info */}
-          <div className="space-y-2 mb-6">
-            <h3 className="text-lg font-bold text-primary mb-3">Details</h3>
-            <div className="flex items-center gap-3 text-muted-foreground px-4 bg-background/50 rounded-xl border border-border/30">
-              <div className="p-2 bg-primary/10 rounded-lg">
-                <Clock className="w-5 h-5 text-primary" />
+          <div className="space-y-1 mb-4">
+            <h3 className="text-base font-bold text-primary mb-2">Details</h3>
+            <div className="flex items-center gap-3 text-muted-foreground px-3 py-2 bg-background/50 rounded-lg border border-border/30">
+              <div className="p-1.5 bg-primary/10 rounded-lg">
+                <Clock className="w-4 h-4 text-primary" />
               </div>
               <div>
-                <span className="text-base font-medium text-foreground block">{event?.starttime?.substring(0, 5)} - {event?.endtime?.substring(0, 5)}</span>
-                <span className="text-sm text-muted-foreground">Duration</span>
+                <span className="text-sm font-medium text-foreground block">{event?.starttime?.substring(0, 5)} - {event?.endtime?.substring(0, 5)}</span>
+                <span className="text-xs text-muted-foreground">Duration</span>
               </div>
             </div>
 
-            <div className="flex items-center gap-3 text-blue-600 px-4 bg-background/50 rounded-xl border border-border/30">
-              <div className="p-2 bg-blue-500/10 rounded-lg">
-                <Calendar className="w-5 h-5 text-blue-600" />
+            <div className="flex items-center gap-3 text-blue-600 px-3 py-2 bg-background/50 rounded-lg border border-border/30">
+              <div className="p-1.5 bg-blue-500/10 rounded-lg">
+                <Calendar className="w-4 h-4 text-blue-600" />
               </div>
               <div>
-                <span className="text-base font-medium text-foreground block">
+                <span className="text-sm font-medium text-foreground block">
                   {event?.eventdate ? new Date(event.eventdate).toLocaleDateString('en-US', {
                     weekday: 'long',
                     year: 'numeric',
@@ -469,47 +457,47 @@ export default function EventDetailsDialog({ event, onClose, profiledata, loadin
                     day: 'numeric'
                   }) : event?.date}
                 </span>
-                <span className="text-sm text-muted-foreground">Date</span>
+                <span className="text-xs text-muted-foreground">Date</span>
               </div>
             </div>
 
-            <div className="flex items-start gap-3 text-dark px-4 bg-background/50 rounded-xl border border-border/30">
-              <div className="p-2 bg-green-500/10 rounded-lg mt-1">
-                <MapPin className="w-5 h-5 text-green-600" />
+            <div className="flex items-start gap-3 text-dark px-3 py-2 bg-background/50 rounded-lg border border-border/30">
+              <div className="p-1.5 bg-green-500/10 rounded-lg mt-0.5">
+                <MapPin className="w-4 h-4 text-green-600" />
               </div>
               <div className="flex-1">
-                <span className="text-base font-medium text-foreground block leading-relaxed">
+                <span className="text-sm font-medium text-foreground block leading-relaxed">
                   {event?.locationdata?.address1 || event?.location}
                 </span>
-                <span className="text-sm text-muted-foreground">Location</span>
+                <span className="text-xs text-muted-foreground">Location</span>
               </div>
             </div>
           </div>
 
           {/* Attendees Section */}
-          <div className="mb-6">
-            <h3 className="text-lg font-bold text-primary mb-3 flex items-center gap-2">
-              <Users className="w-5 h-5" />
+          <div className="mb-4">
+            <h3 className="text-base font-bold text-primary mb-2 flex items-center gap-2">
+              <Users className="w-4 h-4" />
               People
             </h3>
-            <div className="grid grid-cols-2 gap-2 pl-7">
-              <div className="p-4 bg-background/50 rounded-lg border border-border/30">
-                <p className="text-2xl font-bold text-blue-600">{malesCount || 0}</p>
-                <p className="text-sm text-muted-foreground">Males</p>
+            <div className="grid grid-cols-2 gap-2 pl-6">
+              <div className="p-3 bg-background/50 rounded-lg border border-border/30">
+                <p className="text-xl font-bold text-blue-600">{malesCount || 0}</p>
+                <p className="text-xs text-muted-foreground">Males</p>
               </div>
-              <div className="p-4 bg-background/50 rounded-lg border border-border/30">
-                <p className="text-2xl font-bold text-pink-600">{femalesCount || 0}</p>
-                <p className="text-sm text-muted-foreground">Females</p>
+              <div className="p-3 bg-background/50 rounded-lg border border-border/30">
+                <p className="text-xl font-bold text-pink-600">{femalesCount || 0}</p>
+                <p className="text-xs text-muted-foreground">Females</p>
               </div>
             </div>
           </div>
 
-          <Separator className="my-6" />
+          <Separator className="my-4" />
 
           {/* Details Section */}
-          <div className="mb-8">
-            <h3 className="text-lg font-bold text-foreground mb-4">Event Details</h3>
-            <p className="text-base text-muted-foreground leading-relaxed">
+          <div className="mb-6">
+            <h3 className="text-base font-bold text-foreground mb-3">Event Details</h3>
+            <p className="text-sm text-muted-foreground leading-relaxed">
               {event?.details ||
                 "Join us for a wonderful meetup experience! This is a great opportunity to meet new people, share interests, and create lasting connections. We'll have plenty of activities planned to ensure everyone has a great time. Feel free to bring your enthusiasm and an open mind!"}
             </p>
@@ -517,7 +505,7 @@ export default function EventDetailsDialog({ event, onClose, profiledata, loadin
 
           {/* Registration Message */}
           {registrationMessage && (
-            <div className={`mb-4 p-4 rounded-lg border ${
+            <div className={`mb-3 p-3 rounded-lg border ${
               registrationMessage.includes('Successfully') || registrationMessage.includes('unregistered')
                 ? 'bg-green-500/10 border-green-500/20 text-green-700'
                 : 'bg-red-500/10 border-red-500/20 text-red-700'
@@ -537,7 +525,7 @@ export default function EventDetailsDialog({ event, onClose, profiledata, loadin
           <Button
             onClick={handleRegistration}
             disabled={isRegistering}
-            className={`w-full font-semibold py-4 rounded-md transition-all hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] ${
+            className={`w-full font-semibold py-3 rounded-md transition-all hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] ${
               isRegistered
                 ? 'bg-red-500 hover:bg-red-600 text-white'
                 : 'bg-green-500 hover:bg-green-600 text-white'
@@ -545,18 +533,18 @@ export default function EventDetailsDialog({ event, onClose, profiledata, loadin
           >
             {isRegistering ? (
               <div className="flex items-center gap-2">
-                <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+                <div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
                 {isRegistered ? 'Unregistering...' : 'Registering...'}
               </div>
             ) : (
               <div className="flex items-center gap-2">
-                <Heart className={`w-5 h-5 ${isRegistered ? 'fill-current' : ''}`} />
+                <Heart className={`w-4 h-4 ${isRegistered ? 'fill-current' : ''}`} />
                 {isRegistered ? 'UNREGISTER FROM EVENT' : 'REGISTER FOR THIS EVENT'}
               </div>
             )}
           </Button>
         </div>
-      </div>
-    </div>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }
