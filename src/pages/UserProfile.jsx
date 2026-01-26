@@ -15,6 +15,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Slider } from "@/components/ui/slider";
+import { UserProfileSkeleton } from "@/components/UserProfileSkeleton";
 
 const CDNURL = 'https://yrxymkmmfrkrfccmutvr.supabase.co/storage/v1/object/public/meetfirst/images';
 
@@ -128,11 +129,7 @@ export function UserProfile() {
   }, [userid]);
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-linear-to-br from-background via-background to-muted/20 flex items-center justify-center">
-        <Spinner size="xlarge" withText={true} text="Loading profile..." />
-      </div>
-    );
+    return <UserProfileSkeleton />;
   }
 
   if (error || !userData) {
