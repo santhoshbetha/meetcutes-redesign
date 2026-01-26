@@ -393,7 +393,7 @@ export function LocationDialog({ isOpen, onClose, user, profiledata, setProfiled
           )}
 
           {/* Header */}
-          <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-primary/10 border-b border-border/50 px-6 py-4">
+          <div className="bg-linear-to-r from-primary/10 via-primary/5 to-primary/10 border-b border-border/50 px-6 py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">

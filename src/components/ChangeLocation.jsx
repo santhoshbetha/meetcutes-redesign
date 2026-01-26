@@ -18,6 +18,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useOnlineStatus} from "@/hooks/useOnlineStatus";
 import { updateUserInfo } from "@/services/user.service";
 import dayjs from 'dayjs'
+import { toast } from "sonner";
 
 const delay = ms => new Promise(res => setTimeout(res, ms));
 
@@ -33,7 +34,7 @@ const getCity = (stateIn) => {
   }
 };
 
-export function ChangeLocation() {
+export function ChangeLocation({ onClose }) {
   const {user, userSession, profiledata, setProfiledata} = useAuth();
   const [loading, setLoading] = useState(false);
   const [state, setState] = useState("");
@@ -91,21 +92,24 @@ export function ChangeLocation() {
                           exactcoordsset: false,
                           dateoflocation: dateoflocation
                       });
+                      toast.success("Location changed successfully!");
+                      delay(1000).then(async () => {
+                          setLoading(false)
+                          if (onClose) onClose();
+                      })
+                  } else {
+                      toast.error(res.msg || "Failed to change location. Please try again.");
+                      setLoading(false);
                   }
-
-                  delay(1000).then(async () => {
-                      setLoading(false)
-                      //setOpaque("")
-                  })
               } catch (_error) {
                   setLoading(false)
-                  alert('Something wrong. Try later')
+                  toast.error("Something went wrong. Please try again.");
               }
           } else {
-              alert ("Error, logout and login again")
+              toast.error("Authentication error. Please logout and login again.");
           }
       } else {
-          alert('You are offline. check your internet connection.')
+          toast.error("You are offline. Check your internet connection.");
       }
   }
 

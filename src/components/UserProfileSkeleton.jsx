@@ -15,7 +15,7 @@ export function UserProfileSkeleton() {
         {/* Image Carousel Skeleton */}
         <div className="mb-8">
           <div className="max-w-4xl mx-auto rounded-xl overflow-hidden shadow-2xl">
-            <Skeleton className="w-full h-[420px] sm:h-[480px] md:h-[540px]" />
+            <Skeleton className="w-full h-105 sm:h-120 md:h-135" />
           </div>
         </div>
 

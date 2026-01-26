@@ -47,6 +47,7 @@ export function Settings() {
   const [userhandlesearch, setUserhandlesearch] = useState(profiledata?.userhandlesearch ?? false);
   const [onlyhundredmileevisiblity, setOnlyhundredmileevisiblity] = useState(profiledata?.onlyhundredmileevisiblity ?? true);
   const [visibilityPreference, setVisibilityPreference] = useState(profiledata?.visibilitypreference ?? 'both');
+  const [changeLocationOpen, setChangeLocationOpen] = useState(false);
 
   let [valueschanged, setValueschanged] = useState(false);
   const [confirmClick, setConfirmClick] = useState(false);
@@ -447,13 +448,13 @@ export function Settings() {
                       <p className="text-sm text-muted-foreground">
                         Update your city and location information
                       </p>
-                      <Dialog>
+                      <Dialog open={changeLocationOpen} onOpenChange={setChangeLocationOpen}>
                         <DialogTrigger asChild>
                           <Button size="sm" variant="outline" className="mt-2">
                             Change Location
                           </Button>
                         </DialogTrigger>
-                        <ChangeLocation />
+                        <ChangeLocation onClose={() => setChangeLocationOpen(false)} />
                       </Dialog>
                     </div>
                   </div>

@@ -5,7 +5,7 @@ export function SpinnerDemo() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-orange-50 via-red-50 to-pink-50 dark:from-gray-900 dark:to-gray-800 p-8">
       <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 bg-clip-text text-transparent mb-4">
+        <h1 className="text-4xl font-bold bg-linear-to-r from-orange-500 via-red-500 to-pink-500 bg-clip-text text-transparent mb-4">
           MeetCutes Spinner Demo
         </h1>
         <p className="text-gray-600 dark:text-gray-300">
