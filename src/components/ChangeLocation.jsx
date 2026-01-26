@@ -22,27 +22,36 @@ import { toast } from "sonner";
 
 const delay = ms => new Promise(res => setTimeout(res, ms));
 
-const getCity = (stateIn) => {
-  if (!isObjEmpty(stateIn)) {
-    return cities[stateIn]?.map((city, idx) => {
-      return (
-        <SelectItem key={idx} value={city}>
-          {city}
-        </SelectItem>
-      );
-    });
-  }
-};
+const states = [
+  "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware", "Florida", "Georgia", "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire", "New Jersey", "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota", "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming", "Washington DC"
+];
 
 export function ChangeLocation({ onClose }) {
   const {user, userSession, profiledata, setProfiledata} = useAuth();
   const [loading, setLoading] = useState(false);
   const [state, setState] = useState("");
   const [city, setCity] = useState("")
-  const [opaque, setOpaque] = useState("");
   const isOnline = useOnlineStatus();
   const [allowlocationchange, setAllowlocationchange] = useState(false);
   const datenow = new Date(Date.now());
+  const currentState = profiledata?.state;
+  const currentCity = profiledata?.city;
+
+  const getCity = (stateIn) => {
+    if (!isObjEmpty(stateIn)) {
+      let cityList = cities[stateIn] || [];
+      if (stateIn === currentState) {
+        cityList = cityList.filter(c => c !== currentCity);
+      }
+      return cityList.map((city, idx) => {
+        return (
+          <SelectItem key={idx} value={city}>
+            {city}
+          </SelectItem>
+        );
+      });
+    }
+  };
 
   useEffect(() => {
     if (!isObjEmpty(profiledata)) {
@@ -59,7 +68,7 @@ export function ChangeLocation({ onClose }) {
           setAllowlocationchange(true)
         }
     }
-  }, []);
+  }, [profiledata, datenow]);
 
   const handleLocationSubmit = async (e) => {
       e.preventDefault()
@@ -101,7 +110,7 @@ export function ChangeLocation({ onClose }) {
                       toast.error(res.msg || "Failed to change location. Please try again.");
                       setLoading(false);
                   }
-              } catch (_error) {
+              } catch {
                   setLoading(false)
                   toast.error("Something went wrong. Please try again.");
               }
@@ -145,57 +154,11 @@ export function ChangeLocation({ onClose }) {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectGroup>
-                        <SelectItem value="Alabama">Alabama</SelectItem>
-                        <SelectItem value="Alaska">Alaska</SelectItem>
-                        <SelectItem value="Arizona">Arizona</SelectItem>
-                        <SelectItem value="Arkansas">Arkansas</SelectItem>
-                        <SelectItem value="California">California</SelectItem>
-                        <SelectItem value="Colorado">Colorado</SelectItem>
-                        <SelectItem value="Connecticut">Connecticut</SelectItem>
-                        <SelectItem value="Delaware">Delaware</SelectItem>
-                        <SelectItem value="Florida">Florida</SelectItem>
-                        <SelectItem value="Georgia">Georgia</SelectItem>
-                        <SelectItem value="Hawaii">Hawaii</SelectItem>
-                        <SelectItem value="Idaho">Idaho</SelectItem>
-                        <SelectItem value="Illinois">Illinois</SelectItem>
-                        <SelectItem value="Indiana">Indiana</SelectItem>
-                        <SelectItem value="Iowa">Iowa</SelectItem>
-                        <SelectItem value="Kansas">Kansas</SelectItem>
-                        <SelectItem value="Kentucky">Kentucky</SelectItem>
-                        <SelectItem value="Louisiana5">Louisiana</SelectItem>
-                        <SelectItem value="Maine">Maine</SelectItem>
-                        <SelectItem value="Maryland">Maryland</SelectItem>
-                        <SelectItem value="Massachusetts">Massachusetts</SelectItem>
-                        <SelectItem value="Michigan">Michigan</SelectItem>
-                        <SelectItem value="Minnesota">Minnesota</SelectItem>
-                        <SelectItem value="Mississipi">Mississippi</SelectItem>
-                        <SelectItem value="Missouri">Missouri</SelectItem>
-                        <SelectItem value="Montana">Montana</SelectItem>
-                        <SelectItem value="Nebraska">Nebraska</SelectItem>
-                        <SelectItem value="Nevada">Nevada</SelectItem>
-                        <SelectItem value="new Hampshire">New Hampshire</SelectItem>
-                        <SelectItem value="New Jersey">New Jersey</SelectItem>
-                        <SelectItem value="New Mexico">New Mexico</SelectItem>
-                        <SelectItem value="New york">New York</SelectItem>
-                        <SelectItem value="North Carolina">North Carolina</SelectItem>
-                        <SelectItem value="North Dakota">North Dakota</SelectItem>
-                        <SelectItem value="Ohio">Ohio</SelectItem>
-                        <SelectItem value="Oklahoma">Oklahoma</SelectItem>
-                        <SelectItem value="Oregon">Oregon</SelectItem>
-                        <SelectItem value="Pennsylvania">Pennsylvania</SelectItem>
-                        <SelectItem value="Rhode Island">Rhode Island</SelectItem>
-                        <SelectItem value="South Carolina">South Carolina</SelectItem>
-                        <SelectItem value="South Dakota">South Dakota</SelectItem>
-                        <SelectItem value="Tennessee">Tennessee</SelectItem>
-                        <SelectItem value="Texas">Texas</SelectItem>
-                        <SelectItem value="Utah">Utah</SelectItem>
-                        <SelectItem value="Vermont">Vermont</SelectItem>
-                        <SelectItem value="Virginia">Virginia</SelectItem>
-                        <SelectItem value="Washington">Washington</SelectItem>
-                        <SelectItem value="West Virginia">West Virginia</SelectItem>
-                        <SelectItem value="Wisconsin">Wisconsin</SelectItem>
-                        <SelectItem value="Wyoming">Wyoming</SelectItem>
-                        <SelectItem value="Washington DC">Washington DC</SelectItem>
+                        {states.map((state, idx) => (
+                          <SelectItem key={idx} value={state}>
+                            {state}
+                          </SelectItem>
+                        ))}
                       </SelectGroup>
                     </SelectContent>
                   </Select>
