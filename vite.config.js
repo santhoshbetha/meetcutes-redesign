@@ -12,7 +12,11 @@ export default defineConfig({
         // Ensure proper chunk naming and cache busting
         chunkFileNames: 'assets/[name]-[hash].js',
         entryFileNames: 'assets/[name]-[hash].js',
-        assetFileNames: 'assets/[name]-[hash].[ext]'
+        assetFileNames: 'assets/[name]-[hash].[ext]',
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          ui: ['lucide-react', '@radix-ui/react-dialog', '@radix-ui/react-popover']
+        }
       }
     }
   },
