@@ -86,7 +86,8 @@ export function PopularLocations() {
           <div className="bg-linear-to-r from-primary/5 to-primary/10 border border-primary/20 rounded-xl sm:rounded-2xl p-6 sm:p-8 max-w-2xl mx-auto backdrop-blur-sm">
             <h3 className="text-xl sm:text-2xl font-bold text-foreground mb-3 sm:mb-4">Ready to Meet Someone Special?</h3>
             <p className="text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6">
-              Join thousands of singles who are finding real connections at places they already love.
+              {/* Join thousands of singles who are finding real connections at places they already love */}
+              Start your journey to real connections at places you already love.
             </p>
             <div className="flex items-center justify-center gap-2 text-primary font-medium">
               <MapPin className="w-4 h-4 sm:w-5 sm:h-5" />
