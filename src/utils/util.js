@@ -32,6 +32,42 @@ export function haversine(latIn1, lonIn1, latIn2, lonIn2) {
   return 3960 * c;
 }
 
+export function fuzzCoordinates(latitude, longitude, options = {}) {
+  const exactLat = Number(latitude);
+  const exactLng = Number(longitude);
+
+  if (!Number.isFinite(exactLat) || !Number.isFinite(exactLng)) {
+    return { lat: latitude, lng: longitude };
+  }
+
+  const minMiles = options.minMiles ?? 5;
+  const maxMiles = options.maxMiles ?? 7;
+  const earthRadiusMiles = 3958.8;
+  const distanceMiles = minMiles + Math.random() * (maxMiles - minMiles);
+  const bearing = Math.random() * 2 * Math.PI;
+  const angularDistance = distanceMiles / earthRadiusMiles;
+
+  const latRad = deg2rad(exactLat);
+  const lngRad = deg2rad(exactLng);
+
+  const fuzzedLatRad = Math.asin(
+    Math.sin(latRad) * Math.cos(angularDistance) +
+      Math.cos(latRad) * Math.sin(angularDistance) * Math.cos(bearing),
+  );
+
+  const fuzzedLngRad =
+    lngRad +
+    Math.atan2(
+      Math.sin(bearing) * Math.sin(angularDistance) * Math.cos(latRad),
+      Math.cos(angularDistance) - Math.sin(latRad) * Math.sin(fuzzedLatRad),
+    );
+
+  return {
+    lat: (fuzzedLatRad * 180) / Math.PI,
+    lng: ((((fuzzedLngRad * 180) / Math.PI) + 540) % 360) - 180,
+  };
+}
+
 export const generateID = () => Math.random().toString(36).substring(2, 10);
 
 export const slugToSentence = (slug) => {

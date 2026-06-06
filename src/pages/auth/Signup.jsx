@@ -33,6 +33,7 @@ import { toast } from "sonner";
 import { coords } from "@/lib/defaultcoords";
 import { cities } from "@/lib/cities"
 import supabase from "@/lib/supabase";
+import { fuzzCoordinates } from "@/utils/util";
 import { Eye, Users, Calendar as CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -40,8 +41,8 @@ function isEmpty(val) {
   return val === undefined || val == null || val.length <= 0 ? true : false;
 }
 
-function calcAge(dateString) {
-  var birthday = +new Date(dateString);
+function calcAge(birthDate) {
+  var birthday = +new Date(birthDate);
   return ~~((Date.now() - birthday) / 31557600000);
 }
 
@@ -220,14 +221,19 @@ export function Signup({ setOpenSignup, setOpenLogin }) {
       }
 
       if (!userExists) {
-        const dateofbirth = dobDate == '' ? (new Date('2002-01-01')).toISOString()
-                                          : (new Date(`${dobDate}`)).toISOString();
+        const selectedBirthDate = dobDate == '' ? new Date('2002-01-01')
+                             : new Date(dobDate);
+        const yearofbirth = selectedBirthDate.getFullYear();
         const dateofcreation = (new Date()).toISOString();                                 
-        const age = calcAge(dateofbirth.toString());
+        const age = calcAge(selectedBirthDate);
+        const fuzzyCoordinates = fuzzCoordinates(
+          coords[formik.values.state.trim()][formik.values.city.trim()].lat,
+          coords[formik.values.state.trim()][formik.values.city.trim()].lng,
+        );
         const dataIn = {
             firstname: formik.values.firstname.trim(),
             lastname: formik.values.lastname.trim(),
-            dateofbirth: dateofbirth,
+            yearofbirth: yearofbirth,
             age: age,
             gender: formik.values.gender,
             ethnicity: formik.values.ethnicity,
@@ -235,8 +241,8 @@ export function Signup({ setOpenSignup, setOpenLogin }) {
             phonenumber: formik.values.phonenumber.trim(),
             city: formik.values.city,
             state: formik.values.state,
-            latitude: coords[formik.values.state.trim()][formik.values.city.trim()].lat,
-            longitude: coords[formik.values.state.trim()][formik.values.city.trim()].lng,
+            latitude: fuzzyCoordinates.lat,
+            longitude: fuzzyCoordinates.lng,
             dateoflocation: dateofcreation,
             dateofcoordinates: dateofcreation,
             visibilityPreference: formik.values.visibilityPreference

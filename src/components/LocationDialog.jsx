@@ -17,7 +17,7 @@ import { Separator } from '@/components/ui/separator';
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { coords } from '@/lib/defaultcoords'
-import { isObjEmpty } from "../utils/util";
+import { fuzzCoordinates, isObjEmpty } from "../utils/util";
 import { updateUserInfo } from "../services/user.service";
 import dayjs from "dayjs";
 import { haversine } from "../utils/util";
@@ -63,9 +63,10 @@ export function LocationDialog({ isOpen, onClose, user, profiledata, setProfiled
 
   const resetCoords = async (coords) => {
     console.log("resetCoords coords::", coords)
+    const fuzzyCoordinates = fuzzCoordinates(coords.lat, coords.lng);
     let geodata = {
-      latitude: coords.lat,
-      longitude: coords.lng,
+      latitude: fuzzyCoordinates.lat,
+      longitude: fuzzyCoordinates.lng,
       defaultcoordsset: true,
       usercoordsset: false,
     };
@@ -74,7 +75,7 @@ export function LocationDialog({ isOpen, onClose, user, profiledata, setProfiled
       const res = await updateUserInfo(user?.id, geodata);
       if (res.success) {
         setProfiledata({ ...profiledata, ...geodata });
-        toast.success('Location reset to default successfully!', {
+        toast.success('Approximate location reset successfully!', {
           position: 'top-center',
           duration: 4000,
         });
@@ -125,9 +126,10 @@ export function LocationDialog({ isOpen, onClose, user, profiledata, setProfiled
 
   const saveGeoCodes = async (coords) => {
     let dateofcoordinates = new Date().toISOString().substring(0, 10).toString();
+    const fuzzyCoordinates = fuzzCoordinates(coords[0], coords[1]);
     let geodata = {
-      latitude: coords[0],
-      longitude: coords[1],
+      latitude: fuzzyCoordinates.lat,
+      longitude: fuzzyCoordinates.lng,
       defaultcoordsset: false,
       usercoordsset: true,
       dateofcoordinates: dateofcoordinates,
@@ -137,7 +139,7 @@ export function LocationDialog({ isOpen, onClose, user, profiledata, setProfiled
       const res = await updateUserInfo(user?.id, geodata);
       if (res.success) {
         setProfiledata({ ...profiledata, ...geodata });
-        toast.success('Location coordinates saved successfully!', {
+        toast.success('Approximate location saved successfully!', {
           position: 'top-center',
           duration: 4000,
         });
@@ -369,9 +371,9 @@ export function LocationDialog({ isOpen, onClose, user, profiledata, setProfiled
   // Helper function to get coordinate status
   const getCoordinateStatus = () => {
     if (profiledata?.usercoordsset) {
-      return { type: 'custom', label: 'Custom Location Set', color: 'bg-green-500' };
+      return { type: 'custom', label: 'Approximate Location Set', color: 'bg-green-500' };
     } else if (profiledata?.defaultcoordsset) {
-      return { type: 'default', label: 'Default Location', color: 'bg-blue-500' };
+      return { type: 'default', label: 'Default Approximate Location', color: 'bg-blue-500' };
     }
     return { type: 'none', label: 'No Location Set', color: 'bg-gray-500' };
   };
@@ -401,7 +403,7 @@ export function LocationDialog({ isOpen, onClose, user, profiledata, setProfiled
                 </div>
               <div>
                 <h2 className="text-2xl font-bold text-foreground">Set GPS Coordinates</h2>
-                <p className="text-sm text-muted-foreground">Pinpoint your exact location for better matches</p>
+                <p className="text-sm text-muted-foreground">Set an approximate location for better matches and privacy</p>
                 <div className="flex items-center gap-2 mt-2">
                   <Badge variant="secondary" className={`${status.color} text-white text-xs px-2 py-1`}>
                     {status.label}
@@ -470,10 +472,12 @@ export function LocationDialog({ isOpen, onClose, user, profiledata, setProfiled
                 Confirm Location
               </AlertDialogTitle>
               <AlertDialogDescription>
-                Set your coordinates to:
+                Use this point as the basis for your saved location:
                 <span className="font-mono text-green-600 dark:text-green-400 ml-2">
                   ({markerPosition.lat.toFixed(6)}, {markerPosition.lng.toFixed(6)})
                 </span>
+                <br />
+                Your stored coordinates will be blurred by roughly 5 to 10 miles for safety.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
@@ -516,6 +520,15 @@ export function LocationDialog({ isOpen, onClose, user, profiledata, setProfiled
 
           {/* Main Content Area */}
           <div className="flex-1 overflow-y-auto">
+            <div className="px-6 pt-4">
+              <Alert className="border-primary/20 bg-primary/5">
+                <Info className="h-4 w-4 text-primary" />
+                <AlertDescription className="text-sm text-foreground">
+                  Only approximate coordinates will be stored.
+                </AlertDescription>
+              </Alert>
+            </div>
+
             {!profiledata?.usercoordsset && (
               <div className="p-6 space-y-6">
                 {/* Quick Location Button */}
@@ -530,7 +543,7 @@ export function LocationDialog({ isOpen, onClose, user, profiledata, setProfiled
                     {isGettingLocation ? 'Getting Your Location...' : 'Use My Current Location'}
                   </Button>
                   <p className="text-sm text-muted-foreground mt-2">
-                    Automatically detect and set your GPS coordinates
+                    Detect your location, then store an approximate version for privacy
                   </p>
                 </div>
 
@@ -545,7 +558,7 @@ export function LocationDialog({ isOpen, onClose, user, profiledata, setProfiled
                   <div className="text-center">
                     <h3 className="text-lg font-semibold text-foreground mb-2">Set Location Manually</h3>
                     <p className="text-sm text-muted-foreground">
-                      Drag the marker on the map to your exact location, then save your coordinates
+                      Drag the marker near your location, then save an approximate coordinate set blurred by 5 to 10 miles
                     </p>
                   </div>
 

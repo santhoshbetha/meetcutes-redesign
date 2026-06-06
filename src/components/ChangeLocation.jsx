@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { isObjEmpty } from "../utils/util";
+import { fuzzCoordinates, isObjEmpty } from "../utils/util";
 import { cities } from '@/lib/cities'
 import { coords } from '@/lib/defaultcoords'
 import { useAuth } from "@/context/AuthContext";
@@ -76,13 +76,17 @@ export function ChangeLocation({ onClose }) {
       if (isOnline) {
           if (userSession) {
               let dateoflocation = (new Date()).toISOString().substring(0, 10).toString();
+              const fuzzyCoordinates = fuzzCoordinates(
+                coords[state][city].lat,
+                coords[state][city].lng,
+              );
             //  setOpaque("opacity-35 bg-[#F5F5F5]")
               try {
                   let newlocationdata = { 
                       state: state,
                       city: city,
-                      latitude: coords[state][city].lat,
-                      longitude: coords[state][city].lng,
+                      latitude: fuzzyCoordinates.lat,
+                      longitude: fuzzyCoordinates.lng,
                       defaultcoordsset: true,
                       usercoordsset: false, 
                       exactcoordsset: false,
@@ -94,8 +98,8 @@ export function ChangeLocation({ onClose }) {
                       setProfiledata({...profiledata,
                           state: state,
                           city: city,
-                          latitude: coords[state][city].lat,
-                          longitude: coords[state][city].lng,
+                        latitude: fuzzyCoordinates.lat,
+                        longitude: fuzzyCoordinates.lng,
                           defaultcoordsset: true,
                           usercoordsset: false, 
                           exactcoordsset: false,

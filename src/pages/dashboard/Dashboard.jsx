@@ -28,12 +28,28 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { MeetCutesSpinner } from '@/components/ui/MeetCutesSpinner';
 
-const UsersSearch = lazy(() => import("./UsersSearch").then((module) => ({ default: module.UsersSearch })));
-const UserEventsMain = lazy(() => import("./UserEvents/UserEventsMain").then((module) => ({ default: module.UserEventsMain })));
-const Profile = lazy(() => import("./Profile").then((module) => ({ default: module.Profile })));
-const EventsSearch = lazy(() => import("./EventsSearch").then((module) => ({ default: module.EventsSearch })));
-const Settings = lazy(() => import("../Settings").then((module) => ({ default: module.Settings })));
-const Photos = lazy(() => import("../Photos").then((module) => ({ default: module.Photos })));
+const loadUsersSearch = () => import("./UsersSearch");
+const loadUserEventsMain = () => import("./UserEvents/UserEventsMain");
+const loadProfile = () => import("./Profile");
+const loadEventsSearch = () => import("./EventsSearch");
+const loadSettings = () => import("../Settings");
+const loadPhotos = () => import("../Photos");
+
+const UsersSearch = lazy(() => loadUsersSearch().then((module) => ({ default: module.UsersSearch })));
+const UserEventsMain = lazy(() => loadUserEventsMain().then((module) => ({ default: module.UserEventsMain })));
+const Profile = lazy(() => loadProfile().then((module) => ({ default: module.Profile })));
+const EventsSearch = lazy(() => loadEventsSearch().then((module) => ({ default: module.EventsSearch })));
+const Settings = lazy(() => loadSettings().then((module) => ({ default: module.Settings })));
+const Photos = lazy(() => loadPhotos().then((module) => ({ default: module.Photos })));
+
+const dashboardTabPreloaders = {
+  profile: loadProfile,
+  photos: loadPhotos,
+  events: loadUserEventsMain,
+  search: loadEventsSearch,
+  users: loadUsersSearch,
+  settings: loadSettings,
+};
 
 const DashboardTabFallback = () => (
   <div className="flex min-h-[40vh] items-center justify-center px-4 py-12">
@@ -45,7 +61,7 @@ const DashboardTabFallback = () => (
 );
 
 export function Dashboard() {
-  const {user, profiledata, profileLoading, setProfiledata, userSession} = useAuth();
+  const {user, profiledata, profileLoading, setProfiledata} = useAuth();
   const [searchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState(searchParams.get('tab') || "profile");
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -109,6 +125,35 @@ export function Dashboard() {
       setActiveTab(tab);
     }
   }, [searchParams]);
+
+  useEffect(() => {
+    const warmDashboardTabs = () => {
+      Object.entries(dashboardTabPreloaders).forEach(([tabId, preload]) => {
+        if (tabId !== activeTab) {
+          preload().catch(() => {
+            // Ignore opportunistic prefetch failures.
+          });
+        }
+      });
+    };
+
+    let idleHandle;
+    let timeoutHandle;
+
+    if ("requestIdleCallback" in window) {
+      idleHandle = window.requestIdleCallback(warmDashboardTabs, { timeout: 1200 });
+      return () => window.cancelIdleCallback(idleHandle);
+    }
+
+    timeoutHandle = window.setTimeout(warmDashboardTabs, 400);
+    return () => window.clearTimeout(timeoutHandle);
+  }, [activeTab]);
+
+  const preloadTab = useCallback((tabId) => {
+    dashboardTabPreloaders[tabId]?.().catch(() => {
+      // Ignore opportunistic prefetch failures.
+    });
+  }, []);
 
   const handleTabChange = (tabId) => {
     setActiveTab(tabId);
@@ -278,6 +323,8 @@ export function Dashboard() {
               return (
                 <button
                   key={item.id}
+                  onMouseEnter={() => preloadTab(item.id)}
+                  onFocus={() => preloadTab(item.id)}
                   onClick={() => {
                     handleTabChange(item.id);
                     setSidebarOpen(false);
@@ -425,6 +472,8 @@ export function Dashboard() {
             return (
               <button
                 key={item.id}
+                onMouseEnter={() => preloadTab(item.id)}
+                onFocus={() => preloadTab(item.id)}
                 onClick={() => handleTabChange(item.id)}
                 className={`flex flex-col items-center justify-center p-2 rounded-lg transition-colors min-w-0 flex-1 ${
                   activeTab === item.id

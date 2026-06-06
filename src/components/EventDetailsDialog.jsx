@@ -498,7 +498,8 @@ export default function EventDetailsDialog({ event, onClose, profiledata, loadin
           <div className="mb-6">
             <h3 className="text-base font-bold text-foreground mb-3">Event Details</h3>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              {event?.details ||
+              {eventDetails?.description ||
+                eventDetails?.details ||
                 "Join us for a wonderful meetup experience! This is a great opportunity to meet new people, share interests, and create lasting connections. We'll have plenty of activities planned to ensure everyone has a great time. Feel free to bring your enthusiasm and an open mind!"}
             </p>
           </div>

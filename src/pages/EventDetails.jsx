@@ -740,7 +740,8 @@ export default function EventDetails() {
             <TabsContent value="description" className="mt-6">
               <h2 className="text-2xl font-bold text-foreground mb-4">About This Event</h2>
               <p className="text-base text-muted-foreground leading-relaxed">
-                {event?.details ||
+                {event?.description ||
+                  event?.details ||
                   "Join us for a wonderful meetup experience! This is a great opportunity to meet new people, share interests, and create lasting connections. We'll have plenty of activities planned to ensure everyone has a great time. Feel free to bring your enthusiasm and an open mind!"}
               </p>
             </TabsContent>

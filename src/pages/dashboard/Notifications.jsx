@@ -46,6 +46,52 @@ export function Notifications() {
     return formatDate(eventDate);
   };
 
+  const pickFirstText = (...values) => {
+    for (const value of values) {
+      if (typeof value === 'string' && value.trim()) {
+        return value.trim();
+      }
+    }
+
+    return '';
+  };
+
+  const getEventLocation = (event) => {
+    return (
+      pickFirstText(
+        event?.locationdata?.locationname,
+        event?.location,
+        event?.locationname,
+        event?.venue,
+        event?.venue_name,
+      ) || 'Location TBD'
+    );
+  };
+
+  const getEventName = (event) => {
+    return (
+      pickFirstText(
+        event?.title,
+        event?.eventname,
+        event?.name,
+        event?.eventtitle,
+        event?.event_title,
+        event?.headline,
+      ) ||
+      (getEventLocation(event) !== 'Location TBD'
+        ? `Event at ${getEventLocation(event)}`
+        : 'Upcoming Event')
+    );
+  };
+
+  const getEventTimeText = (event) => {
+    return event?.eventtime || event?.starttime || event?.start_time || '';
+  };
+
+  const getEventId = (event, index) => {
+    return event?.eventid || event?.id || index;
+  };
+
   return (
     <div className="min-h-screen bg-linear-to-br from-background via-background to-muted/20">
       <div className="max-w-4xl mx-auto px-4 md:px-8 py-4 md:py-6">
@@ -128,7 +174,7 @@ export function Notifications() {
 
               <div className="grid gap-4">
                 {events.map((event, index) => (
-                  <Card key={event.id || index} className="bg-card/50 backdrop-blur-sm hover:bg-card/70 transition-colors">
+                  <Card key={getEventId(event, index)} className="bg-card/50 backdrop-blur-sm hover:bg-card/70 transition-colors">
                     <CardContent className="p-4">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
@@ -138,23 +184,23 @@ export function Notifications() {
                             </div>
                             <div className="flex-1 min-w-0">
                               <h3 className="font-semibold text-foreground truncate">
-                                {event.eventname || 'Unnamed Event'}
+                                {getEventName(event)}
                               </h3>
                               <div className="flex flex-wrap items-center gap-4 mt-1 text-sm text-muted-foreground">
                                 <div className="flex items-center gap-1">
                                   <Calendar className="w-4 h-4" />
                                   <span>{getDaysUntil(event.eventdate)}</span>
                                 </div>
-                                {event.eventtime && (
+                                {getEventTimeText(event) && (
                                   <div className="flex items-center gap-1">
                                     <Clock className="w-4 h-4" />
-                                    <span>{formatTime(event.eventtime)}</span>
+                                    <span>{formatTime(getEventTimeText(event))}</span>
                                   </div>
                                 )}
                                 <div className="flex items-center gap-1">
                                   <MapPin className="w-4 h-4" />
                                   <span className="truncate max-w-32">
-                                    {event.location || 'Location TBD'}
+                                    {getEventLocation(event)}
                                   </span>
                                 </div>
                                 {event.maxattendees && (
@@ -173,7 +219,7 @@ export function Notifications() {
                           </div>
                         </div>
                         <div className="flex flex-col gap-2 ml-4">
-                          <Link to={`/event/${event.id}`}>
+                          <Link to={`/event/${getEventId(event, index)}`}>
                             <Button size="sm" variant="outline">
                               View Details
                             </Button>

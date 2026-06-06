@@ -1,31 +1,61 @@
 import { useEffect, useState, Suspense, lazy } from "react";
 import { Routes, Route } from "react-router-dom";
-const Home = lazy(() => import("@/pages/Home").then(module => ({ default: module.Home })));
-const About = lazy(() => import("@/pages/About").then(module => ({ default: module.About })));
-const Contact = lazy(() => import("@/pages/Contact").then(module => ({ default: module.Contact })));
-const Donate = lazy(() => import("@/pages/Donate").then(module => ({ default: module.Donate })));
-const Search = lazy(() => import("@/pages/Search").then(module => ({ default: module.Search })));
-const Photos = lazy(() => import("@/pages/Photos"));
-const Questionaire = lazy(() => import("@/pages/Questionaire"));
-const Dashboard = lazy(() => import("@/pages/dashboard/Dashboard").then(module => ({ default: module.Dashboard })));
-const ChangePassword = lazy(() => import("@/pages/ChangePassword").then(module => ({ default: module.ChangePassword })));
-const ForgotPassword = lazy(() => import("@/pages/ForgotPassword").then(module => ({ default: module.ForgotPassword })));
-const Settings = lazy(() => import("@/pages/Settings").then(module => ({ default: module.Settings })));
-const EventDetails = lazy(() => import("@/pages/EventDetails"));
-const UserProfile = lazy(() => import("@/pages/UserProfile").then(module => ({ default: module.UserProfile })));
-const PageNotFound = lazy(() => import("@/pages/PageNotFound").then(module => ({ default: module.PageNotFound })));
-const Terms = lazy(() => import("@/pages/Terms").then(module => ({ default: module.Terms })));
-const Privacy = lazy(() => import("@/pages/Privacy").then(module => ({ default: module.Privacy })));
-const TermsPopup = lazy(() => import("@/pages/TermsPopup").then(module => ({ default: module.TermsPopup })));
-const LoginPage = lazy(() => import("@/pages/auth/LoginPage").then(module => ({ default: module.LoginPage })));
-const RegistrationSuccess = lazy(() => import("@/pages/auth/RegistrationSuccess").then(module => ({ default: module.RegistrationSuccess })));
-const EmailVerification = lazy(() => import("@/pages/auth/EmailVerification").then(module => ({ default: module.EmailVerification })));
-const EmailNotVerified = lazy(() => import("@/pages/auth/EmailNotVerified").then(module => ({ default: module.EmailNotVerified })));
-const AuthConfirm = lazy(() => import("@/pages/auth/AuthConfirm").then(module => ({ default: module.AuthConfirm })));
-const Notifications = lazy(() => import("@/pages/dashboard/Notifications").then(module => ({ default: module.Notifications })));
-const Maintenance = lazy(() => import("@/pages/Maintenance").then(module => ({ default: module.Maintenance })));
-const NavBefore = lazy(() => import("@/components/NavBefore"));
-const NavAfter = lazy(() => import("@/components/NavAfter"));
+const loadHome = () => import("@/pages/Home");
+const loadAbout = () => import("@/pages/About");
+const loadContact = () => import("@/pages/Contact");
+const loadDonate = () => import("@/pages/Donate");
+const loadSearch = () => import("@/pages/Search");
+const loadPhotos = () => import("@/pages/Photos");
+const loadQuestionaire = () => import("@/pages/Questionaire");
+const loadDashboard = () => import("@/pages/dashboard/Dashboard");
+const loadChangePassword = () => import("@/pages/ChangePassword");
+const loadForgotPassword = () => import("@/pages/ForgotPassword");
+const loadSettings = () => import("@/pages/Settings");
+const loadEventDetails = () => import("@/pages/EventDetails");
+const loadUserProfile = () => import("@/pages/UserProfile");
+const loadPageNotFound = () => import("@/pages/PageNotFound");
+const loadTerms = () => import("@/pages/Terms");
+const loadPrivacy = () => import("@/pages/Privacy");
+const loadTermsPopup = () => import("@/pages/TermsPopup");
+const loadLoginPage = () => import("@/pages/auth/LoginPage");
+const loadRegistrationSuccess = () => import("@/pages/auth/RegistrationSuccess");
+const loadEmailVerification = () => import("@/pages/auth/EmailVerification");
+const loadEmailNotVerified = () => import("@/pages/auth/EmailNotVerified");
+const loadAuthConfirm = () => import("@/pages/auth/AuthConfirm");
+const loadNotifications = () => import("@/pages/dashboard/Notifications");
+const loadMaintenance = () => import("@/pages/Maintenance");
+const loadNavBefore = () => import("@/components/NavBefore");
+const loadNavAfter = () => import("@/components/NavAfter");
+
+const Home = lazy(() => loadHome().then(module => ({ default: module.Home })));
+const About = lazy(() => loadAbout().then(module => ({ default: module.About })));
+const Contact = lazy(() => loadContact().then(module => ({ default: module.Contact })));
+const Donate = lazy(() => loadDonate().then(module => ({ default: module.Donate })));
+const Search = lazy(() => loadSearch().then(module => ({ default: module.Search })));
+const Photos = lazy(() => loadPhotos());
+const Questionaire = lazy(() => loadQuestionaire());
+const Dashboard = lazy(() => loadDashboard().then(module => ({ default: module.Dashboard })));
+const ChangePassword = lazy(() => loadChangePassword().then(module => ({ default: module.ChangePassword })));
+const ForgotPassword = lazy(() => loadForgotPassword().then(module => ({ default: module.ForgotPassword })));
+const Settings = lazy(() => loadSettings().then(module => ({ default: module.Settings })));
+const EventDetails = lazy(() => loadEventDetails());
+const UserProfile = lazy(() => loadUserProfile().then(module => ({ default: module.UserProfile })));
+const PageNotFound = lazy(() => loadPageNotFound().then(module => ({ default: module.PageNotFound })));
+const Terms = lazy(() => loadTerms().then(module => ({ default: module.Terms })));
+const Privacy = lazy(() => loadPrivacy().then(module => ({ default: module.Privacy })));
+const TermsPopup = lazy(() => loadTermsPopup().then(module => ({ default: module.TermsPopup })));
+const LoginPage = lazy(() => loadLoginPage().then(module => ({ default: module.LoginPage })));
+const RegistrationSuccess = lazy(() => loadRegistrationSuccess().then(module => ({ default: module.RegistrationSuccess })));
+const EmailVerification = lazy(() => loadEmailVerification().then(module => ({ default: module.EmailVerification })));
+const EmailNotVerified = lazy(() => loadEmailNotVerified().then(module => ({ default: module.EmailNotVerified })));
+const AuthConfirm = lazy(() => loadAuthConfirm().then(module => ({ default: module.AuthConfirm })));
+const Notifications = lazy(() => loadNotifications().then(module => ({ default: module.Notifications })));
+const Maintenance = lazy(() => loadMaintenance().then(module => ({ default: module.Maintenance })));
+const NavBefore = lazy(() => loadNavBefore());
+const NavAfter = lazy(() => loadNavAfter());
+
+const publicRoutePreloaders = [loadAbout, loadContact, loadDonate, loadSearch, loadLoginPage, loadTerms, loadPrivacy];
+const signedInRoutePreloaders = [loadDashboard, loadNotifications, loadSettings, loadPhotos, loadEventDetails, loadUserProfile];
 import { useAuth } from "./context/AuthContext";
 import { SearchAndUserEventsDataContextProvider } from './context/SearchAndUserEventsDataContext';
 import { AutoCompleteDataContextProvider } from './context/AutoCompleteDataContext';
@@ -38,7 +68,6 @@ function App() {
   const { user, profiledata, justLoggedIn } = useAuth();
   const [openLogin, setOpenLogin] = useState(false);
   const [openSignup, setOpenSignup] = useState(false);
-  const [showInitialLoading, setShowInitialLoading] = useState(false);
 
   const [theme, _setTheme] = useState("dark");
 
@@ -65,19 +94,35 @@ function App() {
     root.classList.add(theme);
   }, [theme]);
 
-  // Show brief loading after login, but don't block the app
   useEffect(() => {
-    if (user && !profiledata) {
-      setShowInitialLoading(true);
-      const timer = setTimeout(() => {
-        setShowInitialLoading(false);
-      }, 2000); // 2 seconds
-
-      return () => clearTimeout(timer);
-    } else {
-      setShowInitialLoading(false);
+    const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    if (connection?.saveData) {
+      return undefined;
     }
-  }, [user, profiledata]);
+
+    const preloaders = user
+      ? [...signedInRoutePreloaders, loadNavAfter, loadTermsPopup]
+      : [...publicRoutePreloaders, loadNavBefore, loadRegistrationSuccess, loadForgotPassword, loadEmailVerification, loadEmailNotVerified, loadAuthConfirm];
+
+    const warmRoutes = () => {
+      preloaders.forEach((preload) => {
+        preload().catch(() => {
+          // Ignore opportunistic prefetch failures.
+        });
+      });
+    };
+
+    let idleHandle;
+    let timeoutHandle;
+
+    if ("requestIdleCallback" in window) {
+      idleHandle = window.requestIdleCallback(warmRoutes, { timeout: 1200 });
+      return () => window.cancelIdleCallback(idleHandle);
+    }
+
+    timeoutHandle = window.setTimeout(warmRoutes, 600);
+    return () => window.clearTimeout(timeoutHandle);
+  }, [user]);
 
   // If maintenance mode is enabled, show only the maintenance page
   if (isMaintenanceMode) {
@@ -150,17 +195,6 @@ function App() {
           <InternetStatusBanner />
           <GlobalLoadingSpinner />
           <SearchAndUserEventsDataContextProvider>
-          {showInitialLoading ? (
-            <div className="fixed inset-0 z-9999 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-              <div className="flex flex-col items-center justify-center space-y-4 p-8 bg-background/90 rounded-2xl shadow-2xl border border-border/50">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-                <p className="text-lg font-medium text-foreground animate-pulse">
-                  Loading your profile...
-                </p>
-              </div>
-            </div>
-          ) : null}
-
           <>
             <Suspense fallback={null}>
               {user ?
