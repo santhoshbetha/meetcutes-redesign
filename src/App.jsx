@@ -24,8 +24,8 @@ const EmailNotVerified = lazy(() => import("@/pages/auth/EmailNotVerified").then
 const AuthConfirm = lazy(() => import("@/pages/auth/AuthConfirm").then(module => ({ default: module.AuthConfirm })));
 const Notifications = lazy(() => import("@/pages/dashboard/Notifications").then(module => ({ default: module.Notifications })));
 const Maintenance = lazy(() => import("@/pages/Maintenance").then(module => ({ default: module.Maintenance })));
-import NavBefore from "@/components/NavBefore";
-import NavAfter from "@/components/NavAfter";
+const NavBefore = lazy(() => import("@/components/NavBefore"));
+const NavAfter = lazy(() => import("@/components/NavAfter"));
 import { useAuth } from "./context/AuthContext";
 import { SearchAndUserEventsDataContextProvider } from './context/SearchAndUserEventsDataContext';
 import { AutoCompleteDataContextProvider } from './context/AutoCompleteDataContext';
@@ -162,15 +162,17 @@ function App() {
           ) : null}
 
           <>
-            {user ?
-              <NavAfter /> :
-              <NavBefore
-                openLogin={openLogin}
-                setOpenLogin={setOpenLogin}
-                openSignup={openSignup}
-                setOpenSignup={setOpenSignup}
-              />
-            }
+            <Suspense fallback={null}>
+              {user ?
+                <NavAfter /> :
+                <NavBefore
+                  openLogin={openLogin}
+                  setOpenLogin={setOpenLogin}
+                  openSignup={openSignup}
+                  setOpenSignup={setOpenSignup}
+                />
+              }
+            </Suspense>
 
             <Suspense fallback={
               <div className="fixed inset-0 z-9999 flex items-center justify-center bg-black/50 backdrop-blur-sm">
@@ -215,7 +217,9 @@ function App() {
             
             {/* Terms Popup - shows after login if terms not accepted */}
             {user && profiledata && justLoggedIn && profiledata.termsaccepted == false && (
-              <TermsPopup />
+              <Suspense fallback={null}>
+                <TermsPopup />
+              </Suspense>
             )}
           </>
           </SearchAndUserEventsDataContextProvider>

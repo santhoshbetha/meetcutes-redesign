@@ -1,13 +1,7 @@
-import { useRef, useState, useEffect, useContext, useCallback } from "react";
+import { lazy, Suspense, useRef, useState, useEffect, useContext, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { UsersSearch } from "./UsersSearch";
 import { SearchAndUserEventsDataContext } from '@/context/SearchAndUserEventsDataContext';
 import { AutoCompleteDataContext } from '@/context/AutoCompleteDataContext';
-import { UserEventsMain } from "./UserEvents/UserEventsMain";
-import { Profile } from "./Profile";
-import { EventsSearch } from "./EventsSearch";
-import { Settings } from "../Settings";
-import { Photos } from "../Photos";
 import { useAuth } from "../../context/AuthContext";
 import { isObjEmpty } from "../../utils/util";
 import { updateUserInfo, logoutUser } from "../../services/user.service";
@@ -33,6 +27,22 @@ import {
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { MeetCutesSpinner } from '@/components/ui/MeetCutesSpinner';
+
+const UsersSearch = lazy(() => import("./UsersSearch").then((module) => ({ default: module.UsersSearch })));
+const UserEventsMain = lazy(() => import("./UserEvents/UserEventsMain").then((module) => ({ default: module.UserEventsMain })));
+const Profile = lazy(() => import("./Profile").then((module) => ({ default: module.Profile })));
+const EventsSearch = lazy(() => import("./EventsSearch").then((module) => ({ default: module.EventsSearch })));
+const Settings = lazy(() => import("../Settings").then((module) => ({ default: module.Settings })));
+const Photos = lazy(() => import("../Photos").then((module) => ({ default: module.Photos })));
+
+const DashboardTabFallback = () => (
+  <div className="flex min-h-[40vh] items-center justify-center px-4 py-12">
+    <div className="text-center">
+      <MeetCutesSpinner size="large" />
+      <p className="mt-4 text-sm text-muted-foreground">Loading section...</p>
+    </div>
+  </div>
+);
 
 export function Dashboard() {
   const {user, profiledata, profileLoading, setProfiledata, userSession} = useAuth();
@@ -355,53 +365,55 @@ export function Dashboard() {
 
         {/* Content Area */}
         <main className="flex-1 overflow-auto lg:pb-0 pb-20">
-          {activeTab === "search" ? (
-            <EventsSearch
-              profiledata={profiledata}
-              userhandle={profiledata?.userhandle}
-              latitude={profiledata?.latitude}
-              longitude={profiledata?.longitude}
-              questionairevaluesset={profiledata?.questionairevaluesset}
-              userstate={profiledata?.userstate}
-              onetimepaymentrequired={profiledata?.onetimefeesrequired && !profiledata?.onetimefeespaid}
-            />
-          ) : activeTab === "events" ? (
-            <UserEventsMain
-              profiledata={profiledata}
-              userhandle={profiledata?.userhandle}
-              latitude={profiledata?.latitude}
-              longitude={profiledata?.longitude}
-              questionairevaluesset={profiledata?.questionairevaluesset}
-              userstate={profiledata?.userstate}
-              onetimepaymentrequired={profiledata?.onetimefeesrequired && !profiledata?.onetimefeespaid}
-            />
-          ) : activeTab === "users" ? (
-            <UsersSearch
-              user={user}
-              userhandle={profiledata?.userhandle}
-              gender={profiledata?.gender}
-              latitude={profiledata?.latitude}
-              longitude={profiledata?.longitude}
-              questionairevaluesset={profiledata?.questionairevaluesset}
-              userstate={profiledata?.userstate}
-              onetimepaymentrequired={profiledata?.onetimefeesrequired && !profiledata?.onetimefeespaid}
-            />
-          ) : activeTab === "photos" ? (
-            <Photos />
-          ) : activeTab === "profile" ? (
-            <Profile />
-          ) : activeTab === "settings" ? (
-            <Settings />
-          ) : (
-            <div className="max-w-400 mx-auto px-4 md:px-8 py-8 md:py-12">
-              <h1 className="text-2xl md:text-3xl font-bold mb-6">
-                {activeTab === "search" ? "Search Events" : "Search Users"}
-              </h1>
-              <p className="text-muted-foreground">
-                This page is under construction.
-              </p>
-            </div>
-          )}
+          <Suspense fallback={<DashboardTabFallback />}>
+            {activeTab === "search" ? (
+              <EventsSearch
+                profiledata={profiledata}
+                userhandle={profiledata?.userhandle}
+                latitude={profiledata?.latitude}
+                longitude={profiledata?.longitude}
+                questionairevaluesset={profiledata?.questionairevaluesset}
+                userstate={profiledata?.userstate}
+                onetimepaymentrequired={profiledata?.onetimefeesrequired && !profiledata?.onetimefeespaid}
+              />
+            ) : activeTab === "events" ? (
+              <UserEventsMain
+                profiledata={profiledata}
+                userhandle={profiledata?.userhandle}
+                latitude={profiledata?.latitude}
+                longitude={profiledata?.longitude}
+                questionairevaluesset={profiledata?.questionairevaluesset}
+                userstate={profiledata?.userstate}
+                onetimepaymentrequired={profiledata?.onetimefeesrequired && !profiledata?.onetimefeespaid}
+              />
+            ) : activeTab === "users" ? (
+              <UsersSearch
+                user={user}
+                userhandle={profiledata?.userhandle}
+                gender={profiledata?.gender}
+                latitude={profiledata?.latitude}
+                longitude={profiledata?.longitude}
+                questionairevaluesset={profiledata?.questionairevaluesset}
+                userstate={profiledata?.userstate}
+                onetimepaymentrequired={profiledata?.onetimefeesrequired && !profiledata?.onetimefeespaid}
+              />
+            ) : activeTab === "photos" ? (
+              <Photos />
+            ) : activeTab === "profile" ? (
+              <Profile />
+            ) : activeTab === "settings" ? (
+              <Settings />
+            ) : (
+              <div className="max-w-400 mx-auto px-4 md:px-8 py-8 md:py-12">
+                <h1 className="text-2xl md:text-3xl font-bold mb-6">
+                  {activeTab === "search" ? "Search Events" : "Search Users"}
+                </h1>
+                <p className="text-muted-foreground">
+                  This page is under construction.
+                </p>
+              </div>
+            )}
+          </Suspense>
         </main>
       </div>
 

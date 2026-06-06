@@ -48,6 +48,67 @@ To return to normal operation:
 1. Set `VITE_MAINTENANCE_MODE=false` or remove/comment out the variable
 2. Restart the development server or rebuild the application
 
+## Cloudflare Deployment With Wrangler
+
+This app can be deployed to Cloudflare as a static-assets Worker using Wrangler. The app uses `BrowserRouter`, so the Wrangler config includes SPA fallback handling for deep links such as `/notifications` or `/user/:userid`.
+
+### 1. Prepare environment variables
+
+Create or update your local `.env` file using `.env.example` as the template.
+
+Required variables:
+
+- `VITE_SUPABASE_URL`
+- `VITE_SUPABASE_KEY`
+- `VITE_SITE_URL`
+- `VITE_REACT_APP_GEOAPIFY_API_KEY`
+
+Recommended for Cloudflare:
+
+- Set `VITE_SITE_URL` to your final Cloudflare URL, for example `https://meetcutes.your-subdomain.workers.dev`
+
+### 2. Authenticate Wrangler
+
+```bash
+npm run cf:whoami
+```
+
+If you are not logged in yet, run:
+
+```bash
+npx wrangler login
+```
+
+### 3. Preview locally with Cloudflare
+
+```bash
+npm run cf:preview
+```
+
+This builds the Vite app and serves it through Wrangler using the config in `wrangler.toml`.
+
+### 4. Deploy
+
+```bash
+npm run cf:deploy
+```
+
+That command:
+
+- builds the app into `dist`
+- deploys the built assets with `wrangler deploy`
+- enables SPA fallback so client-side routes work after refresh
+
+### 5. Optional custom domain
+
+After the first deployment, you can attach a custom domain from the Cloudflare dashboard or extend `wrangler.toml` with routes for a zone you control.
+
+### Notes
+
+- `public/sw.js` is deployed as a static asset and will continue to work in production.
+- Because this app is built by Vite, all `VITE_*` values must exist before running the build command.
+- If you change `VITE_SITE_URL`, rebuild and redeploy so auth redirect URLs stay correct.
+
 ## Expanding the ESLint configuration
 
 If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.

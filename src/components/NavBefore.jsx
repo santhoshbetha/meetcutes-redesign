@@ -1,10 +1,19 @@
-import { useState } from "react";
+import { Suspense, lazy, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
-import { Login } from "@/pages/auth/Login";
-import { Signup } from "@/pages/auth/Signup";
 import { Menu, X } from "lucide-react";
+
+const Login = lazy(() =>
+  import("@/pages/auth/Login").then((module) => ({ default: module.Login })),
+);
+const Signup = lazy(() =>
+  import("@/pages/auth/Signup").then((module) => ({ default: module.Signup })),
+);
+
+const AuthDialogFallback = () => (
+  <div className="p-6 text-sm text-muted-foreground">Loading...</div>
+);
 
 const NavBefore = ({ openLogin, setOpenLogin, openSignup, setOpenSignup }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -51,13 +60,21 @@ const NavBefore = ({ openLogin, setOpenLogin, openSignup, setOpenSignup }) => {
                 Login
               </Button>
             </DialogTrigger>
-            <Login setOpenLogin={setOpenLogin} setOpenSignup={setOpenSignup} />
+            {openLogin && (
+              <Suspense fallback={<AuthDialogFallback />}>
+                <Login setOpenLogin={setOpenLogin} setOpenSignup={setOpenSignup} />
+              </Suspense>
+            )}
           </Dialog>
           <Dialog open={openSignup} onOpenChange={setOpenSignup}>
             <DialogTrigger asChild>
               <Button>Signup</Button>
             </DialogTrigger>
-            <Signup setOpenSignup={setOpenSignup} setOpenLogin={setOpenLogin} />
+            {openSignup && (
+              <Suspense fallback={<AuthDialogFallback />}>
+                <Signup setOpenSignup={setOpenSignup} setOpenLogin={setOpenLogin} />
+              </Suspense>
+            )}
           </Dialog>
         </div>
 
@@ -103,7 +120,11 @@ const NavBefore = ({ openLogin, setOpenLogin, openSignup, setOpenSignup }) => {
                   Signup
                 </Button>
               </DialogTrigger>
-              <Signup setOpenSignup={setOpenSignup} setOpenLogin={setOpenLogin} />
+              {openSignup && (
+                <Suspense fallback={<AuthDialogFallback />}>
+                  <Signup setOpenSignup={setOpenSignup} setOpenLogin={setOpenLogin} />
+                </Suspense>
+              )}
             </Dialog>
             </div>
           </div>

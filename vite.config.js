@@ -15,7 +15,11 @@ export default defineConfig({
         assetFileNames: 'assets/[name]-[hash].[ext]',
         manualChunks: {
           vendor: ['react', 'react-dom'],
-          ui: ['lucide-react', '@radix-ui/react-dialog', '@radix-ui/react-popover']
+          platform: ['react-router-dom', '@tanstack/react-query', '@supabase/supabase-js', 'react-secure-storage'],
+          ui: ['lucide-react', '@radix-ui/react-dialog', '@radix-ui/react-popover', 'react-day-picker', 'sonner'],
+          forms: ['formik', 'yup'],
+          dates: ['dayjs', 'moment'],
+          maps: ['@geoapify/geocoder-autocomplete', '@geoapify/react-geocoder-autocomplete']
         }
       }
     }
