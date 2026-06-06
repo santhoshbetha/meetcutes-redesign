@@ -114,7 +114,7 @@ export function Privacy() {
                 <h3 className="text-lg font-medium text-foreground mb-2">Data Access & Deletion</h3>
                 <p className="text-muted-foreground">
                   You can request to view, update, or delete your personal information at any time. 
-                  Contact us at contact@meetcutes.us to make these requests.
+                  Contact us at hello@meetcutes.us to make these requests.
                 </p>
               </div>
               <div>
@@ -156,7 +156,7 @@ export function Privacy() {
             <h2 className="text-2xl font-semibold text-foreground mb-4">Contact Us</h2>
             <p className="text-muted-foreground">
               Questions about this privacy policy? Want to exercise your privacy rights? 
-              Reach out to us at <a href="mailto:contact@meetcutes.us" className="text-primary hover:underline">contact@meetcutes.us</a>
+              Reach out to us at <a href="mailto:hello@meetcutes.us" className="text-primary hover:underline">hello@meetcutes.us</a>
             </p>
           </section>
         </div>

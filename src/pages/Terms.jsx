@@ -163,7 +163,7 @@ export function Terms() {
             <h2 className="text-2xl font-semibold text-foreground mb-4">Contact Us</h2>
             <p className="text-muted-foreground">
               Questions about these terms? Concerns about platform usage? 
-              Reach out to us at <a href="mailto:contact@meetcutes.us" className="text-primary hover:underline">contact@meetcutes.us</a>
+              Reach out to us at <a href="mailto:hello@meetcutes.us" className="text-primary hover:underline">hello@meetcutes.us</a>
             </p>
             <p className="text-muted-foreground mt-2">
               We take reports of violations seriously and will investigate all concerns promptly.

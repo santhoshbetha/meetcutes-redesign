@@ -77,10 +77,10 @@ export function Maintenance() {
             <p className="text-xs text-muted-foreground">
               For urgent inquiries, contact{" "}
               <a
-                href="mailto:support@meetcutes.us"
+                href="mailto:hello@meetcutes.us"
                 className="text-primary hover:text-primary/80 underline"
               >
-                support@meetcutes.us
+                hello@meetcutes.us
               </a>
             </p>
           </div>

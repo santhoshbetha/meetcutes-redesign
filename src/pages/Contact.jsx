@@ -13,7 +13,7 @@ export function Contact() {
       icon: <MessageSquare className="w-6 h-6" />,
       title: "General Inquiries",
       description: "Questions, suggestions, or feedback about MeetCutes",
-      email: "contact@meetcutes.us",
+      email: "hello@meetcutes.us",
       color: "blue"
     },
     {
