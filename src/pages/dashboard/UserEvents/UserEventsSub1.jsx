@@ -1,14 +1,19 @@
-import { useState, useEffect } from "react";
+import { lazy, Suspense, useState, useEffect } from "react";
 import { useRef } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { EventList } from "@/components/EventList";
-import { CreateEvent } from "@/components/CreateEvent";
 import { useUserEvents1 } from "@/hooks/useEvents";
 import { isObjEmpty } from "@/utils/util";
 import { Dialog, DialogTrigger } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
 import { Plus, Sparkles, RefreshCw } from "lucide-react";
+
+const CreateEvent = lazy(() => import("@/components/CreateEvent").then((module) => ({ default: module.CreateEvent })));
+
+const CreateEventFallback = () => (
+  <div className="p-6 text-sm text-muted-foreground">Loading event form...</div>
+);
 
 const delay = ms => new Promise(res => setTimeout(res, ms));
 
@@ -79,7 +84,11 @@ export function UserEventsSub1({profiledata, userhandle, latitude, longitude, er
                 Create Event
               </Button>
             </DialogTrigger>
-            <CreateEvent onClose={() => setCreateEventOpen(false)}/>
+            {createEventOpen && (
+              <Suspense fallback={<CreateEventFallback />}>
+                <CreateEvent onClose={() => setCreateEventOpen(false)}/>
+              </Suspense>
+            )}
           </Dialog>
         </div>
         <Separator />
@@ -103,7 +112,11 @@ export function UserEventsSub1({profiledata, userhandle, latitude, longitude, er
                       Create Your First Event
                     </Button>
                   </DialogTrigger>
-                  <CreateEvent onClose={() => setCreateEventOpen(false)}/>
+                  {createEventOpen && (
+                    <Suspense fallback={<CreateEventFallback />}>
+                      <CreateEvent onClose={() => setCreateEventOpen(false)}/>
+                    </Suspense>
+                  )}
                 </Dialog>
               </CardContent>
             </Card>

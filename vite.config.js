@@ -15,7 +15,10 @@ export default defineConfig({
         assetFileNames: 'assets/[name]-[hash].[ext]',
         manualChunks: {
           vendor: ['react', 'react-dom'],
-          platform: ['react-router-dom', '@tanstack/react-query', '@supabase/supabase-js', 'react-secure-storage'],
+          router: ['react-router-dom'],
+          query: ['@tanstack/react-query'],
+          supabase: ['@supabase/supabase-js'],
+          storage: ['react-secure-storage'],
           ui: ['lucide-react', '@radix-ui/react-dialog', '@radix-ui/react-popover', 'react-day-picker', 'sonner'],
           forms: ['formik', 'yup'],
           dates: ['dayjs', 'moment'],

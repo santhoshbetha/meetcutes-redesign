@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
@@ -32,9 +32,14 @@ import { useAuth } from "@/context/AuthContext";
 import { updateUserInfo, deleteUser } from "@/services/user.service";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { HandleCard } from "@/components/HandleCard";
-import { LocationDialog } from "@/components/LocationDialog";
-import { ChangeLocation } from "@/components/ChangeLocation";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
+
+const LocationDialog = lazy(() => import("@/components/LocationDialog").then((module) => ({ default: module.LocationDialog })));
+const ChangeLocation = lazy(() => import("@/components/ChangeLocation").then((module) => ({ default: module.ChangeLocation })));
+
+const SettingsModalFallback = ({ text = "Loading..." }) => (
+  <div className="p-6 text-sm text-muted-foreground">{text}</div>
+);
 
 export function Settings() {
   const { user, profiledata, setProfiledata, logout } = useAuth();
@@ -454,7 +459,11 @@ export function Settings() {
                             Change Location
                           </Button>
                         </DialogTrigger>
-                        <ChangeLocation onClose={() => setChangeLocationOpen(false)} />
+                        {changeLocationOpen && (
+                          <Suspense fallback={<SettingsModalFallback text="Loading location options..." />}>
+                            <ChangeLocation onClose={() => setChangeLocationOpen(false)} />
+                          </Suspense>
+                        )}
                       </Dialog>
                     </div>
                   </div>
@@ -545,13 +554,17 @@ export function Settings() {
       </Card>
 
       {/* Modals */}
-      <LocationDialog
-        isOpen={isCoordinatesModalOpen}
-        onClose={() => setIsCoordinatesModalOpen(false)}
-        user={user}
-        profiledata={profiledata}
-        setProfiledata={setProfiledata}
-      />
+      {isCoordinatesModalOpen && (
+        <Suspense fallback={<SettingsModalFallback text="Loading coordinates..." />}>
+          <LocationDialog
+            isOpen={isCoordinatesModalOpen}
+            onClose={() => setIsCoordinatesModalOpen(false)}
+            user={user}
+            profiledata={profiledata}
+            setProfiledata={setProfiledata}
+          />
+        </Suspense>
+      )}
       </div>
     </div>
   );

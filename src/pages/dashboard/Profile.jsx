@@ -1,24 +1,27 @@
-import { useState, useEffect } from "react";
+import { lazy, Suspense, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Edit2, Mail, Phone, Settings, Calendar, Eye, Users, ChevronLeft, ChevronRight } from "lucide-react";
 import { FaFacebook, FaInstagram, FaLinkedin } from "react-icons/fa";
-import { LocationDialog } from "@/components/LocationDialog";
-import { ChangeLocation } from "@/components/ChangeLocation";
 import { Dialog, DialogTrigger, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Spinner } from '@/components/ui/Spinner';
 import { Editable } from "@/components/Editable";
 import { HandleCard } from "@/components/HandleCard";
 import { EditableBio } from "@/components/EditableBio";
-import { CreateEvent } from "@/components/CreateEvent";
-import { ImageUploader } from "@/components/ImageUploader";
 import { useAuth } from "@/context/AuthContext";
 import { isObjEmpty } from "@/utils/util";
 import { updateUserInfo } from "@/services/user.service";
 import { uploadImage } from "@/services/image.service";
 import { useOnlineStatus } from '@/hooks/useOnlineStatus';
 import { toast } from "sonner";
+
+const CreateEvent = lazy(() => import("@/components/CreateEvent").then((module) => ({ default: module.CreateEvent })));
+const ImageUploader = lazy(() => import("@/components/ImageUploader").then((module) => ({ default: module.ImageUploader })));
+
+const ProfileModalFallback = ({ text = "Loading..." }) => (
+  <div className="p-6 text-sm text-muted-foreground">{text}</div>
+);
 
 export function Profile() {
   const { user, userSession, profiledata, setProfiledata } = useAuth();
@@ -226,11 +229,13 @@ export function Profile() {
                     onClick={() => setEditingProfileImage(true)}
                   >
                     {editingProfileImage ? (
-                      <ImageUploader
-                        onImageCropped={handleProfileImageCropped}
-                        minimal={true}
-                        className="w-full h-full rounded-full"
-                      />
+                      <Suspense fallback={<ProfileModalFallback text="Loading image editor..." />}>
+                        <ImageUploader
+                          onImageCropped={handleProfileImageCropped}
+                          minimal={true}
+                          className="w-full h-full rounded-full"
+                        />
+                      </Suspense>
                     ) : (
                       <>
                         {profiledata?.images && profiledata.images[0] ? (
@@ -638,7 +643,11 @@ export function Profile() {
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="max-w-4xl max-h-[90vh] p-0">
-                  <CreateEvent onClose={() => setCreateEventOpen(false)} />
+                  {createEventOpen && (
+                    <Suspense fallback={<ProfileModalFallback text="Loading event form..." />}>
+                      <CreateEvent onClose={() => setCreateEventOpen(false)} />
+                    </Suspense>
+                  )}
                 </DialogContent>
               </Dialog>
             </CardContent>

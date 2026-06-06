@@ -1,4 +1,5 @@
 import { createEvent } from "@/services/events.service";
+import supabase from "@/lib/supabase";
 import { toast } from "sonner";
 import secureLocalStorage from "react-secure-storage";
 
@@ -383,16 +384,13 @@ export const handleAuthError = (error) => {
     secureLocalStorage.clear();
     // Note: setSearchUsersData(null) should be called from components that have access to SearchAndUserEventsDataContext
     
-    // Import supabase here to avoid circular dependencies
-    import("@/lib/supabase").then(({ default: supabase }) => {
-      supabase.auth.signOut().then(() => {
-        // Clear local state and redirect
-        window.location.href = '/';
-      }).catch(err => {
-        console.error("Error during auth error logout:", err);
-        // Force redirect even if signOut fails
-        window.location.href = '/';
-      });
+    supabase.auth.signOut().then(() => {
+      // Clear local state and redirect
+      window.location.href = '/';
+    }).catch(err => {
+      console.error("Error during auth error logout:", err);
+      // Force redirect even if signOut fails
+      window.location.href = '/';
     });
     return true; // Indicates auth error was handled
   }
