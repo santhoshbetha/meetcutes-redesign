@@ -24,6 +24,7 @@ export function UserEventsSub2({ profiledata, userhandle, latitude, longitude })
   // Rate-limited refetch: only refetch at most once every 20s when userhandle becomes available
   const lastRefetchRef = useRef(0);
   const [refreshDisabled, setRefreshDisabled] = useState(false);
+  
   useEffect(() => {
     if (typeof refetch !== 'function' || !userhandle) return;
     const now = Date.now();
@@ -38,25 +39,23 @@ export function UserEventsSub2({ profiledata, userhandle, latitude, longitude })
 
   useEffect(() => {
     if (reload == false) {
-        delay(10000).then(async () => {
-            setReload(true)
-        })
+      delay(10000).then(async () => {
+          setReload(true)
+      })
     }
-}, [reload]);
-
-  //console.log("UserEventsSub2 data:", data);
+  }, [reload]);
 
   useEffect(() => {
     if (!isObjEmpty (data)) {
-        for (let key in data) {
-            const distance = haversine(latitude, longitude, data[key].latitude, data[key].longitude);
-            data[key].distance = distance;
-        }
-        //console.log("data here::", data)
+      for (let key in data) {
+          const distance = haversine(latitude, longitude, data[key].latitude, data[key].longitude);
+          data[key].distance = distance;
+      }
+      //console.log("data here::", data)
     }
 
     if (data?.length > 0) {
-        secureLocalStorage.setItem("data" , JSON.stringify(data));
+      secureLocalStorage.setItem("data" , JSON.stringify(data));
     }
   }, [data, latitude, longitude]);
 

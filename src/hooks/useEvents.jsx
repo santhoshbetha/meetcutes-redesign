@@ -23,7 +23,44 @@ import { getAutoCompleteData } from "../services/location.service";
 export const userEvents1QueryKey = () => ["userevents1"];
 export const userEvents2QueryKey = () => ["userevents2"];
 export const eventsSearchQueryKey = () => ["eventssearch"];
-export const notifyEventsQueryKey = () => ["notifyevents"];
+export const notifyEventsQueryKey = (dataIn = {}) => [
+  "notifyevents",
+  dataIn?.lat ?? null,
+  dataIn?.long ?? null,
+  dataIn?.startdate ?? null,
+  dataIn?.enddate ?? null,
+  dataIn?.searchdistance ?? null,
+];
+
+export const getUpcomingEventsSearchParams = (profiledata) => {
+  const today = new Date();
+  const thirtyDaysFromNow = new Date(today);
+  thirtyDaysFromNow.setDate(today.getDate() + 30);
+
+  return {
+    lat: profiledata?.latitude || 40.7128,
+    long: profiledata?.longitude || -74.006,
+    startdate: today.toISOString().split("T")[0],
+    enddate: thirtyDaysFromNow.toISOString().split("T")[0],
+    searchdistance: 80467,
+  };
+};
+
+export const fetchUpcomingEvents = async (dataIn) => {
+  if (isObjEmpty(dataIn?.lat) || isObjEmpty(dataIn?.long)) {
+    return [];
+  }
+
+  const response = await getEventsData(dataIn);
+
+  if (!response?.success || !Array.isArray(response?.data)) {
+    return [];
+  }
+
+  return response.data
+    .sort((a, b) => new Date(a.eventdate) - new Date(b.eventdate))
+    .slice(0, 20);
+};
 
 export function useUserEvents1(dataIn) {
   return useQuery({
@@ -58,19 +95,16 @@ export function useUserEvents2(dataIn) {
 
 export function useNotifyEvents(dataIn) {
   return useQuery({
-    queryKey: notifyEventsQueryKey(),
-    queryFn: async () => {
-      if (!isObjEmpty(dataIn?.lat) && !isObjEmpty(dataIn?.long)) {
-        const response = await getEventsData(dataIn);
-        return response.data || null;
-      }
-    },
+    queryKey: notifyEventsQueryKey(dataIn),
+    queryFn: () => fetchUpcomingEvents(dataIn),
+    enabled: !isObjEmpty(dataIn?.lat) && !isObjEmpty(dataIn?.long),
     //staleTime: 20 * (60 * 1000), // 20 mins
     //cacheTime: 15 * (60 * 1000), // 15 mins
-    refetchInterval: 3 * (60 * 1000), // 3 min
+    refetchInterval: 10 * (60 * 1000), // 10 min
     //refetchOnMount: false
     refetchOnWindowFocus: false,
     refetchOnMount: false,
+    placeholderData: (previousData) => previousData ?? [],
   });
 }
 
@@ -81,7 +115,7 @@ export function useAutoCompleteData(dataIn) {
       const response = await getAutoCompleteData(dataIn);
       return response.data || null;
     },
-    staleTime: 4 * (60 * 1000), // 2 mins
+    staleTime: 4 * (60 * 1000), // 4 mins
     cacheTime: 15 * (60 * 1000), // 15 mins
   });
 }
@@ -330,7 +364,7 @@ export const useUserEvents1Observer = (dataIn) => {
     return () => {
       unsubscribe();
     };
-  }, []);
+  }, [queryClient]);
 
   return {
     ...get_user_events1,
@@ -363,7 +397,7 @@ export const useUserEvents2Observer = (dataIn) => {
     return () => {
       unsubscribe();
     };
-  }, []);
+  }, [queryClient]);
 
   return {
     ...get_user_events2,
@@ -373,17 +407,18 @@ export const useUserEvents2Observer = (dataIn) => {
 
 export const useNotifyEventsObserver = (dataIn) => {
   const get_notify_events2 = useNotifyEvents(dataIn);
+  const queryKey = notifyEventsQueryKey(dataIn);
 
   const queryClient = useQueryClient();
 
   const [notifyEvents, setNotifyEvents] = useState(() => {
-    const data = queryClient.getQueryData(["notifyevents"]);
+    const data = queryClient.getQueryData(queryKey);
     return data ?? [];
   });
 
   useEffect(() => {
     const observer = new QueryObserver(queryClient, {
-      queryKey: ["notifyevents"],
+      queryKey,
       //refetchOnMount: false
     });
 
@@ -396,7 +431,7 @@ export const useNotifyEventsObserver = (dataIn) => {
     return () => {
       unsubscribe();
     };
-  }, []);
+  }, [queryClient, queryKey]);
 
   return {
     ...get_notify_events2,

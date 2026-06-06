@@ -17,6 +17,7 @@ import { successAlert } from "@/services/alert.service";
 import { logoutUser } from "../services/user.service";
 import { useAuth } from "@/context/AuthContext";
 import { SearchAndUserEventsDataContext } from "@/context/SearchAndUserEventsDataContext";
+import { getUpcomingEventsSearchParams, useNotifyEvents } from "@/hooks/useEvents";
 
 const NavAfter = () => {
   const navigate = useNavigate();
@@ -25,6 +26,9 @@ const NavAfter = () => {
   //const {setAutoCompletedata} = useContext(AutoCompleteDataContext);
   const {setSearchUsersData} = useContext(SearchAndUserEventsDataContext);
   const { user, profiledata } = useAuth();
+  const notificationSearchParams = getUpcomingEventsSearchParams(profiledata);
+  const { data: upcomingEvents = [] } = useNotifyEvents(notificationSearchParams);
+  const notificationCount = upcomingEvents.length;
 
   const getInitials = () => {
     if (profiledata?.firstname && profiledata?.lastname) {
@@ -106,9 +110,11 @@ const NavAfter = () => {
           <ThemeToggle />
           <Link to="/notifications" className="relative cursor-pointer group">
             <Bell className="w-6 h-6 text-muted-foreground group-hover:text-foreground transition-colors" />
-            <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-[10px] font-semibold rounded-full w-4 h-4 flex items-center justify-center">
-              10
-            </span>
+            {notificationCount > 0 && (
+              <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-[10px] font-semibold rounded-full min-w-4 h-4 px-1 flex items-center justify-center">
+                {notificationCount > 99 ? "99+" : notificationCount}
+              </span>
+            )}
           </Link>
 
           <Button

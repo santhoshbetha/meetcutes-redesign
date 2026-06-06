@@ -1,64 +1,20 @@
-import { useState, useEffect, useCallback } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Bell, Calendar, MapPin, Clock, Users, ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
-import { getEventsData } from "@/services/events.service";
 import { useAuth } from "@/context/AuthContext";
+import { getUpcomingEventsSearchParams, useNotifyEvents } from "@/hooks/useEvents";
 
 export function Notifications() {
   const { profiledata } = useAuth();
-  const [events, setEvents] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  const fetchUpcomingEvents = useCallback(async () => {
-    try {
-      setLoading(true);
-      // Get current date and next 30 days
-      const today = new Date();
-      const thirtyDaysFromNow = new Date();
-      thirtyDaysFromNow.setDate(today.getDate() + 30);
-
-      const startDate = today.toISOString().split('T')[0];
-      const endDate = thirtyDaysFromNow.toISOString().split('T')[0];
-
-      // Use user's location or default coordinates
-      const latitude = profiledata?.latitude || 40.7128; // Default to NYC
-      const longitude = profiledata?.longitude || -74.0060;
-
-      const searchParams = {
-        lat: latitude,
-        long: longitude,
-        startdate: startDate,
-        enddate: endDate,
-        searchdistance: 80467, // 50 miles in meters
-      };
-
-      const response = await getEventsData(searchParams);
-
-      if (response.success && response.data) {
-        // Sort by date and limit to 20 events
-        const sortedEvents = response.data
-          .sort((a, b) => new Date(a.eventdate) - new Date(b.eventdate))
-          .slice(0, 20);
-        setEvents(sortedEvents);
-      } else {
-        setEvents([]);
-      }
-    } catch (err) {
-      console.error('Error fetching events:', err);
-      setError('Failed to load upcoming events');
-      setEvents([]);
-    } finally {
-      setLoading(false);
-    }
-  }, [profiledata?.latitude, profiledata?.longitude]);
-
-  useEffect(() => {
-    fetchUpcomingEvents();
-  }, [fetchUpcomingEvents]);
+  const notificationSearchParams = getUpcomingEventsSearchParams(profiledata);
+  const {
+    data: events = [],
+    isLoading: loading,
+    error,
+    refetch: fetchUpcomingEvents,
+  } = useNotifyEvents(notificationSearchParams);
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -91,7 +47,7 @@ export function Notifications() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
+    <div className="min-h-screen bg-linear-to-br from-background via-background to-muted/20">
       <div className="max-w-4xl mx-auto px-4 md:px-8 py-4 md:py-6">
         {/* Header */}
         <div className="mb-6">
@@ -136,7 +92,7 @@ export function Notifications() {
                   <Bell className="w-6 h-6 text-destructive" />
                 </div>
                 <h3 className="text-lg font-semibold text-foreground mb-2">Error Loading Events</h3>
-                <p className="text-muted-foreground mb-4">{error}</p>
+                <p className="text-muted-foreground mb-4">{error?.message || 'Failed to load upcoming events'}</p>
                 <Button onClick={fetchUpcomingEvents} variant="outline">
                   Try Again
                 </Button>
@@ -177,7 +133,7 @@ export function Notifications() {
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <div className="flex items-start gap-3">
-                            <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                            <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
                               <Calendar className="w-6 h-6 text-primary" />
                             </div>
                             <div className="flex-1 min-w-0">
