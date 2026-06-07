@@ -154,9 +154,9 @@ export function Notifications() {
                 <p className="text-muted-foreground mb-4">
                   There are no events scheduled in your area within the next 30 days.
                 </p>
-                <Link to="/events">
+                <Link to="/dashboard?tab=search">
                   <Button>
-                    Browse All Events
+                    Search All Events
                   </Button>
                 </Link>
               </CardContent>
