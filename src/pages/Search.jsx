@@ -7,8 +7,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { isObjEmpty } from "../utils/util";
 import { useAuth } from "../context/AuthContext";
 import { searchUser } from "../services/search.service";
-import { Spinner } from "../components/ui/Spinner";
-import { UserCard } from "../components/UserCard";
+import { Spinner } from '@/components/ui/spinner';
+import { UserCard }from "@/components/UserCard";
 import { Search as SearchIcon, Users, AlertCircle, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
 
