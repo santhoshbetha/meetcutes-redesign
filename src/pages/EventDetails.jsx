@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { Clock, Calendar, MapPin, Users, Heart, CheckCircle, AlertCircle, MessageCircle, Send, FileText } from "lucide-react";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { Clock, Calendar, MapPin, Users, Heart, CheckCircle, AlertCircle, MessageCircle, Send, FileText, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -24,6 +24,7 @@ let registeredattendees = [];
 export default function EventDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { userSession, profiledata } = useAuth();
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -83,6 +84,7 @@ export default function EventDetails() {
   ]);
   const [newComment, setNewComment] = useState("");
   const [isPostingComment, setIsPostingComment] = useState(false);
+  const cameFromNotifications = location.state?.from === "/notifications";
 
   useEffect(() => {
     // In a real app, you would fetch the event data from an API
@@ -559,6 +561,17 @@ export default function EventDetails() {
       <div className="max-w-4xl mx-auto px-4 md:px-8 py-6 border-4 border-primary/20 rounded-lg bg-card shadow-lg">
         {/* Header */}
         <div className="mb-8">
+          {cameFromNotifications && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="mb-4"
+              onClick={() => navigate("/notifications")}
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Notifications
+            </Button>
+          )}
           <div className="flex items-start gap-6">
             <div className="text-6xl">{getEventIcon(event?.locationdata?.locationname || event?.name)}</div>
             <div className="flex-1">

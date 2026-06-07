@@ -219,7 +219,10 @@ export function Notifications() {
                           </div>
                         </div>
                         <div className="flex flex-col gap-2 ml-4">
-                          <Link to={`/event/${getEventId(event, index)}`}>
+                          <Link
+                            to={`/event/${getEventId(event, index)}`}
+                            state={{ from: "/notifications" }}
+                          >
                             <Button size="sm" variant="outline">
                               View Details
                             </Button>
