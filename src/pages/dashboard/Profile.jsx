@@ -591,7 +591,7 @@ export function Profile() {
                 </Button>
 
                 <Button
-                  onClick={() => navigate('/preferences')}
+                  onClick={() => navigate('/settings?tab=preferences')}
                   variant="outline"
                   className="w-full justify-start h-12"
                 >

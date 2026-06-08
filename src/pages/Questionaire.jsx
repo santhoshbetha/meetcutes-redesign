@@ -110,6 +110,11 @@ export default function Questionaire() {
     setConfirmPopup(false);
   }
 
+  function handleBackNavigation(e) {
+    e.preventDefault();
+    navigate(-1);
+  }
+
   const clickQuestionaireSubmissionConfirm = async (e) => {
     e.preventDefault();
     setConfirmClick(true);
@@ -209,10 +214,7 @@ export default function Questionaire() {
           <button
             type="button"
             className="text-red-700 rounded bg-transparent border-0 ms-auto"
-            onClick={(e) => {
-              e.preventDefault();
-              navigate(-1);
-            }}
+            onClick={handleBackNavigation}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -226,6 +228,12 @@ export default function Questionaire() {
           </button>
         </div>
         <CardHeader>
+          <div className="mb-4 flex justify-start">
+            <Button type="button" variant="outline" onClick={handleBackNavigation}>
+              <span aria-hidden="true" className="me-2">&larr;</span>
+              <span>Back</span>
+            </Button>
+          </div>
           <CardTitle className="text-2xl">
             Questionnaire
           </CardTitle>
