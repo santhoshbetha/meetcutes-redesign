@@ -1,22 +1,17 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { Clock, Calendar, MapPin, Users, Heart, CheckCircle, AlertCircle, MessageCircle, Send, FileText, ArrowLeft } from "lucide-react";
+import { Clock, Calendar, MapPin, Users, Heart, CheckCircle, AlertCircle, FileText, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useAuth } from "../context/AuthContext";
 import { isObjEmpty } from "../utils/util";
 import { useRegisterToAnEvent, useUnregisterToAnEvent, eventDetailsQueryOptions } from '@/hooks/useEvents'
 import { useSuspenseQuery } from '@tanstack/react-query'
-import { toast } from "sonner";
-
-const delay = ms => new Promise(res => setTimeout(res, ms));
 
 let attendeesdata;
 let registeredattendees = [];
@@ -35,7 +30,7 @@ export default function EventDetails() {
   const { data: eventdata } = useSuspenseQuery(eventDetailsQueryOptions(id));
 
   const [attendeeslistObj, setAttendeeslistObj] = useState({}); // eslint-disable-line no-unused-vars
-  const [attendeesdataObj, setAttendeesdataObj] = useState({}); // eslint-disable-line no-unused-vars
+  const [attendeesdataObj, setAttendeesdataObj] = useState({});
   const [malesCount, setMalesCount] = useState(0);
   const [femalesCount, setFemalesCount] = useState(0);
 
@@ -53,7 +48,7 @@ export default function EventDetails() {
           if (g.startsWith('m')) males += 1;
           else if (g.startsWith('f')) females += 1;
         });
-      } catch (err) {
+      } catch {
         males = 0; females = 0;
       }
       const payload = { attendeeslist: attendeeslist ?? null, attendeesdata: attendeesdata ?? null, males, females, ts: Date.now() };
@@ -66,24 +61,6 @@ export default function EventDetails() {
   const registerToAnEvent = useRegisterToAnEvent();
   const unregisterToAnEvent = useUnregisterToAnEvent();
 
-  const [comments, setComments] = useState([
-    {
-      id: 1,
-      user: "Alice Johnson",
-      avatar: "👩‍💼",
-      text: "This looks like a great event! I'm really excited to meet everyone.",
-      timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
-    },
-    {
-      id: 2,
-      user: "Bob Smith",
-      avatar: "👨‍💻",
-      text: "Will there be any food provided? Just wondering about the logistics.",
-      timestamp: new Date(Date.now() - 1 * 60 * 60 * 1000), // 1 hour ago
-    },
-  ]);
-  const [newComment, setNewComment] = useState("");
-  const [isPostingComment, setIsPostingComment] = useState(false);
   const cameFromNotifications = location.state?.from === "/notifications";
 
   useEffect(() => {
@@ -114,7 +91,7 @@ export default function EventDetails() {
           } else {
             setEvent(eventdata);
           }
-        } catch (e) {
+        } catch {
           setEvent(eventdata);
         }
       } catch (error) {
@@ -170,11 +147,11 @@ export default function EventDetails() {
           try {
             const parsed = detail.attendeesdata ? (Array.isArray(detail.attendeesdata) ? detail.attendeesdata : JSON.parse(detail.attendeesdata)) : null;
             setAttendeesdataObj(parsed);
-          } catch (err) {
+          } catch {
             setAttendeesdataObj(null);
           }
         }
-      } catch (err) {
+      } catch {
         // ignore
       }
     };
@@ -204,18 +181,18 @@ export default function EventDetails() {
           try {
             const ad = parsed.attendeesdata ? (Array.isArray(parsed.attendeesdata) ? parsed.attendeesdata : JSON.parse(parsed.attendeesdata)) : null;
             setAttendeesdataObj(ad);
-          } catch (err) {
+          } catch {
             setAttendeesdataObj(null);
           }
         } else {
           try {
             const ad = parsed.attendeesdata ? (Array.isArray(parsed.attendeesdata) ? parsed.attendeesdata : JSON.parse(parsed.attendeesdata)) : null;
             setAttendeesdataObj(ad);
-          } catch (err) {
+          } catch {
             setAttendeesdataObj(null);
           }
         }
-      } catch (err) {
+      } catch {
         // ignore
       }
     };
@@ -382,11 +359,11 @@ export default function EventDetails() {
             // persist to localStorage so dialog/other tabs can pick up the change
             try {
               saveToLocalStorage(id, payload.attendeeslist, payload.attendeesdata);
-            } catch (e) {
+            } catch {
               // ignore
             }
-          } catch (e) {
-            console.warn('Failed to dispatch event-updated from EventDetails', e);
+          } catch (error) {
+            console.warn('Failed to dispatch event-updated from EventDetails', error);
           }
         }
         setRegistrationMessage("Successfully registered for this event!");
@@ -437,11 +414,11 @@ export default function EventDetails() {
             // persist to localStorage so dialog/other tabs can pick up the change
             try {
               saveToLocalStorage(id, payload.attendeeslist, payload.attendeesdata);
-            } catch (e) {
+            } catch {
               // ignore
             }
-          } catch (e) {
-            console.warn('Failed to dispatch event-updated after unregister in EventDetails', e);
+          } catch (error) {
+            console.warn('Failed to dispatch event-updated after unregister in EventDetails', error);
           }
 
           // Recompute counts
@@ -454,7 +431,7 @@ export default function EventDetails() {
           });
           setMalesCount(males);
           setFemalesCount(females);
-        } catch (e) {
+        } catch {
           // If anything fails, fallback to default counts
           setMalesCount(event?.males || 0);
           setFemalesCount(event?.females || 0);
@@ -468,41 +445,6 @@ export default function EventDetails() {
       setRegistrationMessage("Registration failed. Please try again.");
     } finally {
       setIsRegistering(false);
-    }
-  };
-
-  const handlePostComment = async () => {
-    if (!profiledata?.userhandle) {
-      toast.error("Please log in to post comments");
-      return;
-    }
-
-    if (!newComment.trim()) {
-      toast.error("Please enter a comment");
-      return;
-    }
-
-    setIsPostingComment(true);
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      const comment = {
-        id: comments.length + 1,
-        user: profiledata?.name || profiledata?.userhandle || "Anonymous User",
-        avatar: "👤",
-        text: newComment.trim(),
-        timestamp: new Date(),
-      };
-
-      setComments(prev => [comment, ...prev]);
-      setNewComment("");
-      toast.success("Comment posted successfully!");
-    } catch (error) {
-      console.error("Failed to post comment:", error);
-      toast.error("Failed to post comment. Please try again.");
-    } finally {
-      setIsPostingComment(false);
     }
   };
 
@@ -548,12 +490,12 @@ export default function EventDetails() {
   return (
     <div className="min-h-screen bg-linear-to-br from-background via-background to-muted/20">
       {/* Global Loading Overlay for Operations */}
-      {(isRegistering || isPostingComment) && (
+      {isRegistering && (
         <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
           <div className="text-center">
             <Spinner size="xlarge" className="mb-4" />
             <p className="text-sm font-medium text-muted-foreground">
-              {isRegistering ? (isRegistered ? 'Unregistering from event...' : 'Registering for event...') : 'Posting comment...'}
+              {isRegistered ? 'Unregistering from event...' : 'Registering for event...'}
             </p>
           </div>
         </div>
@@ -758,73 +700,6 @@ export default function EventDetails() {
                   "Join us for a wonderful meetup experience! This is a great opportunity to meet new people, share interests, and create lasting connections. We'll have plenty of activities planned to ensure everyone has a great time. Feel free to bring your enthusiasm and an open mind!"}
               </p>
             </TabsContent>
-
-            {false && (
-            <TabsContent value="discussion" className="mt-6">
-              <div className="space-y-6">
-                {/* Comment Input */}
-                <div className="space-y-4">
-                  <h3 className="text-xl font-bold text-foreground">Join the Discussion</h3>
-                  <div className="space-y-3">
-                    <Textarea
-                      placeholder="Share your thoughts about this event..."
-                      value={newComment}
-                      onChange={(e) => setNewComment(e.target.value)}
-                      className="min-h-25 resize-none"
-                      disabled={isPostingComment}
-                    />
-                    <div className="flex justify-end">
-                      <Button
-                        onClick={handlePostComment}
-                        disabled={isPostingComment || !newComment.trim()}
-                        className="flex items-center gap-2"
-                      >
-                        {isPostingComment ? (
-                          <>
-                            <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-                            Posting...
-                          </>
-                        ) : (
-                          <>
-                            <Send className="w-4 h-4" />
-                            Post Comment
-                          </>
-                        )}
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Comments List */}
-                <div className="space-y-4">
-                  <h4 className="text-lg font-semibold text-foreground">Comments ({comments.length})</h4>
-                  {comments.length === 0 ? (
-                    <div className="text-center py-8 text-muted-foreground">
-                      <MessageCircle className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                      <p>No comments yet. Be the first to share your thoughts!</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-4 max-h-96 overflow-y-auto">
-                      {comments.map((comment) => (
-                        <div key={comment.id} className="flex gap-3 p-4 bg-background/50 rounded-lg border border-border/30">
-                          <div className="text-2xl">{comment.avatar}</div>
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-2">
-                              <span className="font-medium text-foreground">{comment.user}</span>
-                              <span className="text-xs text-muted-foreground">
-                                {comment.timestamp.toLocaleDateString()} at {comment.timestamp.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-                              </span>
-                            </div>
-                            <p className="text-sm text-muted-foreground leading-relaxed">{comment.text}</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </TabsContent>
-            )}
           </Tabs>
         </Card>
       </div>

@@ -121,6 +121,31 @@ export function UsersSearch({ userhandle, gender, latitude, longitude, questiona
     }
   }, [queryError]);
 
+  const normalizeAgeValue = (value, fallback = 21) => {
+    const parsedValue = Number.parseInt(value, 10);
+
+    if (Number.isNaN(parsedValue)) {
+      return fallback;
+    }
+
+    return Math.min(99, Math.max(21, parsedValue));
+  };
+
+  const handleAgeChange = (fieldName) => (e) => {
+    const { value } = e.target;
+
+    if (value === '') {
+      formik.setFieldValue(fieldName, '');
+      return;
+    }
+
+    formik.setFieldValue(fieldName, Number.parseInt(value, 10));
+  };
+
+  const handleAgeBlur = (fieldName, fallback) => () => {
+    formik.setFieldValue(fieldName, normalizeAgeValue(formik.values[fieldName], fallback));
+  };
+
   const formik = useFormik({
     initialValues: {
       searchdistance: 0,
@@ -142,8 +167,8 @@ export function UsersSearch({ userhandle, gender, latitude, longitude, questiona
       
       let searchdata = {
         gender: gender,
-        agefrom: values.agefrom < 21 ? 21 : values.agefrom,
-        ageto: values.ageto,//values.ageto < values.agefrom ? (values.agefrom < 21 ? 21 : values.agefrom) : values.ageto,
+        agefrom: normalizeAgeValue(values.agefrom, 21),
+        ageto: normalizeAgeValue(values.ageto, 21),//values.ageto < values.agefrom ? (values.agefrom < 21 ? 21 : values.agefrom) : values.ageto,
         latitude: latitude,
         longitude: longitude,
         searchdistance: distanceMap.get(values.searchdistance)
@@ -287,9 +312,8 @@ export function UsersSearch({ userhandle, gender, latitude, longitude, questiona
                   min="21"
                   max="99"
                   value={formik.values.agefrom}
-                  onChange={(e) => {
-                    formik.setFieldValue('agefrom', parseInt(e.target.value) || 21);
-                  }}
+                  onChange={handleAgeChange('agefrom')}
+                  onBlur={handleAgeBlur('agefrom', 21)}
                   placeholder="21"
                 />
               </div>
@@ -300,9 +324,8 @@ export function UsersSearch({ userhandle, gender, latitude, longitude, questiona
                   min="21"
                   max="99"
                   value={formik.values.ageto}
-                  onChange={(e) => {
-                    formik.setFieldValue('ageto', parseInt(e.target.value) || 21);
-                  }}
+                  onChange={handleAgeChange('ageto')}
+                  onBlur={handleAgeBlur('ageto', 21)}
                   placeholder="99"
                 />
               </div>
@@ -362,9 +385,8 @@ export function UsersSearch({ userhandle, gender, latitude, longitude, questiona
                   min="21"
                   max="99"
                   value={formik.values.agefrom}
-                  onChange={(e) => {
-                    formik.setFieldValue('agefrom', parseInt(e.target.value) || 21);
-                  }}
+                  onChange={handleAgeChange('agefrom')}
+                  onBlur={handleAgeBlur('agefrom', 21)}
                   placeholder="21"
                   className="h-10"
                 />
@@ -378,9 +400,8 @@ export function UsersSearch({ userhandle, gender, latitude, longitude, questiona
                   min="21"
                   max="99"
                   value={formik.values.ageto}
-                  onChange={(e) => {
-                    formik.setFieldValue('ageto', parseInt(e.target.value) || 21);
-                  }}
+                  onChange={handleAgeChange('ageto')}
+                  onBlur={handleAgeBlur('ageto', 21)}
                   placeholder="99"
                   className="h-10"
                 />

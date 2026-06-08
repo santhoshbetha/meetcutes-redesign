@@ -42,7 +42,7 @@ export default function EventDetailsDialog({ event, onClose, profiledata, loadin
         } else {
           setEventDetails(event);
         }
-      } catch (e) {
+      } catch {
         setEventDetails(event);
       }
     }
@@ -61,7 +61,7 @@ export default function EventDetailsDialog({ event, onClose, profiledata, loadin
         else if (g.startsWith("f")) females += 1;
       });
       return { males, females };
-    } catch (err) {
+    } catch {
       return { males: 0, females: 0 };
     }
   };
@@ -104,7 +104,7 @@ export default function EventDetailsDialog({ event, onClose, profiledata, loadin
       } else {
         setAttendeesdataObj(null);
       }
-    } catch (err) {
+    } catch {
       setAttendeesdataObj(null);
     }
   }, [eventDetails?.attendeesdata]);
@@ -142,7 +142,6 @@ export default function EventDetailsDialog({ event, onClose, profiledata, loadin
         }
 
         if (detail.attendeesdata !== undefined) {
-          const ad = detail.attendeesdata ? (Array.isArray(detail.attendeesdata) ? detail.attendeesdata : JSON.parse(detail.attendeesdata)) : null;
           setEventDetails((prev) => ({ ...prev, attendeesdata: detail.attendeesdata }));
           // if counts provided in detail, use them
           if (detail.males !== undefined && detail.females !== undefined) {
@@ -150,7 +149,7 @@ export default function EventDetailsDialog({ event, onClose, profiledata, loadin
             setFemalesCount(detail.females || 0);
           }
         }
-      } catch (err) {
+      } catch {
         // ignore
       }
     };
@@ -177,7 +176,7 @@ export default function EventDetailsDialog({ event, onClose, profiledata, loadin
           setMalesCount(parsed.males || 0);
           setFemalesCount(parsed.females || 0);
         }
-      } catch (err) {
+      } catch {
         // ignore
       }
     };
@@ -284,11 +283,11 @@ export default function EventDetailsDialog({ event, onClose, profiledata, loadin
             try {
               const counts = computeCountsFromData(attendeesdataParam);
               saveToLocalStorage(eventId, updatedList, JSON.stringify(attendeesdataParam), counts.males, counts.females);
-            } catch (e) {
+            } catch {
               // ignore
             }
-          } catch (e) {
-            console.warn('Failed to dispatch event-updated', e);
+          } catch (error) {
+            console.warn('Failed to dispatch event-updated', error);
           }
         }
         setRegistrationMessage("Successfully registered for this event!");
@@ -336,11 +335,11 @@ export default function EventDetailsDialog({ event, onClose, profiledata, loadin
             try {
               const counts2 = computeCountsFromData(newEvent.attendeesdata);
               saveToLocalStorage(eventId, updatedList, newEvent.attendeesdata, counts2.males, counts2.females);
-            } catch (e) {
+            } catch {
               // ignore
             }
-          } catch (e) {
-            console.warn('Failed to dispatch event-updated', e);
+          } catch (error) {
+            console.warn('Failed to dispatch event-updated', error);
           }
         } catch (e) {
           console.warn('Failed to update local eventDetails after unregister', e);
