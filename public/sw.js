@@ -1,7 +1,6 @@
 // Service Worker for MeetCutes
 // Simplified version to avoid potential issues
 
-const CACHE_NAME = 'meetcutes-v2'; // Updated version to force cache invalidation
 const STATIC_CACHE = 'meetcutes-static-v2';
 const API_CACHE = 'meetcutes-api-v2';
 
@@ -44,6 +43,10 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   const { request } = event;
   const url = new URL(request.url);
+  const isSupabaseRequest = url.origin.includes('supabase');
+  const isSupabaseStorageImage =
+    isSupabaseRequest &&
+    url.pathname.includes('/storage/v1/object/public/');
 
   // Skip non-GET requests and non-HTTP requests
   if (request.method !== 'GET' || !url.protocol.startsWith('http')) {
@@ -75,21 +78,23 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // Cache API responses (Supabase)
-  if (url.origin.includes('supabase')) {
+  // Let image requests bypass the service worker so the browser can fetch the latest object directly.
+  if (isSupabaseStorageImage) {
+    return;
+  }
+
+  // Use network-first for Supabase API responses to avoid stale profile or auth data after login.
+  if (isSupabaseRequest) {
     event.respondWith(
       caches.open(API_CACHE).then(cache => {
-        return cache.match(request).then(response => {
-          if (response) {
-            return response;
-          }
-          return fetch(request).then(response => {
+        return fetch(request)
+          .then(response => {
             if (response.status === 200) {
               cache.put(request, response.clone());
             }
             return response;
-          });
-        });
+          })
+          .catch(() => cache.match(request));
       })
     );
     return;

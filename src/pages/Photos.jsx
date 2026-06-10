@@ -6,31 +6,23 @@ import { useAuth } from '@/context/AuthContext';
 import { updateUserInfo } from '../services/user.service';
 import { useOnlineStatus } from '@/hooks/useOnlineStatus';
 import { ImageUploader } from '@/components/ImageUploader';
-import { ImageLoader } from '@/components/ImageLoader';
 import { Spinner } from '@/components/ui/Spinner';
-import { toast } from "sonner";
+import { toast } from 'sonner';
 import { Separator } from '@/components/ui/separator';
+import { clearAppCaches } from '@/serviceWorkerRegistration';
 import {
   Camera,
-  ImageIcon,
-  Upload,
-  Trash2,
   AlertCircle,
-  CheckCircle,
   X
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Plus, Grid3X3, Loader2 } from 'lucide-react';
+import { Plus, Grid3X3, Loader2, RotateCcw } from 'lucide-react';
 
 const CDNURL = 'https://yrxymkmmfrkrfccmutvr.supabase.co/storage/v1/object/public/meetfirst/images';
 
 //https://www.sammeechward.com/uploading-images-express-and-react
 //https://stackoverflow.com/questions/4109276/how-to-detect-input-type-file-change-for-the-same-file
 //https://jsitor.com/XdnH239VS
-
-function timeout(delay) {
-  return new Promise(res => setTimeout(res, delay));
-}
 
 const IMAGE_NAMES = ['first', 'second', 'third', 'fourth', 'fifth', 'sixth', 'seventh', 'eighth', 'ninth', 'tenth'];
 
@@ -45,13 +37,10 @@ function isObjEmpty(val) {
 export function Photos() {
   const { user, profiledata, setProfiledata } = useAuth();
   const [images, setImages] = useState(Array(10).fill(null));
-  const [numSlots, setNumSlots] = useState(3); // Start with 3 default slots
   const isOnline = useOnlineStatus();
-  let [loadingImages, setLoadingImages] = useState(false);
+  const [loadingImages] = useState(false);
   const [reload, setReload] = useState(false);
-  const [uploading, setUploading] = useState([]);
-  const [deleting, setDeleting] = useState([]);
-  
+  const [clearingCache, setClearingCache] = useState(false);
   const [uploadingSlots, setUploadingSlots] = useState(Array(10).fill(false)); // Track uploading state for each slot
   const [removingSlots, setRemovingSlots] = useState(Array(10).fill(false)); // Track removing state for each slot
   const [removingEmptySlots, setRemovingEmptySlots] = useState(Array(10).fill(false)); // Track removing empty slots state
@@ -80,20 +69,26 @@ export function Photos() {
         // Calculate required slots based on images
         const requiredSlots = Math.max(3, maxIndexWithImage + 1);
 
-        // If visibleSlots is less than required, update it
-        if (visibleSlots < requiredSlots) {
-          const newVisibleSlots = requiredSlots;
-          setVisibleSlots(newVisibleSlots);
-          localStorage.setItem('visibleSlots', newVisibleSlots.toString());
-        }
+        setVisibleSlots(prevVisibleSlots => {
+          if (prevVisibleSlots >= requiredSlots) {
+            return prevVisibleSlots;
+          }
+
+          localStorage.setItem('visibleSlots', requiredSlots.toString());
+          return requiredSlots;
+        });
 
         setReload(false);
       } else {
         // No images, ensure minimum 3 slots
-        if (visibleSlots < 3) {
-          setVisibleSlots(3);
+        setVisibleSlots(prevVisibleSlots => {
+          if (prevVisibleSlots >= 3) {
+            return prevVisibleSlots;
+          }
+
           localStorage.setItem('visibleSlots', '3');
-        }
+          return 3;
+        });
       }
     };
 
@@ -118,8 +113,7 @@ export function Photos() {
     const file = new File([blob], 'cropped-image.jpg', { type: 'image/jpeg' });
 
     // Upload to server
-    const res = await uploadImage(userid, file, imageId, timestamp);
-    //console.log('uploadImage res::', res);
+    await uploadImage(userid, file, imageId, timestamp);
 
     let imagesObj = profiledata?.images ? [...profiledata.images] : [];
 
@@ -177,8 +171,7 @@ export function Photos() {
     });
 
     const imageId = imageIndex + 1;
-    const res = await deleteImage(userid, imageId);
-    //console.log(`handleImageRemove${imageIndex + 1} res::`, res);
+    await deleteImage(userid, imageId);
 
     let imagesObj = profiledata?.images ? [...profiledata.images] : [];
 
@@ -263,6 +256,19 @@ export function Photos() {
     return visibleSlots;
   };
 
+  const handleClearPhotoCache = async () => {
+    setClearingCache(true);
+
+    try {
+      await clearAppCaches();
+      toast.success('Photo cache cleared. Reloading fresh images...');
+      window.location.reload();
+    } catch (error) {
+      toast.error(error?.message || 'Failed to clear cached photos');
+      setClearingCache(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-linear-to-br from-background via-muted/20 to-background">
       {loadingImages && (
@@ -293,6 +299,21 @@ export function Photos() {
                 <p className="text-sm text-muted-foreground">
                   Upload photos to showcase your personality and interests. Start with 3 default slots and add more as needed.
                 </p>
+                <div className="mt-4 flex justify-center">
+                  <Button
+                    onClick={handleClearPhotoCache}
+                    variant="outline"
+                    disabled={clearingCache}
+                    className="rounded-xl"
+                  >
+                    {clearingCache ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <RotateCcw className="mr-2 h-4 w-4" />
+                    )}
+                    Clear Photo Cache
+                  </Button>
+                </div>
               </div>
 
             {/* Photo Grid */}
@@ -406,6 +427,7 @@ export function Photos() {
                       <li>• Avoid group photos as your primary image</li>
                       <li>• Add more photo slots as needed (up to 10 total)</li>
                       <li>• Remove empty extra slots to keep your profile organized</li>
+                      <li>• Use Clear Photo Cache if an updated image still looks stale after login</li>
                     </ul>
                   </div>
                 </div>

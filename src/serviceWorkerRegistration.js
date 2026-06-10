@@ -31,6 +31,51 @@ export default function registerServiceWorker() {
   }
 }
 
+export async function clearAppCaches() {
+  const clearWindowCaches = async () => {
+    if (typeof caches === 'undefined') {
+      return;
+    }
+
+    const cacheNames = await caches.keys();
+    await Promise.all(cacheNames.map(cacheName => caches.delete(cacheName)));
+  };
+
+  if (!('serviceWorker' in navigator)) {
+    await clearWindowCaches();
+    return;
+  }
+
+  const registration = await navigator.serviceWorker.ready;
+
+  if (!registration.active) {
+    await clearWindowCaches();
+    return;
+  }
+
+  await new Promise((resolve, reject) => {
+    const channel = new MessageChannel();
+    const timeoutId = window.setTimeout(() => {
+      reject(new Error('Timed out while clearing cache'));
+    }, 4000);
+
+    channel.port1.onmessage = event => {
+      window.clearTimeout(timeoutId);
+
+      if (event.data?.type === 'CACHE_CLEARED') {
+        resolve();
+        return;
+      }
+
+      reject(new Error(event.data?.error || 'Failed to clear cache'));
+    };
+
+    registration.active.postMessage({ type: 'CLEAR_CACHE' }, [channel.port2]);
+  });
+
+  await clearWindowCaches();
+}
+
 // Utility function to unregister service worker (can be called from browser console)
 export function unregisterServiceWorker() {
   if ('serviceWorker' in navigator) {
