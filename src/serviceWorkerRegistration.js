@@ -4,9 +4,11 @@ export default function registerServiceWorker() {
     return;
   }
 
+  const serviceWorkerUrl = `${import.meta.env.BASE_URL}sw.js`;
+
   // Check if the serviceWorker Object exists in the navigator object
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js')
+    navigator.serviceWorker.register(serviceWorkerUrl)
       .then(registration => {
         console.log('Service Worker registered successfully:', registration);
 

@@ -5,7 +5,7 @@ import react from '@vitejs/plugin-react-swc'
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: './', 
+  base: '/', 
   plugins: [react(), tailwindcss()],
   build: {
     rollupOptions: {
