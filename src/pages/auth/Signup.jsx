@@ -590,6 +590,7 @@ export function Signup({ setOpenSignup, setOpenLogin }) {
                       <SelectItem value="Pacific Islander">Pacific Islander</SelectItem>
                       <SelectItem value="White / Caucasian">White / Caucasian</SelectItem>
                       <SelectItem value="East Indian">East Indian</SelectItem>
+                      <SelectItem value="Mixed Race">Mixed Race</SelectItem>
                     </SelectGroup>
                   </SelectContent>
                 </Select>

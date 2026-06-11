@@ -11,7 +11,7 @@ export const searchUsers = async (searchinput, pageParam = 0, limit = 20) => {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 5000);
 
-  console.log("Search input:", searchinput);
+  //console.log("Search input:", searchinput);
 
   try {
     const gender = searchinput.gender;
@@ -40,14 +40,16 @@ export const searchUsers = async (searchinput, pageParam = 0, limit = 20) => {
       limit: serverLimit, // Server fetches 100 items
     };
 
+    console.log("Search request body:", requestBody);
+
     const { data, error } = await supabase.functions.invoke('search-users', {
       body: requestBody,
       signal: controller.signal
     });
 
-    console.log("Search request body:", requestBody);
-    console.log("Search response data:", data); 
-    console.log("Search response error:", error);
+    //console.log("Search request body:", requestBody);
+    //console.log("Search response data:", data); 
+    //console.log("Search response error:", error);
 
     if (error) {
       return {

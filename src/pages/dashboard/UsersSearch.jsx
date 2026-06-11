@@ -46,6 +46,7 @@ export function UsersSearch({ userhandle, gender, latitude, longitude, questiona
 
   // Form state for search parameters
   const [searchParams, setSearchParams] = useState(null);
+  //console.log("Search params gender:", gender);
 
   // Infinite query for search results
   const {
@@ -494,6 +495,7 @@ export function UsersSearch({ userhandle, gender, latitude, longitude, questiona
                           "Pacific Islander",
                           "White / Caucasian",
                           "East Indian",
+                          "Mixed Race",
                         ].map((ethnicity) => (
                           <div key={ethnicity} className="flex items-center space-x-2">
                             <input
