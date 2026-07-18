@@ -22,6 +22,12 @@ try {
 // Register service worker
 registerServiceWorker();
 
+// Handle chunk loading errors (Vite dynamic import failures)
+window.addEventListener('vite:preloadError', (event) => {
+  console.warn('Vite preload error detected, reloading page:', event);
+  window.location.reload();
+});
+
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <AuthProvider>

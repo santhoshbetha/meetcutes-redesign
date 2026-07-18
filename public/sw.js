@@ -1,8 +1,8 @@
 // Service Worker for MeetCutes
 // Simplified version to avoid potential issues
 
-const STATIC_CACHE = 'meetcutes-static-v2';
-const API_CACHE = 'meetcutes-api-v2';
+const STATIC_CACHE = 'meetcutes-static-v3';
+const API_CACHE = 'meetcutes-api-v3';
 
 // Install event - cache static assets
 self.addEventListener('install', event => {
@@ -53,8 +53,20 @@ self.addEventListener('fetch', event => {
     return;
   }
 
+  // Don't intercept navigation requests (HTML page loads) to ensure they are always fresh
+  if (request.mode === 'navigate') {
+    return;
+  }
+
   // Don't intercept requests for JavaScript, CSS, index.html, and meta.json to avoid caching issues
-  if (request.url.includes('.js') || request.url.includes('.css') || request.url.includes('/assets/') || request.url.includes('meta.json') || request.url.includes('index.html')) {
+  if (
+    request.url.includes('.js') ||
+    request.url.includes('.css') ||
+    request.url.includes('/assets/') ||
+    request.url.includes('meta.json') ||
+    request.url.includes('index.html') ||
+    request.headers.get('accept')?.includes('text/html')
+  ) {
     return; // Let the browser handle these directly
   }
 
