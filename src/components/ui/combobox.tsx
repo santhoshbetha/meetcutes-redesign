@@ -22,6 +22,7 @@ export function Combobox({
   emptyMessage = "No options found.",
   className,
   disabled = false,
+  onOpenChange,
   ...props
 }) {
   const [open, setOpen] = React.useState(false)
@@ -37,7 +38,12 @@ export function Combobox({
   const selectedOption = options.find((option) => option.value === value)
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={open} onOpenChange={(newOpen) => {
+      setOpen(newOpen);
+      if (onOpenChange) {
+        onOpenChange(newOpen);
+      }
+    }}>
       <PopoverTrigger asChild>
         <Button
           variant="outline"

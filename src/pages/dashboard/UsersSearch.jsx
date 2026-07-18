@@ -38,7 +38,6 @@ let distanceMap = new Map([
 ]);
 
 export function UsersSearch({ userhandle, gender, latitude, longitude, questionairevaluesset, userstate, onetimepaymentrequired}) {
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [searchError, setSearchError] = useState(null);
   const {searchUsersData, setSearchUsersData} = useContext(SearchAndUserEventsDataContext);
@@ -438,14 +437,14 @@ export function UsersSearch({ userhandle, gender, latitude, longitude, questiona
       {/* Results Section */}
       <div className="space-y-4">
         {/* Loading Progress Bar */}
-        {(isLoading || isQueryLoading || isFetchingNextPage || isRefetching) && (
+        {(isQueryLoading || isFetchingNextPage || isRefetching) && (
           <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
             <CardContent className="pt-6 pb-6">
               <div className="flex flex-col items-center gap-4">
                 <div className="flex items-center gap-3">
                   <RefreshCw className="w-5 h-5 text-primary animate-spin" />
                   <span className="text-sm font-medium text-foreground">
-                    {isLoading || isQueryLoading ? "Searching for users..." : "Loading more users..."}
+                    {isQueryLoading ? "Searching for users..." : "Loading more users..."}
                   </span>
                 </div>
                 <Progress value={undefined} className="w-full max-w-md" />
@@ -481,7 +480,7 @@ export function UsersSearch({ userhandle, gender, latitude, longitude, questiona
                             type="checkbox"
                             id="all-filter"
                             checked={ethnicityFilter.includes('all')}
-                            onChange={(e) => toggleEthnicityFilter('all')}
+                            onChange={() => toggleEthnicityFilter('all')}
                             className="h-4 w-4"
                           />
                           <Label htmlFor="all-filter">All</Label>

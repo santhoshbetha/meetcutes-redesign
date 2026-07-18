@@ -17,11 +17,11 @@ const CreateEventFallback = () => (
 
 const delay = ms => new Promise(res => setTimeout(res, ms));
 
-export function UserEventsSub1({profiledata, userhandle, latitude, longitude, error }) {
+export function UserEventsSub1({ profiledata, userhandle, latitude, longitude, error }) {
   const [reload, setReload] = useState(true);
   const [createEventOpen, setCreateEventOpen] = useState(false);
-  const { isLoading, error: error1, data, status, refetch } = useUserEvents1({
-      userid: profiledata?.userid
+  const { isLoading, error: error1, data, refetch } = useUserEvents1({
+    userid: profiledata?.userid
   });
 
   // Rate-limited refetch: only refetch at most once every 20s when userid becomes available
@@ -48,7 +48,7 @@ export function UserEventsSub1({profiledata, userhandle, latitude, longitude, er
       })
     }
   }, [reload]);
-  
+
   return (
     <>
       {/* User Profile Dialog */}
@@ -60,10 +60,10 @@ export function UserEventsSub1({profiledata, userhandle, latitude, longitude, er
             <CardTitle>
               <span className="md:text-lg">Events you have created</span>
             </CardTitle>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              disabled={refreshDisabled} 
+            <Button
+              variant="ghost"
+              size="sm"
+              disabled={refreshDisabled}
               onClick={() => {
                 if (typeof refetch === 'function') {
                   lastRefetchRef.current = Date.now();
@@ -86,7 +86,7 @@ export function UserEventsSub1({profiledata, userhandle, latitude, longitude, er
             </DialogTrigger>
             {createEventOpen && (
               <Suspense fallback={<CreateEventFallback />}>
-                <CreateEvent onClose={() => setCreateEventOpen(false)}/>
+                <CreateEvent onClose={() => setCreateEventOpen(false)} />
               </Suspense>
             )}
           </Dialog>
@@ -114,7 +114,7 @@ export function UserEventsSub1({profiledata, userhandle, latitude, longitude, er
                   </DialogTrigger>
                   {createEventOpen && (
                     <Suspense fallback={<CreateEventFallback />}>
-                      <CreateEvent onClose={() => setCreateEventOpen(false)}/>
+                      <CreateEvent onClose={() => setCreateEventOpen(false)} />
                     </Suspense>
                   )}
                 </Dialog>

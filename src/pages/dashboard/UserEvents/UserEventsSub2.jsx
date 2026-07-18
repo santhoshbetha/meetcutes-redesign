@@ -14,7 +14,7 @@ const delay = ms => new Promise(res => setTimeout(res, ms));
 export function UserEventsSub2({ profiledata, userhandle, latitude, longitude }) {
   const navigate = useNavigate();
   const [reload, setReload] = useState(true);
-  const  { isLoading, error, data, status, refetch }  = useUserEvents2({
+  const  { isLoading, error, data, refetch }  = useUserEvents2({
       userhandle: userhandle,
       lat: latitude,
       long: longitude

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import {
   CardContent,
   CardDescription,
@@ -105,7 +105,8 @@ export function Login({ setOpenLogin, setOpenSignup }) {
           <MeetCutesSpinner size="large" />
         </div>
       )}
-      <DialogTitle></DialogTitle>
+      <DialogTitle className="sr-only">Log In to MeetCutes</DialogTitle>
+      <DialogDescription className="sr-only">Log in to your MeetCutes account to see events, view matches, and update your profile.</DialogDescription>
       <CardHeader className="pb-6">
         <div className="flex items-center justify-center mb-4">
           <div className="w-12 h-12 rounded-full bg-linear-to-r from-orange-400 via-red-500 to-pink-500 flex items-center justify-center shadow-lg">

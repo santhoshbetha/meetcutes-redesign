@@ -40,7 +40,7 @@ export function Donate() {
             Help Us Grow
           </h1>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-            MeetCutes operates as a non-profit platform with negative costs. Your support helps us
+            MeetCutes operates as a non-profit platform with minimal operating costs. Your support helps us
             maintain and improve our mission of creating meaningful connections.
           </p>
         </div>

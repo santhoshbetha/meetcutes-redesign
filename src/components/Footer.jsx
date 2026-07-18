@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { Heart, Mail, Phone, MapPin, Twitter, Instagram, Facebook, Youtube } from "lucide-react";
+import { toast } from "sonner";
 
 export default function Footer() {
   return (
@@ -65,7 +66,11 @@ export default function Footer() {
                 Support Us
               </Link>
               <Link
-                to="/blog"
+                to="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  toast.info("Coming soon! Our Blog is currently under development.");
+                }}
                 className="text-muted-foreground hover:text-primary transition-colors duration-300 font-medium hover:translate-x-1 transform"
               >
                 Blog
@@ -81,7 +86,11 @@ export default function Footer() {
             </h4>
             <nav className="flex flex-col space-y-3">
               <Link
-                to="/help"
+                to="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  toast.info("Coming soon! The Help Center is currently under development.");
+                }}
                 className="text-muted-foreground hover:text-primary transition-colors duration-300 font-medium hover:translate-x-1 transform"
               >
                 Help Center
@@ -99,7 +108,11 @@ export default function Footer() {
                 Terms of Service
               </Link>
               <Link
-                to="/safety"
+                to="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  toast.info("Coming soon! Safety Guidelines are currently under development.");
+                }}
                 className="text-muted-foreground hover:text-primary transition-colors duration-300 font-medium hover:translate-x-1 transform"
               >
                 Safety Guidelines
@@ -151,19 +164,31 @@ export default function Footer() {
             </div>
             <div className="flex items-center gap-6">
               <Link
-                to="/security"
+                to="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  toast.info("Coming soon! Security information is currently under development.");
+                }}
                 className="text-muted-foreground hover:text-primary text-sm font-medium transition-colors duration-300"
               >
                 Security
               </Link>
               <Link
-                to="/accessibility"
+                to="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  toast.info("Coming soon! Accessibility details are currently under development.");
+                }}
                 className="text-muted-foreground hover:text-primary text-sm font-medium transition-colors duration-300"
               >
                 Accessibility
               </Link>
               <Link
-                to="/careers"
+                to="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  toast.info("Coming soon! Careers information is currently under development.");
+                }}
                 className="text-muted-foreground hover:text-primary text-sm font-medium transition-colors duration-300"
               >
                 Careers

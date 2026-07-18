@@ -96,18 +96,21 @@ const NavBefore = ({ openLogin, setOpenLogin, openSignup, setOpenSignup }) => {
       {isMenuOpen && (
         <div className="lg:hidden border-t border-border bg-background">
           <div className="px-2 pt-2 pb-3 space-y-1">
-            <Link to="#about" className="block px-3 py-2 text-muted-foreground hover:text-foreground">
+            <Link to="/about" className="block px-3 py-2 text-muted-foreground hover:text-foreground" onClick={() => setIsMenuOpen(false)}>
               About
             </Link>
-            <Link to="#how-it-works" className="block px-3 py-2 text-muted-foreground hover:text-foreground">
+            <Link to="/contact" className="block px-3 py-2 text-muted-foreground hover:text-foreground" onClick={() => setIsMenuOpen(false)}>
               Contact
             </Link>
-            <Link to="#locations" className="block px-3 py-2 text-muted-foreground hover:text-foreground">
+            <Link to="/donate" className="block px-3 py-2 text-muted-foreground hover:text-foreground" onClick={() => setIsMenuOpen(false)}>
               Donate
             </Link>
             <div className="flex space-x-2 px-3 pt-2">
               <Button variant="ghost" size="sm" className="flex-1"
-                onClick={() => setOpenLogin(true)}
+                onClick={() => {
+                  setOpenLogin(true);
+                  setIsMenuOpen(false);
+                }}
               >
                 Login
               </Button>
@@ -115,7 +118,10 @@ const NavBefore = ({ openLogin, setOpenLogin, openSignup, setOpenSignup }) => {
               <Dialog open={openSignup} onOpenChange={setOpenSignup}>
               <DialogTrigger asChild>
                 <Button size="sm" className="flex-1"
-                  onClick={() => setOpenSignup(true)}
+                  onClick={() => {
+                    setOpenSignup(true);
+                    setIsMenuOpen(false);
+                  }}
                 >
                   Signup
                 </Button>

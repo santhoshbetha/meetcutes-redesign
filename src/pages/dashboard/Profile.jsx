@@ -35,24 +35,7 @@ export function Profile() {
   const [change, setChange] = useState(false);
   const [createEventOpen, setCreateEventOpen] = useState(false);
   const [editingProfileImage, setEditingProfileImage] = useState(false);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const isOnline = useOnlineStatus();
-
-  // Filter out null/empty images and ensure we have valid images
-  const validImages = profiledata?.images?.filter(img => img && typeof img === 'string' && img.trim() !== '') || [];
-  const hasImages = validImages.length > 0;
-
-  const nextImage = () => {
-    setCurrentImageIndex((prev) => (prev + 1) % validImages.length);
-  };
-
-  const prevImage = () => {
-    setCurrentImageIndex((prev) => (prev - 1 + validImages.length) % validImages.length);
-  };
-
-  const goToImage = (index) => {
-    setCurrentImageIndex(index);
-  };
 
   //console.log('Profile render', profiledata);
 
@@ -195,7 +178,7 @@ export function Profile() {
         toast.error(res.msg || 'Failed to upload image');
         setEditingProfileImage(false);
       }
-    } catch (error) {
+    } catch {
       toast.error('An error occurred while uploading the image');
       setEditingProfileImage(false);
     }

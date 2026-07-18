@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { useFormik } from "formik";
-import { DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import {
   CardContent,
   CardDescription,
@@ -354,7 +354,8 @@ export function Signup({ setOpenSignup, setOpenLogin }) {
           size="large"
         />
       )}
-      <DialogTitle></DialogTitle>
+      <DialogTitle className="sr-only">Sign Up for MeetCutes</DialogTitle>
+      <DialogDescription className="sr-only">Create your new MeetCutes profile to join local events and make real-life connections.</DialogDescription>
       <ScrollArea className="h-[90vh] w-full">
         <CardHeader className="pb-6 px-8 pt-8">
           <div className="flex items-center justify-center mb-4">
