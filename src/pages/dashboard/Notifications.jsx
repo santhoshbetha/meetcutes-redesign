@@ -236,7 +236,7 @@ export function Notifications() {
 
               {events.length >= 20 && (
                 <div className="text-center pt-4">
-                  <Link to="/events">
+                  <Link to="/dashboard?tab=events">
                     <Button variant="outline">
                       View All Events
                     </Button>
