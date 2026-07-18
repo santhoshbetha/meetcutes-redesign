@@ -147,6 +147,7 @@ export function EventsSearch({
   const resultsRef = useRef(null);
   const [hasScrolledForSearch, setHasScrolledForSearch] = useState(false);
   const [showNoEventsDialog, setShowNoEventsDialog] = useState(false);
+  const [datePopoverOpen, setDatePopoverOpen] = useState(false);
 
   // Utility functions for localStorage persistence
   const saveToStorage = (key, value) => {
@@ -171,6 +172,13 @@ export function EventsSearch({
     Object.values(STORAGE_KEYS).forEach(key => {
       localStorage.removeItem(key);
     });
+  };
+
+  const handleDateSelect = (date) => {
+    if (date) {
+      setSearchDate(date);
+    }
+    setDatePopoverOpen(false);
   };
 
   // Restore search state on component mount
@@ -608,7 +616,7 @@ export function EventsSearch({
                       {!disabledDate && (
                         <div>
                           <Label className="text-sm font-medium">Pick Date</Label>
-                          <Popover>
+                          <Popover open={datePopoverOpen} onOpenChange={setDatePopoverOpen}>
                             <PopoverTrigger asChild>
                               <Button
                                 variant="outline"
@@ -625,7 +633,7 @@ export function EventsSearch({
                               <Calendar
                                 mode="single"
                                 selected={searchDate}
-                                onSelect={setSearchDate}
+                                onSelect={handleDateSelect}
                                 initialFocus
                               />
                             </PopoverContent>
@@ -737,7 +745,7 @@ export function EventsSearch({
                 {!disabledDate && (
                   <div className="space-y-2">
                     <Label className="text-sm font-medium">Pick a Date</Label>
-                    <Popover>
+                    <Popover open={datePopoverOpen} onOpenChange={setDatePopoverOpen}>
                       <PopoverTrigger asChild>
                         <Button
                           variant="outline"
@@ -754,7 +762,7 @@ export function EventsSearch({
                         <Calendar
                           mode="single"
                           selected={searchDate}
-                          onSelect={setSearchDate}
+                          onSelect={handleDateSelect}
                           initialFocus
                         />
                       </PopoverContent>
