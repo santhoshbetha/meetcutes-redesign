@@ -597,7 +597,7 @@ export const registerToAnEvent = async (dataIn) => {
     }
 
     if (dataIn?.registeredattendees?.length > 0) {
-      let colValues = isObjEmpty(dataIn?.registeredattendees)? [] : [...dataIn?.registeredattendees];
+      let colValues = isObjEmpty(dataIn?.registeredattendees) ? [] : [...(dataIn.registeredattendees || [])];
       colValues = [dataIn?.userhandle.toLowerCase(), ...colValues];
 
       let listnew = ["mikehandle", "danielk"];

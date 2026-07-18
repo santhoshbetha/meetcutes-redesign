@@ -16,6 +16,8 @@ import { Formik } from "formik";
 import { Link, useNavigate } from "react-router-dom";
 import usePasswordToggle from "@/hooks/usePasswordToggle";
 import { getUserProfile } from "@/services/user.service";
+import supabase from "@/lib/supabase";
+import secureLocalStorage from "react-secure-storage";
 
 export function LoginPage() {
   const navigate = useNavigate();
