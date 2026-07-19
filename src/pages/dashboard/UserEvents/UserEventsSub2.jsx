@@ -1,122 +1,130 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { isObjEmpty, haversine } from "@/utils/util";
 import { useUserEvents2 } from "@/hooks/useEvents";
 import secureLocalStorage from "react-secure-storage";
 import { Separator } from '@/components/ui/separator';
 import { EventList } from "@/components/EventList";
-import { CalendarIcon, Search, Heart } from "lucide-react";
-
-const delay = ms => new Promise(res => setTimeout(res, ms));
+import { CalendarIcon, Search, Heart, RefreshCw, Loader2, AlertCircle } from "lucide-react";
 
 export function UserEventsSub2({ profiledata, userhandle, latitude, longitude }) {
   const navigate = useNavigate();
-  const [reload, setReload] = useState(true);
-  const  { isLoading, error, data, refetch }  = useUserEvents2({
-      userhandle: userhandle,
-      lat: latitude,
-      long: longitude
-  });
-
-  // Ensure we refetch when this tab mounts (and when userhandle becomes available)
-  // Rate-limited refetch: only refetch at most once every 20s when userhandle becomes available
   const lastRefetchRef = useRef(0);
   const [refreshDisabled, setRefreshDisabled] = useState(false);
-  
+
+  const { isLoading, error, data = [], refetch } = useUserEvents2({
+    userhandle: userhandle,
+    lat: latitude,
+    long: longitude
+  });
+
+  // Ensure we refetch when this tab mounts (rate-limited to 20s)
   useEffect(() => {
     if (typeof refetch !== 'function' || !userhandle) return;
     const now = Date.now();
-    
+
     if (now - lastRefetchRef.current >= 20000) {
       lastRefetchRef.current = now;
       refetch();
-    } else {
-      console.log("UserEventsSub2 refetch skipped due to rate limiting");
     }
   }, [refetch, userhandle]);
 
-  useEffect(() => {
-    if (reload == false) {
-      delay(10000).then(async () => {
-          setReload(true)
-      })
-    }
-  }, [reload]);
+  // Immutable distance calculations + storage persistence sync
+  const processedEvents = useMemo(() => {
+    if (!data || !Array.isArray(data) || data.length === 0) return [];
 
-  useEffect(() => {
-    if (!isObjEmpty (data)) {
-      for (let key in data) {
-          const distance = haversine(latitude, longitude, data[key].latitude, data[key].longitude);
-          data[key].distance = distance;
-      }
-      //console.log("data here::", data)
-    }
+    const computed = data.map((event) => ({
+      ...event,
+      distance: haversine(latitude, longitude, event.latitude, event.longitude)
+    }));
 
-    if (data?.length > 0) {
-      secureLocalStorage.setItem("data" , JSON.stringify(data));
-    }
+    // Local persistence caching layer sync
+    secureLocalStorage.setItem("data", computed);
+    return computed;
   }, [data, latitude, longitude]);
 
+  const handleManualRefresh = () => {
+    if (typeof refetch === 'function' && !refreshDisabled) {
+      lastRefetchRef.current = Date.now();
+      refetch();
+      setRefreshDisabled(true);
+      setTimeout(() => setRefreshDisabled(false), 10000); // 10s cooldown
+    }
+  };
+
   return (
-    <Card className="bg-transparent border-accent border-none shadow-none hover:shadow-none">
-      {isLoading && <p>Loading...</p>}
-      {error && <p>Error: {error.message}</p>}
-      <div className="flex flex-row items-center justify-between md:mx-2 lg:mx-4">
-        <CardTitle>
-          <span className="md:text-lg">Your Upcoming Events</span>
+    <div className="space-y-4">
+      {/* Sub-Header Actions Header Strip */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-1">
+        <CardTitle className="text-base sm:text-lg font-bold tracking-tight text-foreground">
+          Your Upcoming Events
         </CardTitle>
-        <div className="ml-2">
-          <Button variant="outline" disabled={refreshDisabled} onClick={() => {
-            if (typeof refetch === 'function') {
-              lastRefetchRef.current = Date.now();
-              refetch();
-              setRefreshDisabled(true);
-              setTimeout(() => setRefreshDisabled(false), 10000);
-            }
-          }}>
-            Refresh
-          </Button>
-        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={refreshDisabled || isLoading}
+          onClick={handleManualRefresh}
+          className="self-start sm:self-auto bg-card/50 h-9"
+        >
+          <RefreshCw className={`h-3.5 w-3.5 mr-1.5 ${isLoading ? 'animate-spin text-primary' : ''}`} />
+          Refresh
+        </Button>
       </div>
-      <Separator />
-      <CardContent className="space-y-2">
-        {isObjEmpty(data) && (
-          <Card className="mt-3 w-full bg-linear-to-br from-primary/5 via-background to-muted/20 border-2 border-primary/10 shadow-lg backdrop-blur-sm">
-            <CardContent className="pt-8 pb-8 text-center">
-              <div className="w-16 h-16 rounded-full bg-primary/10 mx-auto mb-4 flex items-center justify-center">
-                <CalendarIcon className="w-8 h-8 text-primary" />
+
+      <Separator className="bg-border/60" />
+
+      {/* Main Core Display Workspace */}
+      <div className="space-y-2">
+        {isLoading && processedEvents.length === 0 ? (
+          <div className="py-12 flex flex-col items-center justify-center gap-2 text-sm font-medium text-muted-foreground">
+            <Loader2 className="w-6 h-6 animate-spin text-primary" />
+            <span>Parsing registered events itinerary...</span>
+          </div>
+        ) : error ? (
+          <div className="p-4 rounded-xl border border-destructive/30 bg-destructive/5 text-destructive text-sm flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            <span>Failed to map event registries: {error.message}</span>
+          </div>
+        ) : processedEvents.length === 0 ? (
+          /* Premium Empty Placeholder State Box */
+          <Card className="w-full bg-gradient-to-br from-primary/5 via-background to-muted/20 border border-border/80 shadow-md backdrop-blur-sm animate-fadeIn">
+            <CardContent className="pt-10 pb-10 text-center px-4">
+              <div className="w-14 h-14 rounded-full bg-primary/10 mx-auto mb-4 flex items-center justify-center text-primary">
+                <CalendarIcon className="w-6 h-6" />
               </div>
-              <h3 className="text-xl font-semibold text-foreground mb-2">
+              <h3 className="text-lg font-bold text-foreground mb-1.5">
                 No Upcoming Events Yet
               </h3>
-              <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                Discover amazing events and meetups in your area. Start exploring and register for events that interest you!
+              <p className="text-xs sm:text-sm text-muted-foreground mb-5 max-w-sm mx-auto leading-relaxed">
+                Discover amazing gatherings and meetups in your area. Start exploring and register for modules that interest you!
               </p>
-              <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                <Button className="bg-primary hover:bg-primary/90" onClick={() => navigate('/dashboard?tab=search')}>
-                  <Search className="w-4 h-4 mr-2" />
+              <div className="flex flex-col sm:flex-row gap-2.5 justify-center max-w-xs mx-auto sm:max-w-none">
+                <Button size="sm" className="bg-primary hover:bg-primary/90 text-xs font-bold shadow-md" onClick={() => navigate('/dashboard?tab=search')}>
+                  <Search className="w-3.5 h-3.5 mr-1.5" />
                   Find Events
                 </Button>
-                <Button variant="outline" onClick={() => navigate('/dashboard?tab=users')}>
-                  <Heart className="w-4 h-4 mr-2" />
+                <Button size="sm" variant="outline" className="text-xs font-bold bg-background/50" onClick={() => navigate('/dashboard?tab=users')}>
+                  <Heart className="w-3.5 h-3.5 mr-1.5 text-primary" />
                   Find People
                 </Button>
               </div>
             </CardContent>
           </Card>
+        ) : (
+          /* Rendered Grid Items List Matrix Row */
+          <div className="animate-fadeIn">
+            <EventList
+              events={processedEvents}
+              userhandle={userhandle}
+              userlatitude={latitude}
+              userlongitude={longitude}
+              profiledata={profiledata}
+            />
+          </div>
         )}
-        {!isObjEmpty(data) && (
-          <EventList 
-            events={data}
-            userhandle={userhandle}
-            userlatitude={latitude}
-            userlongitude={longitude}
-            profiledata={profiledata}
-          />
-        )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

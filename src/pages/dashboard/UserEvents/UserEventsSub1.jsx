@@ -1,137 +1,151 @@
-import { lazy, Suspense, useState, useEffect } from "react";
-import { useRef } from "react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { lazy, Suspense, useState, useEffect, useRef } from "react";
+import { Card, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { EventList } from "@/components/EventList";
 import { useUserEvents1 } from "@/hooks/useEvents";
 import { isObjEmpty } from "@/utils/util";
-import { Dialog, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
-import { Plus, Sparkles, RefreshCw } from "lucide-react";
+import { Plus, Sparkles, RefreshCw, Loader2, AlertCircle } from "lucide-react";
 
 const CreateEvent = lazy(() => import("@/components/CreateEvent").then((module) => ({ default: module.CreateEvent })));
 
 const CreateEventFallback = () => (
-  <div className="p-6 text-sm text-muted-foreground">Loading event form...</div>
+  <div className="p-6 text-sm text-center font-medium text-muted-foreground animate-pulse">
+    Loading event form components...
+  </div>
 );
 
-const delay = ms => new Promise(res => setTimeout(res, ms));
-
 export function UserEventsSub1({ profiledata, userhandle, latitude, longitude, error }) {
-  const [reload, setReload] = useState(true);
   const [createEventOpen, setCreateEventOpen] = useState(false);
-  const { isLoading, error: error1, data, refetch } = useUserEvents1({
+  const [refreshDisabled, setRefreshDisabled] = useState(false);
+  const lastRefetchRef = useRef(0);
+
+  const { isLoading, error: queryError, data = [], refetch } = useUserEvents1({
     userid: profiledata?.userid
   });
 
-  // Rate-limited refetch: only refetch at most once every 20s when userid becomes available
-  const lastRefetchRef = useRef(0);
-  const [refreshDisabled, setRefreshDisabled] = useState(false);
-
+  // Automatically fetch layout blocks once userid mounts safely
   useEffect(() => {
     if (typeof refetch !== 'function' || !profiledata?.userid) return;
     const now = Date.now();
     if (now - lastRefetchRef.current >= 20000) {
       lastRefetchRef.current = now;
       refetch();
-    } else {
-      console.log("UserEventsSub1 refetch skipped due to rate limiting");
     }
   }, [refetch, profiledata?.userid]);
 
-  //console.log("UserEventsSub1 data:", data);
-
-  useEffect(() => {
-    if (reload == false) {
-      delay(10000).then(async () => {
-        setReload(true)
-      })
+  const handleManualRefresh = () => {
+    if (typeof refetch === 'function' && !refreshDisabled) {
+      lastRefetchRef.current = Date.now();
+      refetch();
+      setRefreshDisabled(true);
+      setTimeout(() => setRefreshDisabled(false), 10000); // 10s cool-down track
     }
-  }, [reload]);
+  };
 
   return (
-    <>
-      {/* User Profile Dialog */}
-      <Card className="bg-transparent border-accent border-none shadow-none hover:shadow-none">
-        {isLoading && <p>Loading...</p>}
-        {error1 && <p>Error: {error1.message}</p>}
-        <div className="flex flex-row items-center justify-between md:mx-2 lg:mx-4">
-          <div className="flex items-center gap-2">
-            <CardTitle>
-              <span className="md:text-lg">Events you have created</span>
-            </CardTitle>
-            <Button
-              variant="ghost"
-              size="sm"
-              disabled={refreshDisabled}
-              onClick={() => {
-                if (typeof refetch === 'function') {
-                  lastRefetchRef.current = Date.now();
-                  refetch();
-                  setRefreshDisabled(true);
-                  setTimeout(() => setRefreshDisabled(false), 10000);
-                }
-              }}
-              className="h-8 w-8 p-0"
-            >
-              <RefreshCw className="h-4 w-4" />
-            </Button>
-          </div>
-          <Dialog open={createEventOpen} onOpenChange={setCreateEventOpen}>
-            <DialogTrigger asChild>
-              <Button disabled={!!error}>
-                <Plus className="w-4 h-4 mr-2" />
-                Create Event
-              </Button>
-            </DialogTrigger>
-            {createEventOpen && (
-              <Suspense fallback={<CreateEventFallback />}>
-                <CreateEvent onClose={() => setCreateEventOpen(false)} />
-              </Suspense>
-            )}
-          </Dialog>
+    <div className="space-y-4">
+
+      {/* Sub-Header Actions Header Strip */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-1">
+        <div className="flex items-center gap-2">
+          <CardTitle className="text-base sm:text-lg font-bold tracking-tight text-foreground">
+            Events you have created
+          </CardTitle>
+          <Button
+            variant="ghost"
+            size="sm"
+            disabled={refreshDisabled || isLoading}
+            onClick={handleManualRefresh}
+            className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
+            aria-label="Refresh database query rows"
+          >
+            <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin text-primary' : ''}`} />
+          </Button>
         </div>
-        <Separator />
-        <CardContent className="space-y-2">
-          {isObjEmpty(data) && (
-            <Card className="mt-3 w-full bg-linear-to-br from-primary/5 via-background to-muted/20 border-2 border-primary/10 shadow-lg backdrop-blur-sm">
-              <CardContent className="pt-8 pb-8 text-center">
-                <div className="w-16 h-16 rounded-full bg-primary/10 mx-auto mb-4 flex items-center justify-center">
-                  <Plus className="w-8 h-8 text-primary" />
-                </div>
-                <h3 className="text-xl font-semibold text-foreground mb-2">
-                  No Events Created Yet
-                </h3>
-                <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                  Start creating amazing events and connect with people in your community. Your events will appear here once created.
-                </p>
-                <Dialog open={createEventOpen} onOpenChange={setCreateEventOpen}>
-                  <DialogTrigger asChild>
-                    <Button className="bg-primary hover:bg-primary/90" disabled={!!error}>
-                      <Sparkles className="w-4 h-4 mr-2" />
-                      Create Your First Event
-                    </Button>
-                  </DialogTrigger>
-                  {createEventOpen && (
-                    <Suspense fallback={<CreateEventFallback />}>
-                      <CreateEvent onClose={() => setCreateEventOpen(false)} />
-                    </Suspense>
-                  )}
-                </Dialog>
-              </CardContent>
-            </Card>
-          )}
-        </CardContent>
-      </Card>
-      {!isObjEmpty(data) && (
-        <EventList
-          events={data}
-          userhandle={userhandle}
-          userlatitude={latitude}
-          userlongitude={longitude}
-          profiledata={profiledata}
-        />
+
+        {/* Unified Creation Button CTA Trigger */}
+        <Button
+          type="button"
+          onClick={() => setCreateEventOpen(true)}
+          disabled={!!error || isLoading}
+          size="sm"
+          className="self-start sm:self-auto shadow-sm"
+        >
+          <Plus className="w-4 h-4 mr-1.5" />
+          Create Event
+        </Button>
+      </div>
+
+      <Separator className="bg-border/60" />
+
+      {/* Query Communication State Indicators */}
+      {queryError && (
+        <div className="p-4 rounded-xl border border-destructive/30 bg-destructive/5 text-destructive text-sm flex items-center gap-2">
+          <AlertCircle className="w-4 h-4 shrink-0" />
+          <span>Failed to map event registries: {queryError.message}</span>
+        </div>
       )}
-    </>
+
+      {/* Main Core Display Content Switcher */}
+      <div className="space-y-2">
+        {isLoading && data.length === 0 ? (
+          <div className="py-12 flex flex-col items-center justify-center gap-2 text-sm font-medium text-muted-foreground">
+            <Loader2 className="w-6 h-6 animate-spin text-primary" />
+            <span>Parsing organized records...</span>
+          </div>
+        ) : isObjEmpty(data) ? (
+          /* Premium Empty Placeholder State Box */
+          <Card className="w-full bg-gradient-to-br from-primary/5 via-background to-muted/20 border border-border/80 shadow-md backdrop-blur-sm animate-fadeIn">
+            <CardContent className="pt-10 pb-10 text-center px-4">
+              <div className="w-14 h-14 rounded-full bg-primary/10 mx-auto mb-4 flex items-center justify-center text-primary">
+                <Plus className="w-6 h-6" />
+              </div>
+              <h3 className="text-lg font-bold text-foreground mb-1.5">
+                No Events Created Yet
+              </h3>
+              <p className="text-xs sm:text-sm text-muted-foreground mb-5 max-w-sm mx-auto leading-relaxed">
+                Start deploying active meetups to synthesize connection points. Your managed events will populate this workspace area.
+              </p>
+              <Button
+                onClick={() => setCreateEventOpen(true)}
+                className="bg-primary hover:bg-primary/90 text-xs font-bold shadow-md"
+                disabled={!!error}
+              >
+                <Sparkles className="w-3.5 h-3.5 mr-1.5" />
+                Create Your First Event
+              </Button>
+            </CardContent>
+          </Card>
+        ) : (
+          /* Rendered Paginated Grid Items Column */
+          <div className="animate-fadeIn">
+            <EventList
+              events={data}
+              userhandle={userhandle}
+              userlatitude={latitude}
+              userlongitude={longitude}
+              profiledata={profiledata}
+            />
+          </div>
+        )}
+      </div>
+
+      {/* Single Unified Shared Create Event Modal Overlay Structure Context Container */}
+      <Dialog open={createEventOpen} onOpenChange={setCreateEventOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] p-0 overflow-y-auto bg-card border border-border">
+          <div className="sr-only">
+            <DialogTitle>Deploy New Event Manifest Node</DialogTitle>
+            <DialogDescription>Specify operation rules, radius locations, and maximum visitor numbers.</DialogDescription>
+          </div>
+          {createEventOpen && (
+            <Suspense fallback={<CreateEventFallback />}>
+              <CreateEvent onClose={() => setCreateEventOpen(false)} />
+            </Suspense>
+          )}
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 }

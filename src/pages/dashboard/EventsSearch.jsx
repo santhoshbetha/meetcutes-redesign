@@ -251,7 +251,7 @@ export function EventsSearch({
     return infiniteData?.pages?.flat() || [];
   }, [infiniteData?.pages]);
 
-  useEffect (() => {
+  useEffect(() => {
     if (!isObjEmpty(querydata)) {
       // Calculate distances and set search data
       const dataWithDistances = querydata.map(event => ({
@@ -267,9 +267,9 @@ export function EventsSearch({
   useEffect(() => {
     if (searchsuccess.current && !isObjEmpty(searchResults) && resultsRef.current && !hasScrolledForSearch) {
       // Scroll to results section with smooth behavior
-      resultsRef.current.scrollIntoView({ 
-        behavior: 'smooth', 
-        block: 'start' 
+      resultsRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
       });
       setHasScrolledForSearch(true);
     } else if (searchsuccess.current && isObjEmpty(searchResults) && !isRestoredSearch.current) {
@@ -278,24 +278,24 @@ export function EventsSearch({
     }
   }, [searchResults, hasScrolledForSearch]);
 
-  useEffect (() => {
+  useEffect(() => {
     //if (!questionairevaluesset) {
     //  setError("Finish questinaire to start searching")
     //} else
     if (onetimepaymentrequired) {
-        //if (verified) {
-            setError("One time fees required, click on 'SERVICE FEES' button")
-        //}
+      //if (verified) {
+      setError("One time fees required, click on 'SERVICE FEES' button")
+      //}
     } else
-    if (isObjEmpty(userhandle)) {
+      if (isObjEmpty(userhandle)) {
         setError("Set handle to start searching")
-    } else if (isObjEmpty(latitude)) {
+      } else if (isObjEmpty(latitude)) {
         setError("Set co-ordinates to start searching")
-    } else if (userstate != 'active') {
+      } else if (userstate != 'active') {
         setError("Activate your Profile")
-    } else {
+      } else {
         setError("")
-    }
+      }
   }, [userhandle, latitude, questionairevaluesset, userstate]);
 
   const formik = useFormik({
@@ -317,9 +317,9 @@ export function EventsSearch({
       // Scroll to results area immediately when search starts
       setTimeout(() => {
         if (resultsRef.current && !hasScrolledForSearch) {
-          resultsRef.current.scrollIntoView({ 
-            behavior: 'smooth', 
-            block: 'start' 
+          resultsRef.current.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
           });
           setHasScrolledForSearch(true);
         }
@@ -386,17 +386,17 @@ export function EventsSearch({
       const res = await refetch();
 
       if (res.status == "success") {
-          //setSearchResults(res.data);
-          if (res.data.pages[0].length == 0) {
-              setSearchResults([]);
-              setSuccessMessage("Search completed! No events found in your area.");
-          } else {
-              // Don't show success message when events are found to avoid flicker
-              // searchResults will be set by the querydata useEffect
-          }
-      } else {
+        //setSearchResults(res.data);
+        if (res.data.pages[0].length == 0) {
           setSearchResults([]);
-          setSuccessMessage("Search completed, but no events were found.");
+          setSuccessMessage("Search completed! No events found in your area.");
+        } else {
+          // Don't show success message when events are found to avoid flicker
+          // searchResults will be set by the querydata useEffect
+        }
+      } else {
+        setSearchResults([]);
+        setSuccessMessage("Search completed, but no events were found.");
       }
       searchsuccess.current = true;
 
@@ -408,9 +408,9 @@ export function EventsSearch({
       // Scroll to results section immediately after search completes
       setTimeout(() => {
         if (resultsRef.current && !hasScrolledForSearch) {
-          resultsRef.current.scrollIntoView({ 
-            behavior: 'smooth', 
-            block: 'start' 
+          resultsRef.current.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
           });
           setHasScrolledForSearch(true);
         }
@@ -513,11 +513,11 @@ export function EventsSearch({
               </div>
               <Sheet open={open} onOpenChange={setOpen}>
                 <SheetTrigger asChild>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
+                  <Button
+                    variant="outline"
+                    size="sm"
                     className="md:hidden bg-white/50 dark:bg-gray-700/50"
-                  onClick={() => setFormError("")}
+                    onClick={() => setFormError("")}
                   >
                     <SlidersHorizontal className="w-4 h-4 mr-2" />
                     Filters
@@ -826,7 +826,7 @@ export function EventsSearch({
                     </AlertDescription>
                   </Alert>
                 )}
-                <Button 
+                <Button
                   onClick={() => {
                     if (!formik.values.day || !formik.values.searchdistance) {
                       setFormError("Please select both date and distance filters before searching.");
@@ -834,8 +834,8 @@ export function EventsSearch({
                     }
                     setFormError("");
                     formik.handleSubmit();
-                  }} 
-                  className="w-full" 
+                  }}
+                  className="w-full"
                   disabled={isLoading || !!error}
                 >
                   {isLoading ? (
@@ -942,7 +942,7 @@ export function EventsSearch({
               </Button>
             </div>
           )}
-         
+
           {/* Empty State - Hidden when using dialog */}
           {searchsuccess.current && isObjEmpty(searchResults) && (
             <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
@@ -981,7 +981,7 @@ export function EventsSearch({
               <AlertDialogCancel className="w-full sm:w-auto">
                 Close
               </AlertDialogCancel>
-              <AlertDialogAction 
+              <AlertDialogAction
                 onClick={() => setShowNoEventsDialog(false)}
                 className="w-full sm:w-auto"
               >

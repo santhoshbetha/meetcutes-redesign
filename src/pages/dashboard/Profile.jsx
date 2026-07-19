@@ -1,13 +1,14 @@
-import { lazy, Suspense, useState, useEffect } from "react";
+import { lazy, Suspense, useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Edit2, Mail, Phone, Settings, Calendar, Eye, Users, ChevronLeft, ChevronRight } from "lucide-react";
+import { Edit2, Mail, Phone, Settings, Calendar, Eye, Users, ShieldAlert } from "lucide-react";
 import { FaFacebook, FaInstagram, FaLinkedin } from "react-icons/fa";
-import { Dialog, DialogTrigger, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import { Spinner } from '@/components/ui/Spinner';
 import { Editable } from "@/components/Editable";
-import { HandleCard } from "@/components/HandleCard";
 import { EditableBio } from "@/components/EditableBio";
 import { useAuth } from "@/context/AuthContext";
 import { isObjEmpty } from "@/utils/util";
@@ -16,618 +17,444 @@ import { uploadImage } from "@/services/image.service";
 import { useOnlineStatus } from '@/hooks/useOnlineStatus';
 import { toast } from "sonner";
 
+
 const CreateEvent = lazy(() => import("@/components/CreateEvent").then((module) => ({ default: module.CreateEvent })));
 const ImageUploader = lazy(() => import("@/components/ImageUploader").then((module) => ({ default: module.ImageUploader })));
 
-const ProfileModalFallback = ({ text = "Loading..." }) => (
-  <div className="p-6 text-sm text-muted-foreground">{text}</div>
+const ProfileModalFallback = ({ text = "Loading visual component..." }) => (
+  <div className="p-6 text-sm text-center font-medium text-muted-foreground animate-pulse">{text}</div>
 );
 
 export function Profile() {
   const { user, userSession, profiledata, setProfiledata } = useAuth();
-  const [editing, setEditing] = useState(false);
   const navigate = useNavigate();
-  const [phone, setPhone] = useState(isObjEmpty(profiledata?.phonenumber) ? "" : profiledata?.phonenumber);
-  const [facebook, setFacebook] = useState(isObjEmpty(profiledata?.facebook) ? "" : profiledata?.facebook);
-  const [instagram, setInstagram] = useState(isObjEmpty(profiledata?.instagram) ? "" : profiledata?.instagram);
-  const [linkedin, setLinkedIn] = useState(isObjEmpty(profiledata?.linkedin) ? "" : profiledata?.linkedin);
-  const [reload, setReload] = useState(false);
-  const [change, setChange] = useState(false);
-  const [createEventOpen, setCreateEventOpen] = useState(false);
-  const [editingProfileImage, setEditingProfileImage] = useState(false);
   const isOnline = useOnlineStatus();
 
-  //console.log('Profile render', profiledata);
+  // State Declarations
+  const [isSaving, setIsSaving] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [createEventOpen, setCreateEventOpen] = useState(false);
+  const [editingProfileImage, setEditingProfileImage] = useState(false);
 
+  // Field Form Controls
+  const [phone, setPhone] = useState("");
+  const [facebook, setFacebook] = useState("");
+  const [instagram, setInstagram] = useState("");
+  const [linkedin, setLinkedIn] = useState("");
+
+  // Populate form states safely when profile data resolves
   useEffect(() => {
-    if (!isObjEmpty(profiledata) && reload) {
-      setPhone(isObjEmpty(profiledata?.phonenumber) ? "" : profiledata?.phonenumber)
-      setFacebook(isObjEmpty(profiledata?.facebook) ? "" : profiledata?.facebook)
-      setInstagram(isObjEmpty(profiledata?.instagram) ? "" : profiledata?.instagram)
-      setLinkedIn(isObjEmpty(profiledata?.linkedin) ? "" : profiledata?.linkedin)
-      setReload(false)
+    if (!isObjEmpty(profiledata)) {
+      setPhone(profiledata.phonenumber || "");
+      setFacebook(profiledata.facebook || "");
+      setInstagram(profiledata.instagram || "");
+      setLinkedIn(profiledata.linkedin || "");
     }
-  }, [profiledata, reload]);
-  
-  const handlesaveSocials = async (e) => {
-    e.preventDefault()
-    setChange(false)
+  }, [profiledata]);
 
-    var phoneregex = /^\d{10}$/;
-    if (phone.match(phoneregex)) {
-      setEditing(true)
-      if (isOnline) {
-          if (userSession) {
-              const res = await updateUserInfo(user?.id, {
-                  phonenumber: phone,
-                  facebook: facebook,
-                  instagram: instagram,
-                  linkedin: linkedin
-              });
-              if (res.success) {
-                  setProfiledata({...profiledata,
-                      phonenumber: phone,
-                      facebook: facebook,
-                      instagram: instagram,
-                      linkedin: linkedin
-                  });
-                  toast.success('Profile updated successfully!')
-              } else {
-                  toast.error('Something wrong. Try later')
-              }
-              setEditing(false)
-          } else {
-            setEditing(false)
-            toast.error("Error, logout and login again")
-          }
-      } else {
-          setEditing(false)
-          toast.error('You are offline. check your internet connection.')
-      }
+  // Unified Central Change Evaluator
+  const checkUnsavedChanges = (updatedPhone, updatedFb, updatedInsta, updatedLn) => {
+    const isPhoneChanged = String(updatedPhone) !== String(profiledata?.phonenumber || "");
+    const isFbChanged = String(updatedFb) !== String(profiledata?.facebook || "");
+    const isInstaChanged = String(updatedInsta) !== String(profiledata?.instagram || "");
+    const isLnChanged = String(updatedLn) !== String(profiledata?.linkedin || "");
 
-      setEditing(false)
-    } else {
-      setEditing(false)
-      toast.error("invalid phonenumber! try again");
-    }
-    return;
+    setHasUnsavedChanges(isPhoneChanged || isFbChanged || isInstaChanged || isLnChanged);
   };
 
-  async function addbiodata(editdata) {
-      setEditing(true)
-      if (isOnline) {
-          if (userSession) {
-              const res = await updateUserInfo(user?.id, {bio: editdata.bio});
-              if (res.success) {
-                  setProfiledata({...profiledata, bio: editdata.bio});
-                  toast.success('Bio updated successfully!')
-              } else {
-                  toast.error ('Edit Biodata Error.. try again later')
-              }
-              setEditing(false)
-          } else {
-              setEditing(false)
-              toast.error ("Error, logout and login again")
-          }
-      } else {
-          setEditing(false)
-          toast.error('You are offline. check your internet connection.')
-      }
-  }
+  const handleSocialSubmit = async (e) => {
+    if (e) e.preventDefault();
+    setHasUnsavedChanges(false);
 
-  const handleSave = async (val) => {
-      let editdata = {
-        bio: val
-      }
-      if (isOnline) {
-        if (userSession) {
-          // add bio data to database
-          if (String(val) !== String(profiledata?.bio)) {
-              await addbiodata(editdata)
-              setEditing(false)
-          }
-        } else {
-          toast.error ("Error, logout and login again")
-        }
+    const phoneregex = /^\d{10}$/;
+    if (phone && !phone.match(phoneregex)) {
+      toast.error("Invalid phone number! Please ensure it is exactly 10 digits.");
+      return;
+    }
+
+    if (!isOnline) {
+      toast.error('You are currently offline. Please check your network connection.');
+      return;
+    }
+
+    if (!userSession) {
+      toast.error("Session identity expired. Please log out and sign in again.");
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const res = await updateUserInfo(user?.id, {
+        phonenumber: phone,
+        facebook: facebook,
+        instagram: instagram,
+        linkedin: linkedin
+      });
+
+      if (res.success) {
+        setProfiledata({
+          ...profiledata,
+          phonenumber: phone,
+          facebook: facebook,
+          instagram: instagram,
+          linkedin: linkedin
+        });
+        toast.success('Profile contact channels synchronized successfully!');
       } else {
-        toast.error('You are offline. check your internet connection.')
-        return;
+        toast.error(res.msg || 'Failed to update remote directory. Try again later.');
       }
+    } catch (err) {
+      toast.error('An error occurred during communication pipeline negotiation.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleBioSave = async (val) => {
+    if (String(val) === String(profiledata?.bio || "")) return;
+
+    if (!isOnline) {
+      toast.error('Connection state validation failed. Action canceled.');
+      return;
+    }
+
+    if (!userSession) {
+      toast.error("Authentication session token missing.");
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const res = await updateUserInfo(user?.id, { bio: val });
+      if (res.success) {
+        setProfiledata({ ...profiledata, bio: val });
+        toast.success('Biography details saved to data layer.');
+      } else {
+        toast.error('Failed to submit user biography properties.');
+      }
+    } catch (err) {
+      toast.error('Network thread operation rejected.');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleProfileImageCropped = async (blob) => {
     if (!isOnline) {
-      toast.error('You are offline. Check your internet connection');
+      toast.error('Cannot transfer binary blobs while operating offline.');
       return;
     }
 
-    setEditingProfileImage(true);
-
+    setIsSaving(true);
     try {
       const timestamp = Date.now();
-      const file = new File([blob], 'profile-image.jpg', { type: 'image/jpeg' });
-
+      const file = new File([blob], 'avatar.jpg', { type: 'image/jpeg' });
       const res = await uploadImage(profiledata?.userid, file, 1, timestamp);
 
       if (res.success) {
-        let imagesObj = profiledata?.images ? [...profiledata.images] : [];
-
-        // Ensure array has at least 1 slot
-        while (imagesObj.length < 1) {
-          imagesObj.push('');
-        }
-
-        // Update the first image slot
+        const imagesObj = profiledata?.images ? [...profiledata.images] : [];
+        while (imagesObj.length < 1) imagesObj.push('');
         imagesObj[0] = `first?t=${timestamp}`;
 
-        const updateData = { images: imagesObj };
-        const res2 = await updateUserInfo(user?.id, updateData);
+        const res2 = await updateUserInfo(user?.id, { images: imagesObj });
 
         if (res2.success) {
-          setProfiledata({
-            ...profiledata,
-            images: imagesObj,
-          });
+          setProfiledata({ ...profiledata, images: imagesObj });
           setEditingProfileImage(false);
-          toast.success('Profile image updated successfully!');
+          toast.success('Profile avatar updated successfully!');
         } else {
-          toast.error(res2.msg || 'Failed to update profile');
-          setEditingProfileImage(false);
+          toast.error(res2.msg || 'Database reference rewrite rejected.');
         }
       } else {
-        toast.error(res.msg || 'Failed to upload image');
-        setEditingProfileImage(false);
+        toast.error(res.msg || 'Object storage compilation failed.');
       }
-    } catch {
-      toast.error('An error occurred while uploading the image');
-      setEditingProfileImage(false);
+    } catch (err) {
+      toast.error('An unhandled exception occurred during media asset transmission.');
+    } finally {
+      setIsSaving(false);
     }
   };
 
+  // Safe Dynamic Image Fallback Resolution Chain
+  const avatarImageSrc = useMemo(() => {
+    if (profiledata?.images && profiledata.images[0]) {
+      return `https://yrxymkmmfrkrfccmutvr.supabase.co/storage/v1/object/public/meetfirst/images/${profiledata.userid}/${profiledata.images[0]}`;
+    }
+    return "/professional-headshot-of-a-young-man-with-brown-ha.jpg";
+  }, [profiledata]);
+
   return (
-    <div className="min-h-screen bg-linear-to-br from-background via-background to-muted/20">
-      <main className="max-w-[1600px] mx-auto px-4 md:px-8 py-6 md:py-8">
-        {/* Header Section */}
-        <div className="mb-8">
-          <div className="text-center">
-            <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
-              Your Profile
-            </h1>
-            <p className="text-muted-foreground text-lg">
-              Manage your personal information and social connections
-            </p>
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
+      <form onSubmit={handleSocialSubmit} className="max-w-[1600px] mx-auto px-4 md:px-8 py-6 md:py-8 space-y-6">
+
+        {/* Core Profile Context Header */}
+        <div className="text-center py-4">
+          <h1 className="text-3xl md:text-4xl font-black tracking-tight text-foreground mb-1">
+            Your Profile
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            Manage your personal verification tokens and interface presentation hooks
+          </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[350px_1fr] gap-6 md:gap-8">
-          {/* Profile Picture & Basic Info Card */}
-          <Card className="relative overflow-hidden shadow-xl border-2 border-border bg-linear-to-br from-card via-card to-card/95 backdrop-blur-sm h-fit">
-            <div className="absolute inset-0 bg-linear-to-br from-primary/5 via-transparent to-primary/10 pointer-events-none" />
-            <CardContent className="p-6 relative">
-              <div className="text-center">
-                {/* Profile Picture */}
-                <div className="relative w-24 h-24 md:w-28 md:h-28 mx-auto mb-4">
-                  <div 
-                    className="w-full h-full rounded-full overflow-hidden ring-4 ring-primary/20 shadow-2xl cursor-pointer"
-                    onClick={() => setEditingProfileImage(true)}
-                  >
-                    {editingProfileImage ? (
-                      <Suspense fallback={<ProfileModalFallback text="Loading image editor..." />}>
-                        <ImageUploader
-                          onImageCropped={handleProfileImageCropped}
-                          minimal={true}
-                          className="w-full h-full rounded-full"
-                        />
-                      </Suspense>
-                    ) : (
-                      <>
-                        {profiledata?.images && profiledata.images[0] ? (
-                          <img
-                            src={`https://yrxymkmmfrkrfccmutvr.supabase.co/storage/v1/object/public/meetfirst/images/${profiledata.userid}/${profiledata.images[0]}`}
-                            alt="Profile picture"
-                            className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
-                          />
-                        ) : (
-                          <img
-                            src="/professional-headshot-of-a-young-man-with-brown-ha.jpg"
-                            alt="Profile picture"
-                            className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
-                          />
-                        )}
-                      </>
-                    )}
-                  </div>
-                  {!editingProfileImage && (
-                    <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-primary rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-shadow cursor-pointer group" onClick={() => setEditingProfileImage(true)}>
-                      <Edit2 className="w-4 h-4 text-primary-foreground group-hover:scale-110 transition-transform" />
-                    </div>
-                  )}
-                </div>
+        {/* Master Responsive Grid split */}
+        <div className="grid grid-cols-1 lg:grid-cols-[350px_1fr] gap-6 md:gap-8 items-start">
 
-                {/* Name and Location */}
-                <div className="space-y-1">
-                  <h2 className="text-xl md:text-2xl font-bold text-foreground">
-                    {profiledata?.firstname} {profiledata?.lastname}
-                  </h2>
-                  <div className="flex items-center justify-center gap-2 text-muted-foreground">
-                    <div className="w-3 h-3 rounded-full bg-green-500/20 flex items-center justify-center">
-                      <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
-                    </div>
-                    <span className="text-xs font-medium">
-                      {profiledata?.city}, {profiledata?.state}
-                    </span>
-                  </div>
-                  {!isObjEmpty(profiledata?.userhandle) && (
-                    <p className="text-sm font-semibold text-primary">
-                      @{profiledata.userhandle}
-                    </p>
-                  )}
-                </div>
+          {/* LEFT COLUMN: Avatar Summary Node */}
+          <Card className="relative overflow-hidden shadow-xl border border-border bg-gradient-to-br from-card via-card to-card/95 backdrop-blur-sm sticky top-24">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/5 pointer-events-none" />
+            <CardContent className="p-6 space-y-4 text-center">
 
-                {/* Visibility Preference */}
-                <div className="mt-4 pt-4 border-t border-border/50">
-                  <div className="flex items-center justify-center gap-2 text-sm">
-                    {profiledata?.visibilityPreference === 'events-only' && (
-                      <>
-                        <Calendar className="w-4 h-4 text-primary" />
-                        <span className="text-muted-foreground">Events Only</span>
-                      </>
-                    )}
-                    {profiledata?.visibilityPreference === 'online-only' && (
-                      <>
-                        <Users className="w-4 h-4 text-primary" />
-                        <span className="text-muted-foreground">Online Only</span>
-                      </>
-                    )}
-                    {profiledata?.visibilityPreference === 'both' && (
-                      <>
-                        <Eye className="w-4 h-4 text-primary" />
-                        <span className="text-muted-foreground">Visible Everywhere</span>
-                      </>
-                    )}
-                    {(!profiledata?.visibilityPreference || profiledata?.visibilityPreference === '') && (
-                      <>
-                        <Eye className="w-4 h-4 text-primary" />
-                        <span className="text-muted-foreground">Visible Everywhere</span>
-                      </>
-                    )}
-                  </div>
+              {/* Profile Avatar Frame */}
+              <div className="relative w-24 h-24 md:w-28 md:h-28 mx-auto group">
+                <div className="w-full h-full rounded-full overflow-hidden ring-4 ring-primary/10 shadow-xl bg-muted">
+                  <img
+                    src={avatarImageSrc}
+                    alt="Active node graphic reference identifier"
+                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  />
                 </div>
-
-                {/* Quick Stats */}
-                <div className="grid grid-cols-2 gap-3 mt-6 pt-4 border-t border-border/50" hidden>
-                  <div className="text-center">
-                    <div className="text-lg font-bold text-foreground">12</div>
-                    <div className="text-xs text-muted-foreground uppercase tracking-wide">Events Attending</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-lg font-bold text-foreground">28</div>
-                    <div className="text-xs text-muted-foreground uppercase tracking-wide">Events Created</div>
-                  </div>
-                </div>
+                <button
+                  type="button"
+                  onClick={() => setEditingProfileImage(true)}
+                  className="absolute -bottom-1 -right-1 w-8 h-8 bg-primary hover:bg-primary/90 text-primary-foreground rounded-full flex items-center justify-center shadow-md transition-all scale-100 active:scale-95 cursor-pointer"
+                  aria-label="Upload custom image attachment"
+                >
+                  <Edit2 className="w-3.5 h-3.5" />
+                </button>
               </div>
+
+              {/* Identity Descriptions */}
+              <div className="space-y-1">
+                <h2 className="text-xl font-bold tracking-tight text-foreground">
+                  {profiledata?.firstname || "Kollective"} {profiledata?.lastname || "User"}
+                </h2>
+                <div className="flex items-center justify-center gap-1.5 text-xs font-semibold text-muted-foreground">
+                  <span className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_6px_#22c55e]" />
+                  <span>{profiledata?.city || "Unknown Location"}, {profiledata?.state || "NA"}</span>
+                </div>
+                {profiledata?.userhandle && (
+                  <Badge variant="secondary" className="mt-1 font-mono text-xs bg-primary/10 text-primary border-transparent">
+                    @{profiledata.userhandle}
+                  </Badge>
+                )}
+              </div>
+
+              {/* Visibility Preference Mapping Row */}
+              <div className="pt-3 border-t border-border/60 flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                {profiledata?.visibilityPreference === 'events-only' ? (
+                  <><Calendar className="w-3.5 h-3.5 text-primary" /> <span>Events Only</span></>
+                ) : profiledata?.visibilityPreference === 'online-only' ? (
+                  <><Users className="w-3.5 h-3.5 text-primary" /> <span>Online Only</span></>
+                ) : (
+                  <><Eye className="w-3.5 h-3.5 text-primary" /> <span>Both Online and Events</span></>
+                )}
+              </div>
+
             </CardContent>
           </Card>
 
-          {/* Main Profile Information */}
+          {/* RIGHT COLUMN: Detailed Information Stacks */}
           <div className="space-y-6">
-            {/* Contact Information Card */}
-            <Card className="shadow-xl border-2 border-border bg-card/95 backdrop-blur-sm">
-              <CardHeader className="pb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <Mail className="w-5 h-5 text-primary" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-xl">Contact Information</CardTitle>
-                    <p className="text-sm text-muted-foreground">Your contact details and communication preferences</p>
-                  </div>
+
+            {/* Context Card: Contact Information inputs */}
+            <Card className="shadow-lg border border-border bg-card/80 backdrop-blur-md">
+              <CardHeader className="pb-3 flex flex-row items-center gap-3">
+                <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center text-primary"><Mail className="w-4 h-4" /></div>
+                <div>
+                  <CardTitle className="text-base font-bold">Contact Directory</CardTitle>
+                  <p className="text-xs text-muted-foreground">Personal contact routing references</p>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Email */}
-                  <div className="space-y-3">
-                    <label className="text-sm font-semibold text-foreground flex items-center gap-2">
-                      <Mail className="w-4 h-4 text-primary" />
-                      Email Address
-                    </label>
-                    <div className="p-4 bg-muted/30 rounded-xl border border-border/50">
-                      <p className="text-sm text-foreground font-medium break-all">
-                        {profiledata?.email}
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-1">Primary contact email</p>
-                    </div>
+              <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Registered Email</Label>
+                  <div className="p-3 bg-muted/40 rounded-xl border border-border/40 text-sm font-medium text-foreground/80 break-all select-all">
+                    {profiledata?.email || "No secure email set"}
                   </div>
+                </div>
 
-                  {/* Phone */}
-                  <div className="space-y-3">
-                    <label className="text-sm font-semibold text-foreground flex items-center gap-2">
-                      <Phone className="w-4 h-4 text-primary" />
-                      Phone Number
-                      <Edit2 className="w-3 h-3 text-muted-foreground ml-1" />
-                    </label>
-                    <Editable
-                      text={phone}
-                      placeholder="Click to add phone number"
-                      type="input"
-                    >
-                      <input
-                        type="text"
-                        name="phone"
-                        placeholder="Enter your phone number"
-                        value={phone}
-                        onChange={(e) => {
-                          setPhone(e.target.value);
-                        }}
-                        onBlur={() => {
-                          const phoneregex = /^\d{10}$/;
-                          if (phone && !phone.match(phoneregex)) {
-                            toast.error("Invalid phone number! Please enter a 10-digit number");
-                            return;
-                          }
-                          setChange(true);
-                        }}
-                        className="w-full p-4 border border-border/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 bg-background transition-all hover:bg-muted/20 cursor-text"
-                      />
-                    </Editable>
-                  </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-bold uppercase tracking-wide text-muted-foreground flex items-center gap-1">
+                    Phone Link <Edit2 className="w-2.5 h-2.5 text-muted-foreground/60" />
+                  </Label>
+                  <Editable text={phone} placeholder="Assign 10-digit number..." type="input">
+                    <input
+                      type="text"
+                      placeholder="e.g. 5125550199"
+                      value={phone}
+                      onChange={(e) => {
+                        setPhone(e.target.value);
+                        checkUnsavedChanges(e.target.value, facebook, instagram, linkedin);
+                      }}
+                      className="w-full px-3 py-2 border border-border/80 rounded-xl bg-background text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
+                    />
+                  </Editable>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Social Media Card */}
-            <Card className="shadow-xl border-2 border-border bg-card/95 backdrop-blur-sm">
-              <CardHeader className="pb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <FaFacebook className="w-5 h-5 text-primary" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-xl">Social Media</CardTitle>
-                    <p className="text-sm text-muted-foreground">Connect your social profiles and expand your network</p>
-                  </div>
+            {/* Context Card: Social Media Hooks */}
+            <Card className="shadow-lg border border-border bg-card/80 backdrop-blur-md">
+              <CardHeader className="pb-3 flex flex-row items-center gap-3">
+                <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center text-primary"><Users className="w-4 h-4" /></div>
+                <div>
+                  <CardTitle className="text-base font-bold">Social Architecture</CardTitle>
+                  <p className="text-xs text-muted-foreground">Synchronize external media endpoints</p>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {/* Facebook */}
-                  <div className="space-y-3">
-                    <label className="text-sm font-semibold text-foreground flex items-center gap-2">
-                      <FaFacebook className="w-4 h-4 text-blue-600" />
-                      Facebook
-                      <Edit2 className="w-3 h-3 text-muted-foreground ml-1" />
-                    </label>
-                    <Editable
-                      text={facebook}
-                      placeholder="Click to add Facebook"
-                      type="input"
-                    >
-                      <input
-                        type="text"
-                        name="facebook"
-                        placeholder="https://facebook.com/yourprofile"
-                        value={facebook}
-                        onChange={(e) => {
-                          setFacebook(e.target.value);
-                        }}
-                        onBlur={() => setChange(true)}
-                        className="w-full p-4 border border-border/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 bg-background transition-all hover:bg-muted/20 cursor-text"
-                      />
-                    </Editable>
-                  </div>
+              <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
 
-                  {/* Instagram */}
-                  <div className="space-y-3">
-                    <label className="text-sm font-semibold text-foreground flex items-center gap-2">
-                      <FaInstagram className="w-4 h-4 text-pink-600" />
-                      Instagram
-                      <Edit2 className="w-3 h-3 text-muted-foreground ml-1" />
-                    </label>
-                    <Editable
-                      text={instagram}
-                      placeholder="Click to add Instagram"
-                      type="input"
-                    >
-                      <input
-                        type="text"
-                        name="instagram"
-                        placeholder="@yourusername or full URL"
-                        value={instagram}
-                        onChange={(e) => {
-                          setInstagram(e.target.value);
-                        }}
-                        onBlur={() => setChange(true)}
-                        className="w-full p-4 border border-border/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 bg-background transition-all hover:bg-muted/20 cursor-text"
-                      />
-                    </Editable>
-                  </div>
-
-                  {/* LinkedIn */}
-                  <div className="space-y-3">
-                    <label className="text-sm font-semibold text-foreground flex items-center gap-2">
-                      <FaLinkedin className="w-4 h-4 text-blue-700" />
-                      LinkedIn
-                      <Edit2 className="w-3 h-3 text-muted-foreground ml-1" />
-                    </label>
-                    <Editable
-                      text={linkedin}
-                      placeholder="Click to add LinkedIn "
-                      type="input"
-                    >
-                      <input
-                        type="text"
-                        name="linkedin"
-                        placeholder="https://linkedin.com/in/yourprofile"
-                        value={linkedin}
-                        onChange={(e) => {
-                          setLinkedIn(e.target.value);
-                        }}
-                        onBlur={() => setChange(true)}
-                        className="w-full p-4 border border-border/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 bg-background transition-all hover:bg-muted/20 cursor-text"
-                      />
-                    </Editable>
-                  </div>
+                {/* Facebook Handle */}
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-bold uppercase tracking-wide text-muted-foreground flex items-center gap-1.5">
+                    <FaFacebook className="w-3.5 h-3.5 text-blue-600" /> Facebook
+                  </Label>
+                  <Editable text={facebook} placeholder="Link account URL..." type="input">
+                    <input
+                      type="text"
+                      placeholder="Profile address..."
+                      value={facebook}
+                      onChange={(e) => {
+                        setFacebook(e.target.value);
+                        checkUnsavedChanges(phone, e.target.value, instagram, linkedin);
+                      }}
+                      className="w-full px-3 py-2 border border-border/80 rounded-xl bg-background text-sm outline-none focus:border-primary"
+                    />
+                  </Editable>
                 </div>
+
+                {/* Instagram Handle */}
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-bold uppercase tracking-wide text-muted-foreground flex items-center gap-1.5">
+                    <FaInstagram className="w-3.5 h-3.5 text-pink-600" /> Instagram
+                  </Label>
+                  <Editable text={instagram} placeholder="Link handle..." type="input">
+                    <input
+                      type="text"
+                      placeholder="@handle..."
+                      value={instagram}
+                      onChange={(e) => {
+                        setInstagram(e.target.value);
+                        checkUnsavedChanges(phone, facebook, e.target.value, linkedin);
+                      }}
+                      className="w-full px-3 py-2 border border-border/80 rounded-xl bg-background text-sm outline-none focus:border-primary"
+                    />
+                  </Editable>
+                </div>
+
+                {/* LinkedIn Profile */}
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-bold uppercase tracking-wide text-muted-foreground flex items-center gap-1.5">
+                    <FaLinkedin className="w-3.5 h-3.5 text-blue-700" /> LinkedIn
+                  </Label>
+                  <Editable text={linkedin} placeholder="Link identifier..." type="input">
+                    <input
+                      type="text"
+                      placeholder="Professional link..."
+                      value={linkedin}
+                      onChange={(e) => {
+                        setLinkedIn(e.target.value);
+                        checkUnsavedChanges(phone, facebook, instagram, e.target.value);
+                      }}
+                      className="w-full px-3 py-2 border border-border/80 rounded-xl bg-background text-sm outline-none focus:border-primary"
+                    />
+                  </Editable>
+                </div>
+
               </CardContent>
             </Card>
 
-            {/* About Me Card */}
-            <Card className="shadow-xl border-2 border-border bg-card/95 backdrop-blur-sm">
-              <CardHeader className="pb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <Edit2 className="w-5 h-5 text-primary" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-xl">About Me</CardTitle>
-                    <p className="text-sm text-muted-foreground">Share your story and what makes you unique</p>
-                  </div>
+            {/* Context Card: Biography Editor Panel */}
+            <Card className="shadow-lg border border-border bg-card/80 backdrop-blur-md">
+              <CardHeader className="pb-2 flex flex-row items-center gap-3">
+                <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center text-primary"><Edit2 className="w-4 h-4" /></div>
+                <div>
+                  <CardTitle className="text-base font-bold">About Node</CardTitle>
+                  <p className="text-xs text-muted-foreground">Personal positioning statements</p>
                 </div>
               </CardHeader>
               <CardContent>
                 <EditableBio
                   value={!isObjEmpty(profiledata?.bio) ? profiledata?.bio : ""}
-                  onSave={handleSave}
-                  placeholder="Tell others about yourself, your interests, and what you're looking for in connections..."
+                  onSave={handleBioSave}
+                  placeholder="Tell others about your interests, technical stack specialties, or creative domains..."
                 />
               </CardContent>
             </Card>
 
-            {/* Save Changes Dialog */}
-            <Dialog open={change} onOpenChange={setChange}>
-              <DialogContent className="sm:max-w-md">
-                <DialogTitle>Unsaved Changes</DialogTitle>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">You have unsaved changes to your profile</p>
-                  </div>
+            {/* Sticky Action Row for Unsaved changes */}
+            {hasUnsavedChanges && (
+              <div className="p-4 bg-primary/5 border border-primary/20 rounded-xl flex items-center justify-between gap-4 animate-slideIn">
+                <div className="flex items-center gap-2 text-xs font-bold tracking-wide text-primary">
+                  <ShieldAlert className="w-4 h-4" />
+                  <span>Unsaved alterations detected in current card views.</span>
                 </div>
-                <div className="flex gap-3 justify-end mt-4">
+                <div className="flex items-center gap-2">
                   <Button
                     type="button"
                     variant="outline"
+                    size="sm"
                     onClick={() => {
-                      setChange(false);
-                      setPhone(isObjEmpty(profiledata?.phonenumber) ? "" : profiledata?.phonenumber);
-                      setFacebook(isObjEmpty(profiledata?.facebook) ? "" : profiledata?.facebook);
-                      setInstagram(isObjEmpty(profiledata?.instagram) ? "" : profiledata?.instagram);
-                      setLinkedIn(isObjEmpty(profiledata?.linkedin) ? "" : profiledata?.linkedin);
+                      setPhone(profiledata?.phonenumber || "");
+                      setFacebook(profiledata?.facebook || "");
+                      setInstagram(profiledata?.instagram || "");
+                      setLinkedIn(profiledata?.linkedin || "");
+                      setHasUnsavedChanges(false);
                     }}
                   >
-                    Cancel
+                    Discard
                   </Button>
-                  <Button
-                    type="submit"
-                    form="social-form"
-                    className="bg-primary hover:bg-primary/90 shadow-lg"
-                    disabled={editing}
-                  >
-                    {editing ? (
-                      <>
-                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
-                        Saving...
-                      </>
-                    ) : (
-                      'Save Changes'
-                    )}
+                  <Button type="submit" size="sm" className="shadow-md">
+                    Save Changes
                   </Button>
                 </div>
-              </DialogContent>
-            </Dialog>
+              </div>
+            )}
+
           </div>
         </div>
 
-        {/* Bottom Section - Account Settings & Quick Actions */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 mt-8">
-          {/* Account Settings Card */}
-          <Card className="shadow-xl border-2 border-border bg-card/95 backdrop-blur-sm">
-            <CardHeader className="pb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <Settings className="w-5 h-5 text-primary" />
-                </div>
-                <div>
-                  <CardTitle className="text-xl">Account Settings</CardTitle>
-                  <p className="text-sm text-muted-foreground">Manage your account preferences</p>
-                </div>
-              </div>
+        {/* BOTTOM SECTION: Navigation Actions & Account Preferences */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 mt-4">
+
+          <Card className="shadow-md border border-border bg-card/70">
+            <CardHeader className="pb-3 flex flex-row items-center gap-3">
+              <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center text-primary"><Settings className="w-4 h-4" /></div>
+              <CardTitle className="text-sm font-bold">Account Configurations</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-3">
-                <Button
-                  onClick={() => navigate('/settings')}
-                  variant="outline"
-                  className="w-full justify-start h-12"
-                >
-                  <Settings className="w-4 h-4 mr-3" />
-                  Account Settings
-                </Button>
-
-                <Button
-                  onClick={() => navigate('/changepassword')}
-                  variant="outline"
-                  className="w-full justify-start h-12"
-                >
-                  <Edit2 className="w-4 h-4 mr-3" />
-                  Change Password
-                </Button>
-
-                <Button
-                  onClick={() => navigate('/settings?tab=preferences')}
-                  variant="outline"
-                  className="w-full justify-start h-12"
-                >
-                  <Edit2 className="w-4 h-4 mr-3" />
-                  Update Preferences
-                </Button>
-              </div>
-
-              <div className="pt-4 border-t border-border/50">
-                <p className="text-xs text-muted-foreground text-center">
-                  Need help? Contact our support team
-                </p>
-              </div>
+            <CardContent className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <Button type="button" onClick={() => navigate('/settings')} variant="outline" className="w-full justify-start text-xs font-bold">
+                <Settings className="w-3.5 h-3.5 mr-2" /> Settings
+              </Button>
+              <Button type="button" onClick={() => navigate('/changepassword')} variant="outline" className="w-full justify-start text-xs font-bold">
+                <Edit2 className="w-3.5 h-3.5 mr-2" /> Change Password
+              </Button>
+              <Button type="button" onClick={() => navigate('/settings?tab=preferences')} variant="outline" className="w-full justify-start text-xs font-bold">
+                <Edit2 className="w-3.5 h-3.5 mr-2" /> Preferences
+              </Button>
             </CardContent>
           </Card>
 
-          {/* Quick Actions Card */}
-          <Card className="shadow-xl border-2 border-border bg-card/95 backdrop-blur-sm">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-lg">Quick Actions</CardTitle>
+          <Card className="shadow-md border border-border bg-card/70">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-bold">Quick Routing Nodes</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
-              <Button
-                onClick={() => navigate('/dashboard?tab=events')}
-                variant="ghost"
-                className="w-full justify-start h-12 hover:bg-primary/10 hover:text-primary transition-all duration-200 group"
-              >
-                <Calendar className="w-4 h-4 mr-3 group-hover:scale-110 transition-transform" />
-                View My Events
+            <CardContent className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <Button type="button" onClick={() => navigate('/dashboard?tab=events')} variant="ghost" className="w-full justify-start text-xs font-bold hover:bg-primary/5 hover:text-primary">
+                <Calendar className="w-3.5 h-3.5 mr-2" /> My Events
               </Button>
-
-              <Button
-                onClick={() => navigate('/dashboard?tab=users')}
-                variant="ghost"
-                className="w-full justify-start h-12 hover:bg-primary/10 hover:text-primary transition-all duration-200 group"
-              >
-                <Mail className="w-4 h-4 mr-3 group-hover:scale-110 transition-transform" />
-                Find Connections
+              <Button type="button" onClick={() => navigate('/dashboard?tab=users')} variant="ghost" className="w-full justify-start text-xs font-bold hover:bg-primary/5 hover:text-primary">
+                <Mail className="w-3.5 h-3.5 mr-2" /> Search Users
               </Button>
 
               <Dialog open={createEventOpen} onOpenChange={setCreateEventOpen}>
-                <DialogTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start h-12 hover:bg-primary/10 hover:text-primary transition-all duration-200 group"
-                  >
-                    <Edit2 className="w-4 h-4 mr-3 group-hover:scale-110 transition-transform" />
-                    Create Event
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-4xl max-h-[90vh] p-0">
+                <Button type="button" onClick={() => setCreateEventOpen(true)} variant="ghost" className="w-full justify-start text-xs font-bold hover:bg-primary/5 hover:text-primary">
+                  <Edit2 className="w-3.5 h-3.5 mr-2" /> Create Event
+                </Button>
+                <DialogContent className="max-w-4xl max-h-[90vh] p-0 overflow-y-auto">
                   {createEventOpen && (
-                    <Suspense fallback={<ProfileModalFallback text="Loading event form..." />}>
+                    <Suspense fallback={<ProfileModalFallback text="Initializing event manifest framework..." />}>
                       <CreateEvent onClose={() => setCreateEventOpen(false)} />
                     </Suspense>
                   )}
@@ -635,17 +462,30 @@ export function Profile() {
               </Dialog>
             </CardContent>
           </Card>
+
         </div>
+      </form>
 
-        {/* Hidden form for social media submission */}
-        <form id="social-form" onSubmit={handlesaveSocials} className="hidden" />
-      </main>
+      {/* Dynamic Dedicated Image Editor Modal Window Context Layer */}
+      <Dialog open={editingProfileImage} onOpenChange={setEditingProfileImage}>
+        <DialogContent className="max-w-md bg-card border border-border">
+          <DialogTitle>Update Profile Avatar</DialogTitle>
+          <DialogDescription>Select and crop an absolute square aspect-ratio viewport frame alignment.</DialogDescription>
+          <div className="mt-2 min-h-[260px] flex items-center justify-center bg-muted/20 border border-dashed border-border/60 rounded-xl p-4">
+            {editingProfileImage && (
+              <Suspense fallback={<ProfileModalFallback text="Compiling asset manipulation views..." />}>
+                <ImageUploader onImageCropped={handleProfileImageCropped} minimal className="w-full" />
+              </Suspense>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
 
-      {/* Loading Overlay */}
-      {editing && (
-        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
-          <div className="bg-card border border-border rounded-lg p-8 shadow-xl">
-            <Spinner size={50} withText={true} text="Saving changes..." />
+      {/* Global Processing State Screen Overlay blocking interaction grids */}
+      {isSaving && (
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center animate-fadeIn">
+          <div className="bg-card border border-border rounded-xl p-6 shadow-2xl max-w-xs w-full text-center">
+            <Spinner size={40} withText text="Committing alterations..." className="mx-auto" />
           </div>
         </div>
       )}

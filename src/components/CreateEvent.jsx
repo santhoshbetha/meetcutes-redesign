@@ -8,9 +8,9 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Calendar } from "@/components/ui/calendar"
 import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
 } from "@/components/ui/popover"
 import { CalendarIcon } from "lucide-react"
 import { cities } from "@/lib/cities";
@@ -429,7 +429,7 @@ export function CreateEvent({ onClose }) {
   const navigate = useNavigate()
   const isOnline = useOnlineStatus();
   const { userSession, profiledata } = useAuth();
-  const {autocompletedata} = useContext(AutoCompleteDataContext);
+  const { autocompletedata } = useContext(AutoCompleteDataContext);
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false);
   const [successLoading, setSuccessLoading] = useState(false);
@@ -471,21 +471,21 @@ export function CreateEvent({ onClose }) {
 
   const formik = useFormik({
     initialValues: {
-        title: "",
-        location: "",
-        address1: "",
-        state: "",
-        city: "",
-        zip: "",
-        date: undefined,
-        startTime: "08:00",
-        endTime: "09:00",
-        description: ""
+      title: "",
+      location: "",
+      address1: "",
+      state: "",
+      city: "",
+      zip: "",
+      date: undefined,
+      startTime: "08:00",
+      endTime: "09:00",
+      description: ""
     },
     validationSchema,
     validateOnChange: false, // Only validate on blur and submit
     validateOnBlur: true,
-    
+
     onSubmit: async (values) => {
       if (!isOnline) {
         toast({
@@ -503,11 +503,11 @@ export function CreateEvent({ onClose }) {
         });
         return;
       }
-      
+
       let locationid = null;
-        autocompletedata.forEach((each) => {
+      autocompletedata.forEach((each) => {
         if (each.address1 == values.address1 && each.state == values.state && each.city == values.city && each.zipcode == values.zip) {
-            locationid = each.locationid
+          locationid = each.locationid
         }
       });
 
@@ -516,13 +516,13 @@ export function CreateEvent({ onClose }) {
         values.location,
         values.address1, //addressOne
         values.state,
-        values.city, 
+        values.city,
         values.zip,
         eventlat,
         eventlng,
         values.date.toISOString().substring(0, 10).toString(),
         values.startTime,
-        values.endTime, 
+        values.endTime,
         values.description,
         profiledata?.userid,
         profiledata?.latitude,
@@ -541,7 +541,7 @@ export function CreateEvent({ onClose }) {
         toast.success("Create Event Successful");
         setLoading(false);
         setSuccessLoading(true);
-        
+
         // Close dialog and navigate after 5 seconds
         setTimeout(() => {
           setSuccessLoading(false);
@@ -581,7 +581,7 @@ export function CreateEvent({ onClose }) {
       });
 
       setEventLat(lat);
-      setEventLng(lon); 
+      setEventLng(lon);
 
       // Update formik values
       formik.setFieldValue("address1", addressLine1);
@@ -604,8 +604,8 @@ export function CreateEvent({ onClose }) {
   //console.log("formik.errors.city", formik.errors.city);
 
   return (
-      <DialogContent className='flex max-h-[min(900px,80vh)] min-w-[calc(70vw-2rem)] flex-col gap-0 p-0 sm:max-w-md bg-linear-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800'>
-        <ScrollArea className='flex max-h-full flex-col overflow-hidden'>
+    <DialogContent className='flex max-h-[min(900px,80vh)] min-w-[calc(70vw-2rem)] flex-col gap-0 p-0 sm:max-w-md bg-linear-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800'>
+      <ScrollArea className='flex max-h-full flex-col overflow-hidden'>
         <div className="relative">
           {loading && (
             <MeetCutesSpinner
@@ -614,115 +614,115 @@ export function CreateEvent({ onClose }) {
             />
           )}
           <div className="flex flex-col">
-              <DialogTitle></DialogTitle>
-              <div
-                className="w-full max-w-3xlX overflow-y-auto bg-transparent border-none rounded-2xl shadow-2xl animate-in zoom-in-95 duration-300"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <div>
-                  {/* Header */}
-                  <div className="text-center pt-4 sm:pt-6 pb-3 sm:pb-4 px-4 sm:px-8 bg-linear-to-r from-primary/10 via-primary/5 to-primary/10 rounded-t-2xl">
-                    <div className="flex items-center justify-center mb-2">
-                      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                        <CalendarIcon className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
-                      </div>
+            <DialogTitle></DialogTitle>
+            <div
+              className="w-full max-w-3xlX overflow-y-auto bg-transparent border-none rounded-2xl shadow-2xl animate-in zoom-in-95 duration-300"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div>
+                {/* Header */}
+                <div className="text-center pt-4 sm:pt-6 pb-3 sm:pb-4 px-4 sm:px-8 bg-linear-to-r from-primary/10 via-primary/5 to-primary/10 rounded-t-2xl">
+                  <div className="flex items-center justify-center mb-2">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                      <CalendarIcon className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
                     </div>
-                    <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground mb-2">
-                      Create New Event 🎉
-                    </h2>
-                    <p className="text-muted-foreground text-sm md:text-base max-w-md mx-auto px-4">
-                      Share your event with the community and connect with like-minded people
-                    </p>
+                  </div>
+                  <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground mb-2">
+                    Create New Event 🎉
+                  </h2>
+                  <p className="text-muted-foreground text-sm md:text-base max-w-md mx-auto px-4">
+                    Share your event with the community and connect with like-minded people
+                  </p>
+                </div>
+
+                {/* Form */}
+                <form
+                  className="px-4 sm:px-6 md:px-8 lg:px-12 pb-8 sm:pb-12 space-y-4 sm:space-y-6 bg-white dark:bg-gray-900 rounded-b-2xl mt-4"
+                  onSubmit={formik.handleSubmit}
+                >
+                  {/* Event Title */}
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="title"
+                      className="text-sm font-medium text-foreground flex items-center gap-2"
+                    >
+                      <CalendarIcon className="w-4 h-4" />
+                      Event Title
+                    </Label>
+                    <Input
+                      id='title'
+                      name='title'
+                      type='text'
+                      onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                      value={formik.values.title}
+                      className="bg-background border-border focus:border-primary focus:ring-primary/20 h-10"
+                      placeholder="e.g., Coffee Meetup or Age range based title"
+                      required
+                    />
+                    {formik.errors.title && formik.touched.title && (
+                      <p className="text-red-500 text-sm">{formik.errors.title}</p>
+                    )}
                   </div>
 
-                  {/* Form */}
-                  <form
-                      className="px-4 sm:px-6 md:px-8 lg:px-12 pb-8 sm:pb-12 space-y-4 sm:space-y-6 bg-white dark:bg-gray-900 rounded-b-2xl mt-4"
-                      onSubmit={formik.handleSubmit}
-                  >
-                    {/* Event Title */}
-                    <div className="space-y-2">
-                      <Label
-                        htmlFor="title"
-                        className="text-sm font-medium text-foreground flex items-center gap-2"
-                      >
-                        <CalendarIcon className="w-4 h-4" />
-                        Event Title
-                      </Label>
-                      <Input
-                        id='title'
-                        name='title'
-                        type='text'
-                        onChange={formik.handleChange}
-                        onBlur={formik.handleBlur}
-                        value={formik.values.title}
-                        className="bg-background border-border focus:border-primary focus:ring-primary/20 h-10"
-                        placeholder="e.g., Coffee Meetup or Age range based title"
-                        required
-                      />
-                      {formik.errors.title && formik.touched.title && (
-                        <p className="text-red-500 text-sm">{formik.errors.title}</p>
+                  {/* Location Name */}
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="locationName"
+                      className="text-sm font-medium text-foreground flex items-center gap-2"
+                    >
+                      <MapPin className="w-4 h-4" />
+                      Venue/Location Name
+                    </Label>
+                    <Input
+                      id='location'
+                      name='location'
+                      type='text'
+                      onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                      value={formik.values.location}
+                      className="bg-background border-border focus:border-primary focus:ring-primary/20 h-10"
+                      placeholder="e.g., TARGET, Starbucks, Central Park"
+                      required
+                    />
+                    {formik.errors.location && formik.touched.location && (
+                      <p className="text-red-500 text-sm">{formik.errors.location}</p>
+                    )}
+                  </div>
+
+                  {/* Street Address */}
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="streetAddress"
+                      className="text-sm font-medium text-foreground flex items-center gap-2"
+                    >
+                      <MapPin className="w-4 h-4" />
+                      Street Address
+                    </Label>
+                    <div className="geoapify-custom-autocomplete relative" ref={autocompleteRef}>
+                      <GeoapifyContext apiKey={import.meta.env.VITE_REACT_APP_GEOAPIFY_API_KEY || import.meta.env.REACT_APP_GEOAPIFY_API_KEY}>
+                        <GeoapifyGeocoderAutocomplete
+                          placeholder="Enter address here"
+                          lang="en"
+                          limit={5}
+                          types={["address"]}
+                          filterByCountryCode={["us"]}
+                          placeSelect={onPlaceSelect}
+                          suggestionsChange={onSuggestionChange}
+                        />
+                      </GeoapifyContext>
+                      {addressLoading && (
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2 z-10">
+                          <div className="animate-spin rounded-full h-4 w-4 border-2 border-gray-300 border-t-blue-600 dark:border-gray-600 dark:border-t-blue-400"></div>
+                        </div>
                       )}
                     </div>
+                    {formik.errors.address1 && formik.touched.address1 && (
+                      <p className="text-red-500 text-sm">{formik.errors.address1}</p>
+                    )}
+                  </div>
 
-                    {/* Location Name */}
-                    <div className="space-y-2">
-                      <Label
-                        htmlFor="locationName"
-                        className="text-sm font-medium text-foreground flex items-center gap-2"
-                      >
-                        <MapPin className="w-4 h-4" />
-                        Venue/Location Name
-                      </Label>
-                      <Input
-                        id='location'
-                        name='location'
-                        type='text'
-                        onChange={formik.handleChange}
-                        onBlur={formik.handleBlur}
-                        value={formik.values.location}
-                        className="bg-background border-border focus:border-primary focus:ring-primary/20 h-10"
-                        placeholder="e.g., TARGET, Starbucks, Central Park"
-                        required
-                      />
-                      {formik.errors.location && formik.touched.location && (
-                        <p className="text-red-500 text-sm">{formik.errors.location}</p>
-                      )}
-                    </div>
-
-                    {/* Street Address */}
-                    <div className="space-y-2">
-                      <Label
-                        htmlFor="streetAddress"
-                        className="text-sm font-medium text-foreground flex items-center gap-2"
-                      >
-                        <MapPin className="w-4 h-4" />
-                        Street Address
-                      </Label>
-                      <div className="geoapify-custom-autocomplete relative" ref={autocompleteRef}>
-                        <GeoapifyContext apiKey={import.meta.env.VITE_REACT_APP_GEOAPIFY_API_KEY || import.meta.env.REACT_APP_GEOAPIFY_API_KEY}>
-                          <GeoapifyGeocoderAutocomplete
-                            placeholder="Enter address here"
-                            lang="en"
-                            limit={5}
-                            types={["address"]}
-                            filterByCountryCode={["us"]}
-                            placeSelect={onPlaceSelect}
-                            suggestionsChange={onSuggestionChange}
-                          />
-                        </GeoapifyContext>
-                        {addressLoading && (
-                          <div className="absolute right-3 top-1/2 -translate-y-1/2 z-10">
-                            <div className="animate-spin rounded-full h-4 w-4 border-2 border-gray-300 border-t-blue-600 dark:border-gray-600 dark:border-t-blue-400"></div>
-                          </div>
-                        )}
-                      </div>
-                      {formik.errors.address1 && formik.touched.address1 && (
-                        <p className="text-red-500 text-sm">{formik.errors.address1}</p>
-                      )}
-                    </div>
-
-                    {/* State, City, Zipcode Row 
+                  {/* State, City, Zipcode Row 
                                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4" hidden>
                       <div className="space-y-2">
                         <Label
@@ -801,173 +801,160 @@ export function CreateEvent({ onClose }) {
                     </div>
                     */}
 
-                    {/* Date and Time Row */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-                      <div className="space-y-2">
-                        <Label
-                          htmlFor="eventDate"
-                          className="text-sm font-medium text-gray-700"
-                        >
-                          Event Date
-                        </Label>
-                        <Popover open={open} onOpenChange={setOpen}>
-                          <PopoverTrigger asChild>
-                              <Button
-                                  variant={"outline"}
-                                  className={cn(
-                                    "w-full justify-start text-left font-normal h-10",
-                                    !formik.values.date && "text-muted-foreground"
-                                  )}
-                              >
-                              <CalendarIcon />
-                              {formik.values.date ? format(formik.values.date, "PPP") : <span>Event date</span>}
-                              </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0">
-                              <Calendar
-                                  mode="single"
-                                  selected={formik.values.date}
-                                  onSelect={(date) => {
-                                    formik.setFieldValue('date', date);
-                                    setOpen(false);
-                                  }}
-                                  initialFocus
-                              />
-                          </PopoverContent>
-                        </Popover>
-                        {formik.errors.date && formik.touched.date && (
-                          <p className="text-red-500 text-sm">{formik.errors.date}</p>
-                        )}
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label
-                          htmlFor="startTime"
-                          className="text-sm font-medium text-gray-700"
-                        >
-                          Start Time
-                        </Label>
-                        <div className="relative">
-                          <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-                          <Input
-                            id='startTime'
-                            name='startTime'
-                            type='time'
-                            onChange={(e) => {
-                                formik.setFieldValue('startTime', e.target.value);
-                            }}
-                            onBlur={formik.handleBlur}
-                            value={formik.values.startTime}
-                            className="bg-card dark:bg-slate-800 dark:text-white border-gray-300 dark:border-gray-700 focus:border-primary focus:ring-primary/20 pl-10 w-full h-10"
-                            required
-                          />
-                        </div>
-                        {formik.errors.startTime && formik.touched.startTime && (
-                          <p className="text-red-500 text-sm">{formik.errors.startTime}</p>
-                        )}
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label
-                          htmlFor="endTime"
-                          className="text-sm font-medium text-gray-700"
-                        >
-                          End Time
-                        </Label>
-                        <div className="relative">
-                          <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-                          <Input
-                            id='endTime'
-                            name='endTime'
-                            type='time'
-                            onChange={(e) => {
-                              formik.setFieldValue('endTime', e.target.value);
-                            }}
-                            onBlur={formik.handleBlur}
-                            value={formik.values.endTime}
-                            className="bg-card dark:bg-slate-800 dark:text-white border-gray-300 dark:border-gray-700 focus:border-primary focus:ring-primary/20 pl-10 w-full h-10"
-                            required
-                          />
-                        </div>
-                        {formik.errors.endTime && formik.touched.endTime && (
-                          <p className="text-red-500 text-sm">{formik.errors.endTime}</p>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Description */}
+                  {/* Date and Time Row */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                     <div className="space-y-2">
                       <Label
-                        htmlFor="description"
+                        htmlFor="eventDate"
                         className="text-sm font-medium text-gray-700"
                       >
-                        Description/Special Instructions (if any)
+                        Event Date
                       </Label>
-                      <Textarea
-                        id="description"
-                        name="description"
-                        value={formik.values.description}
-                        onChange={(e) => {
-                          formik.setFieldValue('description', e.target.value);
-                        }}
-                        onBlur={formik.handleBlur}
-                        className="bg-card dark:bg-slate-800 dark:text-white border-gray-300 dark:border-gray-700 focus:border-primary focus:ring-primary/20 min-h-[120px] resize-none"
-                        placeholder="Provide details about the event"
-                      />
-                      {formik.errors.description && formik.touched.description && (
-                        <p className="text-red-500 text-sm">{formik.errors.description}</p>
+                      <Popover open={open} onOpenChange={setOpen}>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant={"outline"}
+                            className={cn(
+                              "w-full justify-start text-left font-normal h-10",
+                              !formik.values.date && "text-muted-foreground"
+                            )}
+                          >
+                            <CalendarIcon />
+                            {formik.values.date ? format(formik.values.date, "PPP") : <span>Event date</span>}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0">
+                          <Calendar
+                            mode="single"
+                            selected={formik.values.date}
+                            onSelect={(date) => {
+                              formik.setFieldValue('date', date);
+                              setOpen(false);
+                            }}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      {formik.errors.date && formik.touched.date && (
+                        <p className="text-red-500 text-sm">{formik.errors.date}</p>
                       )}
                     </div>
 
-                    {/* Submit Button */}
-                    {!loading &&
-                      <Button
-                        type="submit"
-                        className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-6 text-base shadow-lg hover:shadow-xl transition-all"
+                    <div className="space-y-2">
+                      <Label
+                        htmlFor="startTime"
+                        className="text-sm font-medium text-gray-700"
                       >
-                        CREATE EVENT
-                      </Button>
-                    }
-                    {
-                      loading &&
-                      <LoadingButton loading
-                        className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-6 text-base shadow-lg hover:shadow-xl transition-all">
-                        Submitting Event...
-                      </LoadingButton>
-                    }
-                  </form>
-                </div>
+                        Start Time
+                      </Label>
+                      <div className="relative">
+                        <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+                        <Input
+                          id='startTime'
+                          name='startTime'
+                          type='time'
+                          onChange={(e) => {
+                            formik.setFieldValue('startTime', e.target.value);
+                          }}
+                          onBlur={formik.handleBlur}
+                          value={formik.values.startTime}
+                          className="bg-card dark:bg-slate-800 dark:text-white border-gray-300 dark:border-gray-700 focus:border-primary focus:ring-primary/20 pl-10 w-full h-10"
+                          required
+                        />
+                      </div>
+                      {formik.errors.startTime && formik.touched.startTime && (
+                        <p className="text-red-500 text-sm">{formik.errors.startTime}</p>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label
+                        htmlFor="endTime"
+                        className="text-sm font-medium text-gray-700"
+                      >
+                        End Time
+                      </Label>
+                      <div className="relative">
+                        <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+                        <Input
+                          id='endTime'
+                          name='endTime'
+                          type='time'
+                          onChange={(e) => {
+                            formik.setFieldValue('endTime', e.target.value);
+                          }}
+                          onBlur={formik.handleBlur}
+                          value={formik.values.endTime}
+                          className="bg-card dark:bg-slate-800 dark:text-white border-gray-300 dark:border-gray-700 focus:border-primary focus:ring-primary/20 pl-10 w-full h-10"
+                          required
+                        />
+                      </div>
+                      {formik.errors.endTime && formik.touched.endTime && (
+                        <p className="text-red-500 text-sm">{formik.errors.endTime}</p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Description */}
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="description"
+                      className="text-sm font-medium text-gray-700"
+                    >
+                      Description/Special Instructions (if any)
+                    </Label>
+                    <Textarea
+                      id="description"
+                      name="description"
+                      value={formik.values.description}
+                      onChange={(e) => {
+                        formik.setFieldValue('description', e.target.value);
+                      }}
+                      onBlur={formik.handleBlur}
+                      className="bg-card dark:bg-slate-800 dark:text-white border-gray-300 dark:border-gray-700 focus:border-primary focus:ring-primary/20 min-h-[120px] resize-none"
+                      placeholder="Provide details about the event"
+                    />
+                    {formik.errors.description && formik.touched.description && (
+                      <p className="text-red-500 text-sm">{formik.errors.description}</p>
+                    )}
+                  </div>
+
+                  {/* Submit Button */}
+                  {!loading &&
+                    <Button
+                      type="submit"
+                      className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-6 text-base shadow-lg hover:shadow-xl transition-all"
+                    >
+                      CREATE EVENT
+                    </Button>
+                  }
+                  {
+                    loading &&
+                    <LoadingButton loading
+                      className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-6 text-base shadow-lg hover:shadow-xl transition-all">
+                      Submitting Event...
+                    </LoadingButton>
+                  }
+                </form>
               </div>
-          </div>
-        </div>
-        </ScrollArea>
-        {successLoading && (
-          <div className="absolute inset-0 bg-white/80 dark:bg-slate-900/80 flex items-center justify-center z-50">
-            <div className="text-center">
-              <MeetCutesSpinner size="large" />
-              <p className="mt-4 text-lg font-semibold text-gray-700 dark:text-gray-300">
-                Event Created Successfully!
-              </p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                Redirecting to dashboard...
-              </p>
             </div>
           </div>
-        )}
+        </div>
+      </ScrollArea>
+      {successLoading && (
+        <div className="absolute inset-0 bg-white/80 dark:bg-slate-900/80 flex items-center justify-center z-50">
+          <div className="text-center">
+            <MeetCutesSpinner size="large" />
+            <p className="mt-4 text-lg font-semibold text-gray-700 dark:text-gray-300">
+              Event Created Successfully!
+            </p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              Redirecting to dashboard...
+            </p>
+          </div>
+        </div>
+      )}
     </DialogContent>
   );
 }
 
-/*
-    <DialogContent className='flex min-w-[calc(70vw-2rem)] justify-center'>
-          {loading && (
-            <Spinner
-              className='absolute top-[50%] left-[50%] -translate-x-1/2 -translate-y-1/2'
-              size="xlarge" 
-              text="Creating Event..."
-            />
-          )}
-                    <DialogTitle></DialogTitle>
-                    
-            
-*/
