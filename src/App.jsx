@@ -60,7 +60,7 @@ import { useAuth } from "./context/AuthContext";
 import { SearchAndUserEventsDataContextProvider } from './context/SearchAndUserEventsDataContext';
 import { AutoCompleteDataContextProvider } from './context/AutoCompleteDataContext';
 import { GlobalLoadingProvider } from './context/GlobalLoadingContext';
-import { Toaster } from "sonner";
+import { Toaster, toast } from "sonner";
 import GlobalLoadingSpinner from './components/GlobalLoadingSpinner';
 import { InternetStatusBanner } from './components/InternetStatusBanner';
 
@@ -123,6 +123,18 @@ function App() {
     timeoutHandle = window.setTimeout(warmRoutes, 600);
     return () => window.clearTimeout(timeoutHandle);
   }, [user]);
+
+  useEffect(() => {
+    const handleUpdateAvailable = () => {
+      toast.info('A newer version is ready. Refresh when convenient to load it.');
+    };
+
+    window.addEventListener('meetcutes:update-available', handleUpdateAvailable);
+
+    return () => {
+      window.removeEventListener('meetcutes:update-available', handleUpdateAvailable);
+    };
+  }, []);
 
   // If maintenance mode is enabled, show only the maintenance page
   if (isMaintenanceMode) {

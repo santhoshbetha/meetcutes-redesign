@@ -10,7 +10,7 @@ export function Maintenance() {
     const timer = setInterval(() => {
       setTimeLeft((prevTime) => {
         if (prevTime <= 1) {
-          window.location.reload();
+          clearInterval(timer);
           return 0;
         }
         return prevTime - 1;

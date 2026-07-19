@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 
 /**
@@ -6,7 +7,8 @@ import { useAuth } from '@/context/AuthContext';
  * This hook provides additional token checking beyond the AuthContext
  */
 export const useTokenExpiration = () => {
-  const { userSession, profiledata } = useAuth();
+  const { userSession, logout } = useAuth();
+  const navigate = useNavigate();
 
   //const now22 = Math.floor(Date.now() / 1000);
   //console.log('useTokenExpiration hook initialized, userSession::',userSession.expires_at < now22);
@@ -19,8 +21,9 @@ export const useTokenExpiration = () => {
       const now = Math.floor(Date.now() / 1000);
       if (userSession.expires_at && userSession.expires_at < now) {
         console.log('Token expired via useTokenExpiration hook');
-        // The AuthContext will handle the logout
-        window.location.reload(); // Force a reload to trigger auth state change
+        logout().finally(() => {
+          navigate('/', { replace: true });
+        });
       }
     };
 
@@ -31,7 +34,7 @@ export const useTokenExpiration = () => {
     const interval = setInterval(checkToken, 60 * 1000);
 
     return () => clearInterval(interval);
-  }, [userSession]);
+  }, [userSession, logout, navigate]);
 
   return null;
 };

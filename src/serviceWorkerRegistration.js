@@ -17,9 +17,9 @@ export default function registerServiceWorker() {
           if (newWorker) {
             newWorker.addEventListener('statechange', () => {
               if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                // New service worker is available
-                console.log('New service worker available, reloading...');
-                window.location.reload();
+                // A new version is available, but keep the current page stable.
+                console.log('New service worker available. Refresh when convenient to load the latest version.');
+                window.dispatchEvent(new CustomEvent('meetcutes:update-available'));
               }
             });
           }

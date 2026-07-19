@@ -261,8 +261,9 @@ export function Photos() {
 
     try {
       await clearAppCaches();
-      toast.success('Photo cache cleared. Reloading fresh images...');
-      window.location.reload();
+      toast.success('Photo cache cleared. Refreshing images...');
+      setReload(prev => !prev);
+      setClearingCache(false);
     } catch (error) {
       toast.error(error?.message || 'Failed to clear cached photos');
       setClearingCache(false);
