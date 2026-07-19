@@ -24,7 +24,7 @@ const NavAfter = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const queryClient = useQueryClient();
   //const {setAutoCompletedata} = useContext(AutoCompleteDataContext);
-  const {setSearchUsersData} = useContext(SearchAndUserEventsDataContext);
+  const { setSearchUsersData } = useContext(SearchAndUserEventsDataContext);
   const { user, profiledata } = useAuth();
   const notificationSearchParams = getUpcomingEventsSearchParams(profiledata);
   const { data: upcomingEvents = [] } = useNotifyEvents(notificationSearchParams);
@@ -39,25 +39,25 @@ const NavAfter = () => {
 
   async function onLogout() {
     const res = await logoutUser();
-      if (res.success) {
-          localStorage.clear(); 
-          setSearchUsersData(null)
-          secureLocalStorage.clear()
-          //setAutoCompletedata(null)
-          // Force dark mode for homepage after logout
-          document.documentElement.classList.add("dark");
-          navigate('/')
-          successAlert('', 'Logout Successful');
-      } else {
-          localStorage.clear(); 
-          setSearchUsersData(null)
-          secureLocalStorage.clear()
-          //setAutoCompletedata(null)
-          // Force dark mode for homepage after logout
-          document.documentElement.classList.add("dark");
-          navigate('/')
-      }
-      queryClient.clear();
+    if (res.success) {
+      localStorage.clear();
+      setSearchUsersData(null)
+      secureLocalStorage.clear()
+      //setAutoCompletedata(null)
+      // Force dark mode for homepage after logout
+      document.documentElement.classList.add("dark");
+      navigate('/')
+      successAlert('', 'Logout Successful');
+    } else {
+      localStorage.clear();
+      setSearchUsersData(null)
+      secureLocalStorage.clear()
+      //setAutoCompletedata(null)
+      // Force dark mode for homepage after logout
+      document.documentElement.classList.add("dark");
+      navigate('/')
+    }
+    queryClient.clear();
   }
 
   return (
@@ -107,7 +107,9 @@ const NavAfter = () => {
 
         {/* Right side actions */}
         <div className="flex items-center gap-3 md:gap-5">
-          <ThemeToggle />
+          <div className="hidden lg:block">
+            <ThemeToggle />
+          </div>
           <Link to="/notifications" className="relative cursor-pointer group">
             <Bell className="w-6 h-6 text-muted-foreground group-hover:text-foreground transition-colors" />
             {notificationCount > 0 && (
@@ -168,16 +170,16 @@ const NavAfter = () => {
       {isMenuOpen && (
         <div className="lg:hidden border-t border-border bg-background">
           <div className="px-2 pt-2 pb-3 space-y-1">
-            <Link to="#about" className="block px-3 py-2 text-muted-foreground hover:text-foreground">
+            <Link to="/about" className="block px-3 py-2 text-muted-foreground hover:text-foreground">
               About
             </Link>
-            <Link to="#how-it-works" className="block px-3 py-2 text-muted-foreground hover:text-foreground">
+            <Link to="/contact" className="block px-3 py-2 text-muted-foreground hover:text-foreground">
               Contact
             </Link>
-            <Link to="#locations" className="block px-3 py-2 text-muted-foreground hover:text-foreground">
+            <Link to="/donate" className="block px-3 py-2 text-muted-foreground hover:text-foreground">
               Donate
             </Link>
-            <Link to="#contact" className="block px-3 py-2 text-muted-foreground hover:text-foreground">
+            <Link to="/search" className="block px-3 py-2 text-muted-foreground hover:text-foreground">
               Search
             </Link>
             <div className="px-3 py-2">
@@ -188,7 +190,7 @@ const NavAfter = () => {
                 className="flex-1 text-lg"
                 onClick={onLogout}
               >
-                 Log out
+                Log out
               </Button>
             </div>
           </div>

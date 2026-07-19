@@ -162,409 +162,409 @@ export function Settings() {
       )}
       <div className="container mx-auto px-4 py-4 max-w-4xl">
         <Card className="bg-background rounded-2xl shadow-xl border border-border overflow-hidden">
-        <AlertDialog open={confirmPopup} onOpenChange={setConfirmPopup}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle className="flex items-center gap-2">
-                <AlertTriangle className="w-5 h-5 text-destructive" />
-                Deactivate Account
-              </AlertDialogTitle>
-              <AlertDialogDescription>
-                This will deactivate your account and hide your profile from other users. Your data will be preserved and you can contact support to reactivate your account if needed.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel disabled={confirmClick}>Cancel</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={clickDeleteConfirm}
-                disabled={confirmClick}
-                className="bg-destructive hover:bg-destructive/90"
-              >
-                {confirmClick ? (
-                  <>
-                    <Spinner size="small" className="mr-2" />
-                    Deactivating...
-                  </>
-                ) : (
-                  'Deactivate Account'
-                )}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-        <CardHeader className="bg-linear-to-r from-primary/10 via-primary/5 to-primary/10 px-6 py-8 border-b border-border flex items-start justify-between shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-primary/10 rounded-lg">
-              <SettingsIcon className="w-6 h-6 text-primary" />
-            </div>
-            <div>
-              <CardTitle className="text-2xl text-primary">Settings</CardTitle>
-              <p className="text-sm text-muted-foreground mt-1">Manage your privacy and account preferences</p>
-            </div>
-          </div>
-          <button
-            type="button"
-            className="text-red-700 rounded bg-transparent border-0"
-            onClick={() => navigate("/")}
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              height="20"
-              width="14"
-              viewBox="0 0 384 512"
-              fill=""
-            >
-              <path d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z" />
-            </svg>
-          </button>
-        </CardHeader>
-        <CardContent className="p-6 space-y-8">
-          <div className="space-y-6">
-            <div className="flex items-center gap-3 mb-6">
-              <Shield className="w-5 h-5 text-primary" />
-              <h2 className="text-xl font-semibold text-foreground">Privacy Settings</h2>
-            </div>
-
-            <div className="space-y-4">
-              <Card className="border border-border/50 hover:border-border transition-colors">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-1">
-                      <h3 className="font-medium text-foreground">Email Search Visibility</h3>
-                      <p className="text-sm text-muted-foreground">Allow others to find your profile via email search</p>
-                    </div>
-                    <Switch
-                      checked={emailsearch}
-                      onCheckedChange={(value) => {
-                        setEmailsearch(value);
-                        setValueschanged(true);
-                      }}
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="border border-border/50 hover:border-border transition-colors">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-1">
-                      <h3 className="font-medium text-foreground">Phone Search Visibility</h3>
-                      <p className="text-sm text-muted-foreground">Allow others to find your profile via phone number search</p>
-                    </div>
-                    <Switch
-                      checked={phonenumbersearch}
-                      onCheckedChange={(value) => {
-                        setPhonenumbersearch(value);
-                        setValueschanged(true);
-                      }}
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="border border-border/50 hover:border-border transition-colors">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-1">
-                      <h3 className="font-medium text-foreground">UserHandle Search Visibility</h3>
-                      <p className="text-sm text-muted-foreground">Allow others to find your profile via username search</p>
-                    </div>
-                    <Switch
-                      checked={userhandlesearch}
-                      onCheckedChange={(value) => {
-                        setUserhandlesearch(value);
-                        setValueschanged(true);
-                      }}
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="border border-border/50 hover:border-border transition-colors">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-1">
-                      <h3 className="font-medium text-foreground">Distance Visibility</h3>
-                      <p className="text-sm text-muted-foreground">Only show your profile to people within 100 miles</p>
-                    </div>
-                    <Switch
-                      checked={onlyhundredmileevisiblity}
-                      onCheckedChange={(value) => {
-                        setOnlyhundredmileevisiblity(value);
-                        setValueschanged(true);
-                      }}
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            <Separator className="my-6" />
-
-            <div className="flex items-center gap-3 mb-6">
-              <Target className="w-5 h-5 text-primary" />
-              <h2 className="text-xl font-semibold text-foreground">Activity Preferences</h2>
-            </div>
-
-            <div className="space-y-4">
-              <Card className="border border-border/50 hover:border-border transition-colors">
-                <CardContent className="p-4">
-                  <div className="space-y-3">
-                    <div className="space-y-1">
-                      <h3 className="font-medium text-foreground">Visibility Preference</h3>
-                      <p className="text-sm text-muted-foreground">Choose how you want to interact on MeetCutes</p>
-                    </div>
-                    <Select
-                      value={visibilityPreference}
-                      onValueChange={(value) => {
-                        setVisibilityPreference(value);
-                        setValueschanged(true);
-                      }}
-                    >
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select preference" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="events-only">
-                          <div className="flex items-center gap-2">
-                            <Calendar className="w-4 h-4" />
-                            <div>
-                              <div className="font-medium">Events Only</div>
-                              <div className="text-xs text-muted-foreground">Attend events, not visible in user searches</div>
-                            </div>
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="online-only">
-                          <div className="flex items-center gap-2">
-                            <Search className="w-4 h-4" />
-                            <div>
-                              <div className="font-medium">Online Only</div>
-                              <div className="text-xs text-muted-foreground">Visible in searches, not interested in events</div>
-                            </div>
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="both">
-                          <div className="flex items-center gap-2">
-                            <Users className="w-4 h-4" />
-                            <div>
-                              <div className="font-medium">Both Events & Online</div>
-                              <div className="text-xs text-muted-foreground">Participate in events and be visible in searches</div>
-                            </div>
-                          </div>
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {valueschanged && (
-              <div className="flex justify-end gap-3 pt-4">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => {
-                    setEmailsearch(profiledata.emailsearch || false);
-                    setPhonenumbersearch(profiledata.phonenumbersearch || false);
-                    setUserhandlesearch(profiledata.userhandlesearch || false);
-                    setOnlyhundredmileevisiblity(profiledata.onlyhundredmileevisiblity || false);
-                    setVisibilityPreference(profiledata.visibilitypreference || 'both');
-                    setValueschanged(false);
-                  }}
-                  disabled={!valueschanged}
+          <AlertDialog open={confirmPopup} onOpenChange={setConfirmPopup}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle className="flex items-center gap-2">
+                  <AlertTriangle className="w-5 h-5 text-destructive" />
+                  Deactivate Account
+                </AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will deactivate your account and hide your profile from other users. Your data will be preserved and you can contact support to reactivate your account if needed.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel disabled={confirmClick}>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={clickDeleteConfirm}
+                  disabled={confirmClick}
+                  className="bg-destructive hover:bg-destructive/90"
                 >
-                  Cancel
-                </Button>
-                <Button
-                  type="submit"
-                  onClick={formik.handleSubmit}
-                  disabled={!valueschanged || loading}
-                  className="bg-primary hover:bg-primary/90"
-                >
-                  {loading ? (
+                  {confirmClick ? (
                     <>
                       <Spinner size="small" className="mr-2" />
-                      Saving...
+                      Deactivating...
                     </>
                   ) : (
-                    'Save Changes'
+                    'Deactivate Account'
                   )}
-                </Button>
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+          <CardHeader className="bg-linear-to-r from-primary/10 via-primary/5 to-primary/10 px-6 py-8 border-b border-border flex items-start justify-between shadow-sm">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-primary/10 rounded-lg">
+                <SettingsIcon className="w-6 h-6 text-primary" />
               </div>
-            )}
-          </div>
-
-          <Separator className="my-8" />
-
-          {/* Profile Actions Section */}
-          <div className="space-y-6">
-            <div className="flex items-center gap-3">
-              <User className="w-5 h-5 text-primary" />
-              <h2 className="text-xl font-semibold text-foreground">Profile Actions</h2>
+              <div>
+                <CardTitle className="text-2xl text-primary">Settings</CardTitle>
+                <p className="text-sm text-muted-foreground mt-1">Manage your privacy and account preferences</p>
+              </div>
             </div>
+            <button
+              type="button"
+              className="text-red-700 rounded bg-transparent border-0"
+              onClick={() => navigate("/")}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                height="20"
+                width="14"
+                viewBox="0 0 384 512"
+                fill=""
+              >
+                <path d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z" />
+              </svg>
+            </button>
+          </CardHeader>
+          <CardContent className="p-6 space-y-8">
+            <div className="space-y-6">
+              <div className="flex items-center gap-3 mb-6">
+                <Shield className="w-5 h-5 text-primary" />
+                <h2 className="text-xl font-semibold text-foreground">Privacy Settings</h2>
+              </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Set Handle */}
-              <Card className="border border-border/50 hover:border-primary/50 transition-colors">
-                <CardContent className="p-6">
-                  <div className="flex items-start gap-4">
-                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                      <Edit className="w-5 h-5 text-primary" />
+              <div className="space-y-4">
+                <Card className="border border-border/50 hover:border-border transition-colors">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-1">
+                        <h3 className="font-medium text-foreground">Email Search Visibility</h3>
+                        <p className="text-sm text-muted-foreground">Allow others to find your profile via email search</p>
+                      </div>
+                      <Switch
+                        checked={emailsearch}
+                        onCheckedChange={(value) => {
+                          setEmailsearch(value);
+                          setValueschanged(true);
+                        }}
+                      />
                     </div>
-                    <div className="flex-1 space-y-2">
-                      <h3 className="font-semibold text-foreground">Set Handle</h3>
-                      <p className="text-sm text-muted-foreground">
-                        Create a unique username for your profile
-                      </p>
-                      {profiledata?.userhandle ? (
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-medium text-green-600">
-                            @{profiledata.userhandle}
-                          </span>
-                          <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
-                            Set
-                          </span>
-                        </div>
-                      ) : (
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <Button size="sm" className="mt-2">
-                              Set Handle
-                            </Button>
-                          </DialogTrigger>
-                          <HandleCard />
-                        </Dialog>
-                      )}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
 
-              {/* Change Location */}
-              <Card className="border border-border/50 hover:border-primary/50 transition-colors">
-                <CardContent className="p-6">
-                  <div className="flex items-start gap-4">
-                    <div className="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center shrink-0">
-                      <MapPin className="w-5 h-5 text-green-600" />
+                <Card className="border border-border/50 hover:border-border transition-colors">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-1">
+                        <h3 className="font-medium text-foreground">Phone Search Visibility</h3>
+                        <p className="text-sm text-muted-foreground">Allow others to find your profile via phone number search</p>
+                      </div>
+                      <Switch
+                        checked={phonenumbersearch}
+                        onCheckedChange={(value) => {
+                          setPhonenumbersearch(value);
+                          setValueschanged(true);
+                        }}
+                      />
                     </div>
-                    <div className="flex-1 space-y-2">
-                      <h3 className="font-semibold text-foreground">Change Location</h3>
-                      <p className="text-sm text-muted-foreground">
-                        Update your city and location information
-                      </p>
-                      <Dialog open={changeLocationOpen} onOpenChange={setChangeLocationOpen}>
-                        <DialogTrigger asChild>
-                          <Button size="sm" variant="outline" className="mt-2">
-                            Change Location
-                          </Button>
-                        </DialogTrigger>
-                        {changeLocationOpen && (
-                          <Suspense fallback={<SettingsModalFallback text="Loading location options..." />}>
-                            <ChangeLocation onClose={() => setChangeLocationOpen(false)} />
-                          </Suspense>
-                        )}
-                      </Dialog>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
 
-              {/* Coordinates */}
-              <Card className="border border-border/50 hover:border-primary/50 transition-colors">
-                <CardContent className="p-6">
-                  <div className="flex items-start gap-4">
-                    <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0">
-                      <Target className="w-5 h-5 text-blue-600" />
+                <Card className="border border-border/50 hover:border-border transition-colors">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-1">
+                        <h3 className="font-medium text-foreground">UserHandle Search Visibility</h3>
+                        <p className="text-sm text-muted-foreground">Allow others to find your profile via username search</p>
+                      </div>
+                      <Switch
+                        checked={userhandlesearch}
+                        onCheckedChange={(value) => {
+                          setUserhandlesearch(value);
+                          setValueschanged(true);
+                        }}
+                      />
                     </div>
-                    <div className="flex-1 space-y-2">
-                      <h3 className="font-semibold text-foreground">Coordinates</h3>
-                      <p className="text-sm text-muted-foreground">
-                        View and manage your location coordinates
-                      </p>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => setIsCoordinatesModalOpen(true)}
-                        className="mt-2"
+                  </CardContent>
+                </Card>
+
+                <Card className="border border-border/50 hover:border-border transition-colors">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-1">
+                        <h3 className="font-medium text-foreground">Distance Visibility</h3>
+                        <p className="text-sm text-muted-foreground">Only show your profile to people within 100 miles</p>
+                      </div>
+                      <Switch
+                        checked={onlyhundredmileevisiblity}
+                        onCheckedChange={(value) => {
+                          setOnlyhundredmileevisiblity(value);
+                          setValueschanged(true);
+                        }}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <Separator className="my-6" />
+
+              <div className="flex items-center gap-3 mb-6">
+                <Target className="w-5 h-5 text-primary" />
+                <h2 className="text-xl font-semibold text-foreground">Activity Preferences</h2>
+              </div>
+
+              <div className="space-y-4">
+                <Card className="border border-border/50 hover:border-border transition-colors">
+                  <CardContent className="p-4">
+                    <div className="space-y-3">
+                      <div className="space-y-1">
+                        <h3 className="font-medium text-foreground">Visibility Preference</h3>
+                        <p className="text-sm text-muted-foreground">Choose how you want to interact on MeetCutes</p>
+                      </div>
+                      <Select
+                        value={visibilityPreference}
+                        onValueChange={(value) => {
+                          setVisibilityPreference(value);
+                          setValueschanged(true);
+                        }}
                       >
-                        View Coordinates
-                      </Button>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select preference" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="events-only">
+                            <div className="flex items-center gap-2">
+                              <Calendar className="w-4 h-4" />
+                              <div>
+                                <div className="font-medium">Events Only</div>
+                                <div className="text-xs text-muted-foreground">Attend events, not visible in user searches</div>
+                              </div>
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="online-only">
+                            <div className="flex items-center gap-2">
+                              <Search className="w-4 h-4" />
+                              <div>
+                                <div className="font-medium">Online Only</div>
+                                <div className="text-xs text-muted-foreground">Visible in searches, not interested in events</div>
+                              </div>
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="both">
+                            <div className="flex items-center gap-2">
+                              <Users className="w-4 h-4" />
+                              <div>
+                                <div className="font-medium">Both Events & Online</div>
+                                <div className="text-xs text-muted-foreground">Participate in events and be visible in searches</div>
+                              </div>
+                            </div>
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              </div>
 
-              {/* Mindset Questionnaire */}
-              <Card className="border border-border/50 hover:border-primary/50 transition-colors">
-                <CardContent className="p-6">
-                  <div className="flex items-start gap-4">
-                    <div className="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center shrink-0">
-                      <Brain className="w-5 h-5 text-purple-600" />
-                    </div>
-                    <div className="flex-1 space-y-2">
-                      <h3 className="font-semibold text-foreground">Mindset Questionnaire</h3>
-                      <p className="text-sm text-muted-foreground">
-                        Take our personality assessment to improve matches
-                      </p>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={gotoQuestionaire}
-                        className="mt-2"
-                      >
-                        Take Questionnaire
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-
-          <Separator className="my-8" />
-
-          <div className="space-y-6">
-            <div className="flex items-center gap-3">
-              <AlertTriangle className="w-5 h-5 text-destructive" />
-              <h2 className="text-xl font-semibold text-destructive">Danger Zone</h2>
-            </div>
-
-            <Card className="border-destructive/50 bg-destructive/5">
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between">
-                  <div className="space-y-2">
-                    <h3 className="font-semibold text-destructive">Deactivate Account</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Deactivate your account and hide your profile from other users. Your data will be preserved for potential reactivation.
-                    </p>
-                  </div>
+              {valueschanged && (
+                <div className="flex justify-end gap-3 pt-4">
                   <Button
-                    variant="destructive"
-                    onClick={() => setConfirmPopup(true)}
-                    className="bg-destructive hover:bg-destructive/90"
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      setEmailsearch(profiledata.emailsearch || false);
+                      setPhonenumbersearch(profiledata.phonenumbersearch || false);
+                      setUserhandlesearch(profiledata.userhandlesearch || false);
+                      setOnlyhundredmileevisiblity(profiledata.onlyhundredmileevisiblity || false);
+                      setVisibilityPreference(profiledata.visibilitypreference || 'both');
+                      setValueschanged(false);
+                    }}
+                    disabled={!valueschanged}
                   >
-                    Deactivate Account
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    onClick={formik.handleSubmit}
+                    disabled={!valueschanged || loading}
+                    className="bg-primary hover:bg-primary/90"
+                  >
+                    {loading ? (
+                      <>
+                        <Spinner size="small" className="mr-2" />
+                        Saving...
+                      </>
+                    ) : (
+                      'Save Changes'
+                    )}
                   </Button>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
-        </CardContent>
-      </Card>
+              )}
+            </div>
 
-      {/* Modals */}
-      {isCoordinatesModalOpen && (
-        <Suspense fallback={<SettingsModalFallback text="Loading coordinates..." />}>
-          <LocationDialog
-            isOpen={isCoordinatesModalOpen}
-            onClose={() => setIsCoordinatesModalOpen(false)}
-            user={user}
-            profiledata={profiledata}
-            setProfiledata={setProfiledata}
-          />
-        </Suspense>
-      )}
+            <Separator className="my-8" />
+
+            {/* Profile Actions Section */}
+            <div className="space-y-6">
+              <div className="flex items-center gap-3">
+                <User className="w-5 h-5 text-primary" />
+                <h2 className="text-xl font-semibold text-foreground">Profile Actions</h2>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Set Handle */}
+                <Card className="border border-border/50 hover:border-primary/50 transition-colors">
+                  <CardContent className="p-6">
+                    <div className="flex items-start gap-4">
+                      <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                        <Edit className="w-5 h-5 text-primary" />
+                      </div>
+                      <div className="flex-1 space-y-2">
+                        <h3 className="font-semibold text-foreground">Set Handle</h3>
+                        <p className="text-sm text-muted-foreground">
+                          Create a unique username for your profile
+                        </p>
+                        {profiledata?.userhandle ? (
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-medium text-green-600">
+                              @{profiledata.userhandle}
+                            </span>
+                            <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
+                              Set
+                            </span>
+                          </div>
+                        ) : (
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button size="sm" className="mt-2">
+                                Set Handle
+                              </Button>
+                            </DialogTrigger>
+                            <HandleCard />
+                          </Dialog>
+                        )}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Change Location */}
+                <Card className="border border-border/50 hover:border-primary/50 transition-colors">
+                  <CardContent className="p-6">
+                    <div className="flex items-start gap-4">
+                      <div className="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center shrink-0">
+                        <MapPin className="w-5 h-5 text-green-600" />
+                      </div>
+                      <div className="flex-1 space-y-2">
+                        <h3 className="font-semibold text-foreground">Change Location</h3>
+                        <p className="text-sm text-muted-foreground">
+                          Update your city and location information
+                        </p>
+                        <Dialog open={changeLocationOpen} onOpenChange={setChangeLocationOpen}>
+                          <DialogTrigger asChild>
+                            <Button size="sm" variant="outline" className="mt-2">
+                              Change Location
+                            </Button>
+                          </DialogTrigger>
+                          {changeLocationOpen && (
+                            <Suspense fallback={<SettingsModalFallback text="Loading location options..." />}>
+                              <ChangeLocation onClose={() => setChangeLocationOpen(false)} />
+                            </Suspense>
+                          )}
+                        </Dialog>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Coordinates */}
+                <Card className="border border-border/50 hover:border-primary/50 transition-colors">
+                  <CardContent className="p-6">
+                    <div className="flex items-start gap-4">
+                      <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0">
+                        <Target className="w-5 h-5 text-blue-600" />
+                      </div>
+                      <div className="flex-1 space-y-2">
+                        <h3 className="font-semibold text-foreground">Coordinates</h3>
+                        <p className="text-sm text-muted-foreground">
+                          View and manage your location coordinates
+                        </p>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setIsCoordinatesModalOpen(true)}
+                          className="mt-2"
+                        >
+                          View Coordinates
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Mindset Questionnaire */}
+                <Card className="border border-border/50 hover:border-primary/50 transition-colors">
+                  <CardContent className="p-6">
+                    <div className="flex items-start gap-4">
+                      <div className="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center shrink-0">
+                        <Brain className="w-5 h-5 text-purple-600" />
+                      </div>
+                      <div className="flex-1 space-y-2">
+                        <h3 className="font-semibold text-foreground">Mindset Questionnaire</h3>
+                        <p className="text-sm text-muted-foreground">
+                          Take our personality assessment to improve matches
+                        </p>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={gotoQuestionaire}
+                          className="mt-2"
+                        >
+                          Take Questionnaire
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+
+            <Separator className="my-8" />
+
+            <div className="space-y-6">
+              <div className="flex items-center gap-3">
+                <AlertTriangle className="w-5 h-5 text-destructive" />
+                <h2 className="text-xl font-semibold text-destructive">Danger Zone</h2>
+              </div>
+
+              <Card className="border-destructive/50 bg-destructive/5">
+                <CardContent className="p-6">
+                  <div className="flex items-start justify-between">
+                    <div className="space-y-2">
+                      <h3 className="font-semibold text-destructive">Deactivate Account</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Deactivate your account and hide your profile from other users. Your data will be preserved for potential reactivation.
+                      </p>
+                    </div>
+                    <Button
+                      variant="destructive"
+                      onClick={() => setConfirmPopup(true)}
+                      className="bg-destructive hover:bg-destructive/90"
+                    >
+                      Deactivate Account
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Modals */}
+        {isCoordinatesModalOpen && (
+          <Suspense fallback={<SettingsModalFallback text="Loading coordinates..." />}>
+            <LocationDialog
+              isOpen={isCoordinatesModalOpen}
+              onClose={() => setIsCoordinatesModalOpen(false)}
+              user={user}
+              profiledata={profiledata}
+              setProfiledata={setProfiledata}
+            />
+          </Suspense>
+        )}
       </div>
     </div>
   );

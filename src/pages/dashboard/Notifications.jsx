@@ -5,6 +5,7 @@ import { Bell, Calendar, MapPin, Clock, Users, ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { getUpcomingEventsSearchParams, useNotifyEvents } from "@/hooks/useEvents";
+import { Container } from "@/components/Container";
 
 export function Notifications() {
   const { profiledata } = useAuth();

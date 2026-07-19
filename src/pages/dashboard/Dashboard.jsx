@@ -61,15 +61,15 @@ const DashboardTabFallback = () => (
 );
 
 export function Dashboard() {
-  const {user, profiledata, profileLoading, setProfiledata} = useAuth();
+  const { user, profiledata, profileLoading, setProfiledata } = useAuth();
   const [searchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState(searchParams.get('tab') || "profile");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
   const profiledataupdate = useRef(0);
   const queryClient = useQueryClient();
-  const {logininitsDone, setLogininitsDone, setSearchUsersData} = useContext(SearchAndUserEventsDataContext);
-  const {autocompletedata, setAutoCompletedata} = useContext(AutoCompleteDataContext);
+  const { logininitsDone, setLogininitsDone, setSearchUsersData } = useContext(SearchAndUserEventsDataContext);
+  const { autocompletedata, setAutoCompletedata } = useContext(AutoCompleteDataContext);
 
   // Use token expiration hook to automatically log out when token expires
   useTokenExpiration();
@@ -116,7 +116,7 @@ export function Dashboard() {
   useEffect(() => {
     if (!user) {
       navigate('/')
-    } 
+    }
   }, [user, navigate]);
 
   useEffect(() => {
@@ -171,9 +171,9 @@ export function Dashboard() {
     });
     if (res.success) {
       if (res.data.length == 0) {
-          await setAutoCompletedata(['123 Address']);
+        await setAutoCompletedata(['123 Address']);
       } else {
-          await setAutoCompletedata(res.data);
+        await setAutoCompletedata(res.data);
       }
     } else {
       setAutoCompletedata([])
@@ -183,7 +183,7 @@ export function Dashboard() {
   const updateTimeOfLogin = useCallback(async (logintimedata) => {
     const res = await updateUserInfo(user?.id, logintimedata);
     if (res.success) {
-      setProfiledata({...profiledata, ...logintimedata});
+      setProfiledata({ ...profiledata, ...logintimedata });
     } else {
       console.log(res.msg);
     }
@@ -209,7 +209,7 @@ export function Dashboard() {
   };
 
   useEffect(() => {
-    const loginInits = async () => {        
+    const loginInits = async () => {
       if (!isObjEmpty(profiledata) && (!logininitsDone)) {
         //
         // reset password retry count to zero
@@ -223,58 +223,59 @@ export function Dashboard() {
         //
         //
         //
-        updateTimeOfLogin({timeoflogin: user?.last_sign_in_at});
+        updateTimeOfLogin({ timeoflogin: user?.last_sign_in_at });
 
         setLogininitsDone(true)
       }
     }
-    
+
     loginInits();
   }, [profiledata, logininitsDone, setLogininitsDone, updateTimeOfLogin, user?.last_sign_in_at]);
 
   useEffect(() => {
-      const datenow = new Date(Date.now());
-      const loadAutodata = async () => {
-        await loadAutoCompletedata(profiledata?.latitude, profiledata?.longitude)
-      }
+    const datenow = new Date(Date.now());
+    const loadAutodata = async () => {
+      await loadAutoCompletedata(profiledata?.latitude, profiledata?.longitude)
+    }
 
-      async function resetPrevious() {
-        const newdateofprevious = (new Date()).toLocaleDateString('en-US', { timeZone: 'America/New_York' });
+    async function resetPrevious() {
+      const newdateofprevious = (new Date()).toLocaleDateString('en-US', { timeZone: 'America/New_York' });
 
-        const res = await updateUserInfo(user?.id, {
+      const res = await updateUserInfo(user?.id, {
+        previouseventsattendeeslist: null,
+        previouseventsattendeesdate: newdateofprevious
+      });
+      if (res.success) {
+        setProfiledata({
+          ...profiledata,
           previouseventsattendeeslist: null,
           previouseventsattendeesdate: newdateofprevious
         });
-        if (res.success) {
-          setProfiledata({...profiledata, 
-              previouseventsattendeeslist: null,
-              previouseventsattendeesdate: newdateofprevious
-          }); 
-        } 
       }
-      
-      if (!isObjEmpty(profiledata)) {
-        profiledataupdate.current = profiledataupdate.current + 1
-        //setRerender(true)
-        //
-        //
-        //
-        if (isObjEmpty(autocompletedata)) {
-          loadAutodata();
-        }
+    }
 
-        //
-        // Clear previouseventsattendeeslist and update previouseventsattendeesdate
-        //
-        if (!isObjEmpty(profiledata?.previouseventsattendeesdate)) {
-          let dif = Math.abs(datenow - new Date(profiledata?.previouseventsattendeesdate))
-          let dayssinceprevious = Math.floor(dif/(1000 * 3600 * 24));
+    if (!isObjEmpty(profiledata)) {
+      profiledataupdate.current = profiledataupdate.current + 1
+      //setRerender(true)
+      //
+      //
+      //
+      if (isObjEmpty(autocompletedata)) {
+        loadAutodata();
+      }
 
-          if (dayssinceprevious > 123) { //4 months
-              resetPrevious();
-          }
+      //
+      // Clear previouseventsattendeeslist and update previouseventsattendeesdate
+      //
+      if (!isObjEmpty(profiledata?.previouseventsattendeesdate)) {
+        let dif = Math.abs(datenow - new Date(profiledata?.previouseventsattendeesdate))
+        let dayssinceprevious = Math.floor(dif / (1000 * 3600 * 24));
+
+        if (dayssinceprevious > 123) { //4 months
+          resetPrevious();
         }
       }
+    }
   }, [profiledata, autocompletedata, loadAutoCompletedata, setProfiledata, user?.id]);
 
   return (
@@ -291,9 +292,8 @@ export function Dashboard() {
       )}
 
       {/* Sidebar */}
-      <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-card border-r border-border transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 ${
-        sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-      }`}>
+      <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-card border-r border-border transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}>
         <div className="flex flex-col h-full">
           {/* Sidebar Header */}
           <div className="flex items-center justify-between p-4 border-b border-border">
@@ -329,18 +329,16 @@ export function Dashboard() {
                     handleTabChange(item.id);
                     setSidebarOpen(false);
                   }}
-                  className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg text-left transition-colors ${
-                    activeTab === item.id
+                  className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg text-left transition-colors ${activeTab === item.id
                       ? "bg-primary text-primary-foreground shadow-sm"
                       : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-                  }`}
+                    }`}
                 >
                   <Icon className="w-5 h-5 shrink-0" />
                   <div className="flex-1 min-w-0">
                     <div className="font-medium text-sm">{item.label}</div>
-                    <div className={`text-xs mt-0.5 ${
-                      activeTab === item.id ? "text-primary-foreground/80" : "text-muted-foreground"
-                    }`}>
+                    <div className={`text-xs mt-0.5 ${activeTab === item.id ? "text-primary-foreground/80" : "text-muted-foreground"
+                      }`}>
                       {item.description}
                     </div>
                   </div>
@@ -475,11 +473,10 @@ export function Dashboard() {
                 onMouseEnter={() => preloadTab(item.id)}
                 onFocus={() => preloadTab(item.id)}
                 onClick={() => handleTabChange(item.id)}
-                className={`flex flex-col items-center justify-center p-2 rounded-lg transition-colors min-w-0 flex-1 ${
-                  activeTab === item.id
+                className={`flex flex-col items-center justify-center p-2 rounded-lg transition-colors min-w-0 flex-1 ${activeTab === item.id
                     ? "bg-primary text-primary-foreground"
                     : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-                }`}
+                  }`}
               >
                 <Icon className="w-5 h-5 mb-1" />
                 <span className="text-xs font-medium truncate hidden sm:block">{item.label}</span>
