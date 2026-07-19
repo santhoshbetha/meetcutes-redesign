@@ -43,6 +43,25 @@ export function UserProfileDialog({ user, userData, onClose }) {
   // Helper function to check if a value is available and not empty
   const hasValue = (value) => value != null && typeof value === 'string' && value.trim() !== '';
 
+  const reportUser = () => {
+    // 1. Point explicitly to userData (the person being viewed)
+    const targetUserId = userData?.userid || user?.userid || "Unknown ID";
+    const targetUserName = `${userData?.firstname || user?.firstname || ''} ${userData?.lastname || user?.lastname || ''}`.trim();
+
+    const supportEmail = "hello@meetcutes.us"; // 2. Explicit destination mail box
+    const subject = encodeURIComponent(`Report User: ${targetUserName}`);
+
+    // 3. Swapped \n for %0A to guarantee clean line breaking alignment across native mail apps
+    const body = encodeURIComponent(
+      `Reporting User Name: ${targetUserName}\n` +
+      `Reporting User ID: ${targetUserId}\n\n` +
+      `Please provide specific details about the violation or issue below:\n- `
+    );
+
+    const mailtoLink = `mailto:${supportEmail}?subject=${subject}&body=${body}`;
+    window.location.href = mailtoLink;
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="relative w-full max-w-4xl bg-background rounded-2xl shadow-2xl animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto dark:border-3">
@@ -89,9 +108,8 @@ export function UserProfileDialog({ user, userData, onClose }) {
                   {validImages.map((image, index) => (
                     <div
                       key={index}
-                      className={`absolute inset-0 transition-opacity duration-500 ${
-                        index === currentImageIndex ? "opacity-100" : "opacity-0"
-                      }`}
+                      className={`absolute inset-0 transition-opacity duration-500 ${index === currentImageIndex ? "opacity-100" : "opacity-0"
+                        }`}
                     >
                       <img
                         src={
@@ -136,11 +154,10 @@ export function UserProfileDialog({ user, userData, onClose }) {
                       <button
                         key={index}
                         onClick={() => goToImage(index)}
-                        className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                          index === currentImageIndex
-                            ? "bg-card w-6"
-                            : "bg-card/50 hover:bg-card/75"
-                        }`}
+                        className={`w-2 h-2 rounded-full transition-all duration-300 ${index === currentImageIndex
+                          ? "bg-card w-6"
+                          : "bg-card/50 hover:bg-card/75"
+                          }`}
                         aria-label={`Go to image ${index + 1}`}
                       />
                     ))}
@@ -170,7 +187,9 @@ export function UserProfileDialog({ user, userData, onClose }) {
                     <p className="text-lg text-muted-foreground">{user.name}</p>
                   )}
                 </div>
-                <button className="p-2 hover:bg-destructive/10 rounded-md transition-colors lg:order-last">
+                <button
+                  onClick={reportUser}
+                  className="p-2 hover:bg-destructive/10 rounded-md transition-colors lg:order-last">
                   <Flag className="w-5 h-5 text-destructive group-hover:scale-110 transition-transform" />
                 </button>
               </div>
@@ -287,13 +306,13 @@ export function UserProfileDialog({ user, userData, onClose }) {
 
             {/* No data message */}
             {!hasValue(user?.city) && !hasValue(user?.state) && !hasValue(user?.phonenumber) &&
-             !hasValue(user?.email) && !hasValue(user?.facebook) && !hasValue(user?.instagram) &&
-             !hasValue(user?.linkedin) && !hasValue(user?.bio) && (
-              <div className="text-center py-8 text-muted-foreground">
-                <User className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                <p className="text-sm">No additional information available</p>
-              </div>
-            )}
+              !hasValue(user?.email) && !hasValue(user?.facebook) && !hasValue(user?.instagram) &&
+              !hasValue(user?.linkedin) && !hasValue(user?.bio) && (
+                <div className="text-center py-8 text-muted-foreground">
+                  <User className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                  <p className="text-sm">No additional information available</p>
+                </div>
+              )}
           </div>
         </div>
       </div>

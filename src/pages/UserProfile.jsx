@@ -143,6 +143,26 @@ export function UserProfile() {
         return [userData?.questionairevalues?.[key] ?? 20];
     };
 
+    const reportUser = () => {
+        // 1. Point explicitly to userData (the person being viewed)
+        const targetUserId = userData?.userid || "Unknown ID";
+        const targetUserName = `${userData?.firstname || ''} ${userData?.lastname || ''}`.trim();
+
+        const supportEmail = "hello@meetcutes.us"; // 2. Explicit destination mail box
+        const subject = encodeURIComponent(`Report User: ${targetUserName}`);
+
+        // 3. Swapped \n for %0A to guarantee clean line breaking alignment across native mail apps
+        const body = encodeURIComponent(
+            `Reporting User Name: ${targetUserName}\n` +
+            `Reporting User ID: ${targetUserId}\n\n` +
+            `Please provide specific details about the violation or issue below:\n- `
+        );
+
+        const mailtoLink = `mailto:${supportEmail}?subject=${subject}&body=${body}`;
+        window.location.href = mailtoLink;
+    };
+
+
     if (loading) return <UserProfileSkeleton />;
 
     if (error || !userData) {
@@ -175,7 +195,7 @@ export function UserProfile() {
                 {/* Flag Action Button Link */}
                 <button
                     title="Flag user node context"
-                    onClick={() => console.log('Flag user target:', userData.userid)}
+                    onClick={reportUser}
                     className="absolute right-4 top-4 p-2 rounded-xl bg-card hover:bg-muted/50 border border-border shadow-xs transition-colors cursor-pointer"
                 >
                     <Flag className="w-4 h-4 text-destructive" />
