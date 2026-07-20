@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { UserCard } from "./UserCard";
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -17,6 +17,14 @@ export function UserList({ users, isLoading }) {
   const indexOfLastUser = currentPage * usersPerPage;
   const indexOfFirstUser = indexOfLastUser - usersPerPage;
   const currentUsers = users.slice(indexOfFirstUser, indexOfLastUser);
+
+  useEffect(() => {
+    // If filtering/searching shrinks the result set below the active page,
+    // reset to page 1 so cards remain visible.
+    if (currentPage !== 1 && (totalPages === 0 || currentPage > totalPages)) {
+      setCurrentPage(1);
+    }
+  }, [currentPage, totalPages]);
 
   // Pagination handlers
   const goToPrevious = () => {
