@@ -424,13 +424,13 @@ export function Profile() {
               <CardTitle className="text-sm font-bold">Account Configurations</CardTitle>
             </CardHeader>
             <CardContent className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-              <Button type="button" onClick={() => navigate('/settings')} variant="outline" className="w-full justify-start text-xs font-bold">
+              <Button type="button" onClick={() => navigate('/dashboard?tab=settings')} variant="outline" className="w-full justify-start text-xs font-bold">
                 <Settings className="w-3.5 h-3.5 mr-2" /> Settings
               </Button>
               <Button type="button" onClick={() => navigate('/changepassword')} variant="outline" className="w-full justify-start text-xs font-bold">
                 <Edit2 className="w-3.5 h-3.5 mr-2" /> Change Password
               </Button>
-              <Button type="button" onClick={() => navigate('/settings?tab=preferences')} variant="outline" className="w-full justify-start text-xs font-bold">
+              <Button type="button" onClick={() => navigate('/dashboard?tab=settings&tab=preferences')} variant="outline" className="w-full justify-start text-xs font-bold">
                 <Edit2 className="w-3.5 h-3.5 mr-2" /> Preferences
               </Button>
             </CardContent>
